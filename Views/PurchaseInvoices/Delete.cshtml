@@ -1,0 +1,18 @@
+@model PurchaseInvoice
+@{
+    ViewData["Title"] = "حذف فاتورة شراء";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("حذف فاتورة شراء", "تأكيد حذف الفاتورة المحددة."))" />
+
+<section class="details-panel">
+    <div class="alert alert-danger">هل تريد حذف الفاتورة @Model.PurchaseInvoiceNumber؟</div>
+    <dl class="row">
+        <dt class="col-md-3">المورد</dt><dd class="col-md-9">@Model.Supplier?.NameAr</dd>
+        <dt class="col-md-3">الإجمالي</dt><dd class="col-md-9">@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</dd>
+    </dl>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> حذف</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+    </form>
+</section>

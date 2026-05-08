@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.db
+*.sqlite
+appsettings.Local.json
+wwwroot/uploads/
+.DS_Store
+**/.DS_Store

@@ -1,0 +1,37 @@
+@model IReadOnlyList<JournalEntry>
+@{
+    ViewData["Title"] = "القيود اليومية";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("القيود اليومية", "إنشاء ومراجعة القيود المحاسبية قبل الترحيل.", "Create", "JournalEntries", "قيد جديد"))" />
+
+<section class="data-panel">
+    <partial name="_SearchBar" />
+
+    @if (!Model.Any())
+    {
+        <partial name="_EmptyState" model="@("لا توجد قيود يومية مطابقة للفلاتر الحالية.")" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead><tr><th>رقم القيد</th><th>التاريخ</th><th>المصدر</th><th>مدين</th><th>دائن</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                <tbody>
+                    @foreach (var entry in Model)
+                    {
+                        <tr>
+                            <td>@entry.EntryNumber</td>
+                            <td>@entry.EntryDate.ToString("yyyy/MM/dd")</td>
+                            <td>@(entry.SourceModule ?? "-")</td>
+                            <td>@EntityDisplayHelper.FormatValue(entry.TotalDebit, nameof(entry.TotalDebit))</td>
+                            <td>@EntityDisplayHelper.FormatValue(entry.TotalCredit, nameof(entry.TotalCredit))</td>
+                            <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(entry.Status))" /></td>
+                            <td><partial name="_ActionButtons" model="@entry.Id" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

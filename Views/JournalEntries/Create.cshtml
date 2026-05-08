@@ -1,0 +1,21 @@
+@model JournalEntryFormViewModel
+@{
+    ViewData["Title"] = "قيد يومية جديد";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("قيد يومية جديد", "أدخل أطراف القيد وتأكد من توازن المدين والدائن قبل الترحيل."))" />
+
+<section class="form-panel">
+    <form asp-action="Create" method="post" data-journal-form>
+        <partial name="_Form" model="@Model" />
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> حفظ القيد</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/journal-entry.js" asp-append-version="true"></script>
+}

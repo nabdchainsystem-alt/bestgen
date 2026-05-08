@@ -1,0 +1,537 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "وازن | برنامج محاسبي سحابي";
+
+    var trustItems = new[]
+    {
+        "فوترة ومبيعات",
+        "مشتريات وموردين",
+        "مخزون ومستودعات",
+        "تقارير مالية"
+    };
+
+    var problemCards = new[]
+    {
+        (Title: "فواتير منفصلة عن المخزون", Description: "عند غياب الربط بين البيع والمخزون تظهر أخطاء في الكميات والتكلفة والربح."),
+        (Title: "أرصدة العملاء والموردين غير واضحة", Description: "المتابعة اليدوية تجعل التحصيلات والمدفوعات أصعب وتزيد احتمالية التأخير."),
+        (Title: "تقارير كثيرة لكن القرار غير واضح", Description: "الأرقام وحدها لا تكفي، تحتاج رؤية مختصرة توضّح أين تقف شركتك.")
+    };
+
+    var solutionCards = new[]
+    {
+        (Title: "فواتير المبيعات", Description: "إصدار فواتير منظمة وربطها بالعملاء والمخزون والتحصيلات من نفس المسار."),
+        (Title: "فواتير المشتريات", Description: "تسجيل مشتريات الموردين ومتابعة المستحقات وتأثيرها على تكلفة المخزون."),
+        (Title: "العملاء والموردون", Description: "أرصدة واضحة، بيانات مرتبة، وحركة مالية يمكن الرجوع إليها بسرعة."),
+        (Title: "المنتجات والمخزون", Description: "تعريف المنتجات والمستودعات وحدود إعادة الطلب مع متابعة الحركة اليومية."),
+        (Title: "الخزينة والبنوك", Description: "متابعة النقد والحسابات البنكية والمدفوعات والتحصيلات بصورة مترابطة."),
+        (Title: "التقارير المحاسبية", Description: "مؤشرات وتقارير تساعدك على قراءة المبيعات، المصروفات، الأرباح، والالتزامات.")
+    };
+
+    var featureItems = new[]
+    {
+        "العملاء",
+        "الموردين",
+        "عروض الأسعار",
+        "فواتير المبيعات",
+        "إيصالات المبيعات",
+        "طلبات الشراء",
+        "فواتير المشتريات",
+        "إيصالات المشتريات",
+        "المنتجات",
+        "المخازن",
+        "الجرد",
+        "نقل المخزون",
+        "شجرة الحسابات",
+        "القيود اليومية",
+        "الإقرار الضريبي",
+        "مراكز التكلفة"
+    };
+
+    var complianceCards = new[]
+    {
+        (Title: "ضريبة القيمة المضافة", Description: "تنظيم البيانات الضريبية ومراجعة أثر الضريبة على الفواتير والتقارير."),
+        (Title: "فواتير إلكترونية جاهزة للتطوير", Description: "هيكلة قابلة للتوسع حسب احتياج المنشأة ومراحل التطوير القادمة."),
+        (Title: "بيانات المنشأة والسجل التجاري", Description: "حفظ بيانات النشاط الأساسية لاستخدامها في المستندات والتقارير."),
+        (Title: "تقارير تساعد المحاسب وصاحب العمل", Description: "ملخصات مالية قابلة للقراءة تساعد في المتابعة والمراجعة اليومية.")
+    };
+
+    var dashboardMetrics = new[]
+    {
+        (Label: "إجمالي المبيعات", Value: "128,450 ر.س"),
+        (Label: "إجمالي المشتريات", Value: "72,180 ر.س"),
+        (Label: "صافي الربح", Value: "31,940 ر.س"),
+        (Label: "رصيد الخزينة", Value: "18,600 ر.س"),
+        (Label: "العملاء المدينون", Value: "24,300 ر.س"),
+        (Label: "الموردون الدائنون", Value: "15,720 ر.س"),
+        (Label: "المنتجات منخفضة المخزون", Value: "3"),
+        (Label: "الفواتير المتأخرة", Value: "4")
+    };
+
+    var moduleGroups = new[]
+    {
+        (Title: "المبيعات", Items: new[] { "قائمة العملاء", "عروض الأسعار", "فواتير المبيعات", "إيصالات المبيعات" }),
+        (Title: "المشتريات", Items: new[] { "قائمة الموردين", "طلبات الشراء", "فواتير المشتريات", "إيصالات المشتريات" }),
+        (Title: "المنتجات والمخزون", Items: new[] { "أصناف المنتجات", "قائمة المنتجات", "المخازن", "عمليات الجرد", "نقل المخزون" }),
+        (Title: "الأصول الثابتة", Items: new[] { "أصول", "وسوم الأصول", "تأجيرات الأصول" }),
+        (Title: "المحاسبة المتقدمة", Items: new[] { "شجرة الحسابات", "القيود اليدوية", "الإيصالات العامة", "الرصيد الافتتاحي", "أبعاد التقارير" }),
+        (Title: "الموارد البشرية", Items: new[] { "الموظفين", "قيود الرواتب", "الخصومات", "المكافآت", "القروض" }),
+        (Title: "التقارير", Items: new[] { "دفتر الأستاذ", "الميزانية العمومية", "قائمة الدخل", "ميزان المراجعة", "الإقرار الضريبي" })
+    };
+
+    var reasons = new[]
+    {
+        "واجهة عربية واضحة",
+        "مناسب لصاحب العمل والمحاسب",
+        "يربط الفواتير بالمخزون والحسابات",
+        "قابل للتوسع مع نمو الشركة",
+        "تقارير تساعدك على اتخاذ القرار"
+    };
+
+    var pricingPlans = new[]
+    {
+        (Name: "البداية", Price: "49 ريال / شهر", ForText: "للمنشآت الصغيرة التي تريد تنظيم الفواتير والعملاء", Features: new[] { "فواتير المبيعات", "العملاء", "الموردين", "تقارير أساسية", "مستخدم واحد" }, Highlight: false),
+        (Name: "النمو", Price: "99 ريال / شهر", ForText: "للأنشطة التي تحتاج مشتريات ومخزون وتقارير أوضح", Features: new[] { "كل مميزات البداية", "المنتجات والمخزون", "فواتير المشتريات", "الخزينة والبنوك", "3 مستخدمين" }, Highlight: true),
+        (Name: "الأعمال", Price: "199 ريال / شهر", ForText: "للشركات التي تحتاج محاسبة أعمق وصلاحيات وتقارير متقدمة", Features: new[] { "كل مميزات النمو", "المحاسبة المتقدمة", "مراكز تكلفة", "صلاحيات مستخدمين", "تقارير متقدمة", "5 مستخدمين" }, Highlight: false)
+    };
+
+    var testimonials = new[]
+    {
+        (Role: "صاحب مؤسسة تجارية", Text: "أحتاج أن أرى المبيعات والمخزون والتحصيلات في شاشة واحدة قبل اتخاذ أي قرار شراء جديد."),
+        (Role: "محاسب منشأة صغيرة", Text: "الأهم بالنسبة لي أن تكون الفواتير والقيود والتقارير مترابطة بدون نقل يدوي متكرر."),
+        (Role: "مدير عمليات", Text: "وجود تنبيهات للمخزون والفواتير المتأخرة يساعد الفريق على التحرك قبل أن تتراكم المشكلات.")
+    };
+
+    var faqs = new[]
+    {
+        (Question: "هل وازن مناسب للمؤسسات الصغيرة؟", Answer: "نعم، صمم وازن للمنشآت الصغيرة والمتوسطة التي تحتاج نظاما منظما للفواتير والمخزون والحسابات دون تعقيد زائد."),
+        (Question: "هل يدعم اللغة العربية؟", Answer: "نعم، الواجهة عربية واتجاهها من اليمين إلى اليسار لتناسب فرق العمل في السعودية والمنطقة."),
+        (Question: "هل يمكن إدارة المخزون؟", Answer: "نعم، يمكنك متابعة المنتجات والمخازن والجرد ونقل المخزون وربط الحركة بفواتير البيع والشراء."),
+        (Question: "هل يدعم ضريبة القيمة المضافة؟", Answer: "يدعم تنظيم بيانات ضريبة القيمة المضافة على الفواتير والتقارير بما يساعد المحاسب على المراجعة."),
+        (Question: "هل يمكن إضافة أكثر من مستخدم؟", Answer: "نعم، تختلف حدود المستخدمين حسب الباقة، ويمكن تطوير الصلاحيات حسب احتياج المنشأة."),
+        (Question: "هل يمكن تطويره لاحقًا للفوترة الإلكترونية؟", Answer: "نعم، وازن جاهز للتطوير نحو متطلبات الفوترة الإلكترونية والربط المستقبلي دون ادعاء اعتماد رسمي قبل تنفيذه.")
+    };
+}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="وازن برنامج محاسبي سحابي عربي للمنشآت الصغيرة والمتوسطة لإدارة الفواتير والمخزون والعملاء والموردين والتقارير والضريبة من مكان واحد." />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header" id="top">
+        <div class="announcement">
+            <div class="landing-container announcement-inner">
+                <span>نسخة تجريبية مبكرة — برنامج محاسبي سحابي للمنشآت الصغيرة والمتوسطة</span>
+                <a href="#features">اكتشف المميزات</a>
+            </div>
+        </div>
+
+        <nav class="navbar" aria-label="التنقل الرئيسي">
+            <div class="landing-container nav-inner">
+                <a class="brand" href="#top" aria-label="وازن">
+                    <span class="brand-symbol">و</span>
+                    <span class="brand-copy">
+                        <strong>وازن</strong>
+                        <small>Wazen Accounting Cloud</small>
+                    </span>
+                </a>
+
+                <div class="nav-links" aria-label="روابط الصفحة">
+                    <a href="#features">المميزات</a>
+                    <a href="#solutions">الحلول</a>
+                    <a href="#reports">التقارير</a>
+                    <a href="#pricing">الأسعار</a>
+                    <a href="#faq">الأسئلة الشائعة</a>
+                </div>
+
+                <div class="nav-actions">
+                    <a class="btn btn-secondary" href="/Identity/Account/Login">تسجيل الدخول</a>
+                    <a class="btn btn-primary" href="/Identity/Account/Register">ابدأ التجربة</a>
+                </div>
+
+                <details class="mobile-menu">
+                    <summary>القائمة</summary>
+                    <div class="mobile-panel">
+                        <a href="#features">المميزات</a>
+                        <a href="#solutions">الحلول</a>
+                        <a href="#reports">التقارير</a>
+                        <a href="#pricing">الأسعار</a>
+                        <a href="#faq">الأسئلة الشائعة</a>
+                        <span class="mobile-actions">
+                            <a class="btn btn-secondary" href="/Identity/Account/Login">تسجيل الدخول</a>
+                            <a class="btn btn-primary" href="/Identity/Account/Register">ابدأ التجربة</a>
+                        </span>
+                    </div>
+                </details>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="landing-container hero-grid">
+                <div class="hero-copy">
+                    <span class="eyebrow">محاسبة سحابية هادئة وواضحة</span>
+                    <h1>برنامج محاسبي سحابي يوازن مبيعاتك، مخزونك، وحساباتك في مكان واحد</h1>
+                    <p>
+                        وازن يساعدك على إصدار الفواتير، متابعة العملاء والموردين، إدارة المخزون،
+                        مراقبة الخزينة والبنوك، وفهم وضعك المالي من لوحة تحكم واضحة وسهلة.
+                    </p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary btn-large" href="/Identity/Account/Register">ابدأ الآن</a>
+                        <a class="btn btn-secondary btn-large" href="/Dashboard">شاهد لوحة التحكم</a>
+                    </div>
+                    <ul class="trust-notes" aria-label="ملاحظات الثقة">
+                        <li>بدون تعقيد</li>
+                        <li>مناسب للمنشآت السعودية</li>
+                        <li>جاهز للتوسع</li>
+                    </ul>
+                </div>
+
+                <div class="hero-visual" aria-label="تصور للوحة تحكم وازن">
+                    <div class="mock-dashboard">
+                        <aside class="mock-sidebar">
+                            <div class="mock-logo">وازن</div>
+                            <span class="mock-nav active"></span>
+                            <span class="mock-nav"></span>
+                            <span class="mock-nav"></span>
+                            <span class="mock-nav short"></span>
+                        </aside>
+                        <div class="mock-main">
+                            <div class="mock-topline">
+                                <div>
+                                    <strong>لوحة الشركة</strong>
+                                    <span>ملخص اليوم</span>
+                                </div>
+                                <span class="mock-chip">نشط</span>
+                            </div>
+                            <div class="mock-kpis">
+                                <div class="mock-kpi">
+                                    <span>المبيعات</span>
+                                    <strong>48,250</strong>
+                                </div>
+                                <div class="mock-kpi">
+                                    <span>المخزون</span>
+                                    <strong>1,284</strong>
+                                </div>
+                                <div class="mock-kpi">
+                                    <span>التحصيل</span>
+                                    <strong>92%</strong>
+                                </div>
+                            </div>
+                            <div class="mock-body">
+                                <div class="mock-chart">
+                                    <div class="chart-bars">
+                                        <span style="height: 38%"></span>
+                                        <span style="height: 58%"></span>
+                                        <span style="height: 46%"></span>
+                                        <span style="height: 72%"></span>
+                                        <span style="height: 64%"></span>
+                                        <span style="height: 86%"></span>
+                                    </div>
+                                </div>
+                                <div class="mock-alert">
+                                    <strong>تنبيه</strong>
+                                    <p>فاتورتان متأخرتان ومنتج واحد وصل حد إعادة الطلب.</p>
+                                </div>
+                            </div>
+                            <div class="mock-table">
+                                <div><span>INV-1042</span><strong>مدفوعة</strong></div>
+                                <div><span>INV-1041</span><strong>جزئية</strong></div>
+                                <div><span>INV-1040</span><strong>مستحقة</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="value-strip" aria-label="مجالات القيمة">
+            <div class="landing-container value-grid">
+                @foreach (var item in trustItems)
+                {
+                    <div class="value-item">
+                        <span class="value-icon" aria-hidden="true"></span>
+                        <strong>@item</strong>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="landing-section" id="problems">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">المشكلة</span>
+                    <h2>المحاسبة لا يجب أن تكون مشتتة</h2>
+                </div>
+                <div class="three-grid">
+                    @foreach (var card in problemCards)
+                    {
+                        <article class="landing-card">
+                            <span class="card-index"></span>
+                            <h3>@card.Title</h3>
+                            <p>@card.Description</p>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section section-muted" id="solutions">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">الحل</span>
+                    <h2>وازن يجمع التشغيل المالي في نظام واحد</h2>
+                </div>
+                <div class="feature-grid feature-grid-six">
+                    @foreach (var card in solutionCards)
+                    {
+                        <article class="landing-card feature-card">
+                            <span class="feature-icon" aria-hidden="true"></span>
+                            <h3>@card.Title</h3>
+                            <p>@card.Description</p>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section" id="features">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">المميزات</span>
+                    <h2>كل ما تحتاجه لإدارة حساباتك اليومية</h2>
+                </div>
+                <div class="compact-grid">
+                    @foreach (var feature in featureItems)
+                    {
+                        <div class="compact-card">
+                            <span aria-hidden="true"></span>
+                            <strong>@feature</strong>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section section-muted">
+            <div class="landing-container compliance-layout">
+                <div class="section-heading align-start">
+                    <span class="eyebrow">السعودية</span>
+                    <h2>مصمم لبيئة الأعمال في السعودية</h2>
+                    <p class="section-lead">جاهز للتطوير نحو متطلبات الفوترة الإلكترونية والربط المستقبلي</p>
+                </div>
+                <div class="two-grid">
+                    @foreach (var card in complianceCards)
+                    {
+                        <article class="landing-card">
+                            <h3>@card.Title</h3>
+                            <p>@card.Description</p>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section" id="reports">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">لوحة التحكم</span>
+                    <h2>لوحة تحكم تعطيك صورة واضحة عن شركتك</h2>
+                </div>
+                <div class="dashboard-preview-layout">
+                    <div class="dashboard-preview">
+                        <div class="preview-head">
+                            <div>
+                                <strong>مؤشرات الأداء</strong>
+                                <span>آخر 30 يوم</span>
+                            </div>
+                            <span>تحديث تلقائي</span>
+                        </div>
+                        <div class="preview-metrics">
+                            @foreach (var metric in dashboardMetrics)
+                            {
+                                <div class="preview-metric">
+                                    <span>@metric.Label</span>
+                                    <strong>@metric.Value</strong>
+                                </div>
+                            }
+                        </div>
+                        <div class="preview-chart-row">
+                            <div class="wide-chart">
+                                <span class="line one"></span>
+                                <span class="line two"></span>
+                                <span class="line three"></span>
+                            </div>
+                            <div class="preview-list">
+                                <div><span>تحصيلات اليوم</span><strong>6,800 ر.س</strong></div>
+                                <div><span>مدفوعات الموردين</span><strong>4,250 ر.س</strong></div>
+                                <div><span>طلبات شراء مفتوحة</span><strong>7</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="insight-card">
+                        <span class="insight-label">تنبيه ذكي</span>
+                        <h3>يوجد 4 فواتير متأخرة و3 منتجات وصلت إلى حد إعادة الطلب.</h3>
+                        <p>تساعدك التنبيهات المختصرة على متابعة التحصيل والمخزون قبل أن تتحول التفاصيل اليومية إلى ضغط تشغيلي.</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section section-muted">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">الوحدات</span>
+                    <h2>نظام متكامل قابل للتوسع</h2>
+                </div>
+                <div class="modules-grid">
+                    @foreach (var module in moduleGroups)
+                    {
+                        <article class="module-card">
+                            <h3>@module.Title</h3>
+                            <ul>
+                                @foreach (var item in module.Items)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section">
+            <div class="landing-container why-layout">
+                <div class="section-heading align-start">
+                    <span class="eyebrow">الاختيار</span>
+                    <h2>لماذا وازن؟</h2>
+                </div>
+                <div class="why-list">
+                    @foreach (var reason in reasons)
+                    {
+                        <div class="why-item">
+                            <span aria-hidden="true"></span>
+                            <strong>@reason</strong>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section section-muted" id="pricing">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">الأسعار</span>
+                    <h2>باقات بسيطة تبدأ معك وتتوسع مع نشاطك</h2>
+                </div>
+                <div class="pricing-grid">
+                    @foreach (var plan in pricingPlans)
+                    {
+                        <article class="pricing-card @(plan.Highlight ? "featured" : "")">
+                            <div class="pricing-head">
+                                <h3>@plan.Name</h3>
+                                @if (plan.Highlight)
+                                {
+                                    <span>الأكثر توازنا</span>
+                                }
+                            </div>
+                            <strong class="price">@plan.Price</strong>
+                            <p>@plan.ForText</p>
+                            <ul>
+                                @foreach (var feature in plan.Features)
+                                {
+                                    <li>@feature</li>
+                                }
+                            </ul>
+                            <a class="btn @(plan.Highlight ? "btn-primary" : "btn-secondary")" href="/Identity/Account/Register">ابدأ التجربة</a>
+                        </article>
+                    }
+                </div>
+                <p class="pricing-note">الأسعار تجريبية ويمكن تعديلها حسب مرحلة الإطلاق.</p>
+            </div>
+        </section>
+
+        <section class="landing-section">
+            <div class="landing-container">
+                <div class="section-heading">
+                    <span class="eyebrow">طريقة العمل</span>
+                    <h2>مصمم ليكون قريبًا من طريقة عملك اليومية</h2>
+                </div>
+                <div class="three-grid">
+                    @foreach (var testimonial in testimonials)
+                    {
+                        <article class="testimonial-card">
+                            <p>“@testimonial.Text”</p>
+                            <strong>@testimonial.Role</strong>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section section-muted" id="faq">
+            <div class="landing-container faq-layout">
+                <div class="section-heading align-start">
+                    <span class="eyebrow">الأسئلة الشائعة</span>
+                    <h2>إجابات مختصرة قبل أن تبدأ</h2>
+                </div>
+                <div class="faq-list">
+                    @foreach (var faq in faqs)
+                    {
+                        <details class="faq-item">
+                            <summary>@faq.Question</summary>
+                            <p>@faq.Answer</p>
+                        </details>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta">
+            <div class="landing-container final-cta-inner">
+                <h2>ابدأ بتنظيم حساباتك اليوم</h2>
+                <p>جرّب وازن كنسخة مبكرة، وابدأ ببناء نظام مالي أوضح لشركتك.</p>
+                <div class="hero-actions center-actions">
+                    <a class="btn btn-primary btn-large" href="/Identity/Account/Register">ابدأ التجربة</a>
+                    <a class="btn btn-secondary btn-large" href="#contact">تواصل معنا</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+        <div class="landing-container footer-grid">
+            <div>
+                <h2>وازن</h2>
+                <p>برنامج محاسبي سحابي للمنشآت الصغيرة والمتوسطة</p>
+            </div>
+            <div>
+                <h3>المنتج</h3>
+                <a href="#features">المميزات</a>
+                <a href="#reports">التقارير</a>
+                <a href="#pricing">الأسعار</a>
+                <a href="/Identity/Account/Login">تسجيل الدخول</a>
+            </div>
+            <div>
+                <h3>الموارد</h3>
+                <a href="#faq">الأسئلة الشائعة</a>
+                <span>الدعم</span>
+                <span>التوثيق لاحقًا</span>
+            </div>
+            <div>
+                <h3>تواصل</h3>
+                <span>البريد الإلكتروني placeholder</span>
+                <span>واتساب placeholder</span>
+            </div>
+        </div>
+        <div class="landing-container footer-bottom">
+            <span>© 2026 وازن. جميع الحقوق محفوظة.</span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,33 @@
+@model IReadOnlyList<ReportCardViewModel>
+@{
+    ViewData["Title"] = "مركز التقارير";
+    var groups = Model.GroupBy(x => x.Category).ToList();
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("مركز التقارير", "كل تقاريرك المحاسبية والتشغيلية في مكان واحد. اختر التقرير لفتحه مع فلاتر فترة وتصدير."))" />
+
+<section class="data-panel mb-3">
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+        <span class="badge bg-emerald-soft text-emerald" style="font-size:13px;">@Model.Count تقرير</span>
+        <span class="text-muted small">مجموعات: @groups.Count</span>
+        <div class="vr"></div>
+        @foreach (var group in groups)
+        {
+            <a href="#group-@group.Key.GetHashCode()" class="badge bg-secondary-subtle text-secondary" style="font-size:12.5px;">@group.Key</a>
+        }
+    </div>
+</section>
+
+@foreach (var group in groups)
+{
+    <div class="report-group-title" id="group-@group.Key.GetHashCode()">
+        <h2>@group.Key</h2>
+        <span class="pill">@group.Count() تقارير</span>
+    </div>
+    <section class="report-grid">
+        @foreach (var report in group)
+        {
+            <partial name="_ReportCard" model="@report" />
+        }
+    </section>
+}

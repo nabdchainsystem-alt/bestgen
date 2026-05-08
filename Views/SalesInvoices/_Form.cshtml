@@ -1,0 +1,154 @@
+@model SalesInvoiceFormViewModel
+@{
+    var customers = ViewBag.Customers as List<Customer> ?? new List<Customer>();
+    var warehouses = ViewBag.Warehouses as List<Warehouse> ?? new List<Warehouse>();
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+    var paymentMethods = ViewBag.PaymentMethods as PaymentMethod[] ?? Array.Empty<PaymentMethod>();
+    var statuses = ViewBag.Statuses as InvoiceStatus[] ?? Array.Empty<InvoiceStatus>();
+    var invariant = System.Globalization.CultureInfo.InvariantCulture;
+    string number(decimal value) => value.ToString("0.##", invariant);
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="form-section-title">بيانات الفاتورة</div>
+<div class="form-grid">
+    <div>
+        <label asp-for="InvoiceNumber" class="form-label"></label>
+        <input asp-for="InvoiceNumber" class="form-control" placeholder="تلقائي عند الحفظ" />
+        <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="InvoiceDate" class="form-label"></label>
+        <input asp-for="InvoiceDate" type="date" class="form-control" />
+        <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="CustomerId" class="form-label"></label>
+        <select asp-for="CustomerId" class="form-select">
+            <option value="">اختر العميل</option>
+            @foreach (var customer in customers)
+            {
+                <option value="@customer.Id">@customer.CustomerCode - @customer.NameAr</option>
+            }
+        </select>
+        <span asp-validation-for="CustomerId" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="WarehouseId" class="form-label"></label>
+        <select asp-for="WarehouseId" class="form-select">
+            <option value="">اختر المستودع</option>
+            @foreach (var warehouse in warehouses)
+            {
+                <option value="@warehouse.Id">@warehouse.Name</option>
+            }
+        </select>
+        <span asp-validation-for="WarehouseId" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="PaymentMethod" class="form-label"></label>
+        <select asp-for="PaymentMethod" class="form-select">
+            @foreach (var method in paymentMethods)
+            {
+                <option value="@method">@EntityDisplayHelper.TranslateEnum(method)</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select">
+            @foreach (var status in statuses)
+            {
+                <option value="@status">@EntityDisplayHelper.TranslateEnum(status)</option>
+            }
+        </select>
+    </div>
+    <div class="full-width">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-section-title mt-4">الأصناف</div>
+<div class="table-responsive">
+    <table class="table invoice-items">
+        <thead>
+            <tr>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الخصم</th>
+                <th>الضريبة %</th>
+                <th>الإجمالي</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-items-body>
+            @for (var i = 0; i < Model.Items.Count; i++)
+            {
+                <tr data-item-row>
+                    <td>
+                        <select class="form-select js-product-select" name="Items[@i].ProductId">
+                            <option value="">اختر الصنف</option>
+                            @foreach (var product in products)
+                            {
+                                if (product.Id == Model.Items[i].ProductId)
+                                {
+                                    <option value="@product.Id" data-selling-price="@number(product.SellingPrice)" data-purchase-price="@number(product.PurchasePrice)" data-vat="@number(product.VatRate)" selected>@product.SKU - @product.NameAr</option>
+                                }
+                                else
+                                {
+                                    <option value="@product.Id" data-selling-price="@number(product.SellingPrice)" data-purchase-price="@number(product.PurchasePrice)" data-vat="@number(product.VatRate)">@product.SKU - @product.NameAr</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td><input class="form-control js-qty" name="Items[@i].Quantity" value="@number(Model.Items[i].Quantity)" type="number" step="0.01" min="0" /></td>
+                    <td><input class="form-control js-unit" name="Items[@i].UnitPrice" value="@number(Model.Items[i].UnitPrice)" type="number" step="0.01" min="0" /></td>
+                    <td><input class="form-control js-discount" name="Items[@i].Discount" value="@number(Model.Items[i].Discount)" type="number" step="0.01" min="0" /></td>
+                    <td><input class="form-control js-vat" name="Items[@i].VatRate" value="@number(Model.Items[i].VatRate)" type="number" step="0.01" min="0" /></td>
+                    <td><input class="form-control js-line-total" name="Items[@i].LineTotal" value="@number(Model.Items[i].LineTotal)" type="number" step="0.01" readonly /></td>
+                    <td><button class="btn btn-light text-danger js-remove-row" type="button" title="حذف"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<button class="btn btn-outline-primary" type="button" data-add-row><i class="bi bi-plus-lg"></i> إضافة صنف</button>
+
+<template data-row-template>
+    <tr data-item-row>
+        <td>
+            <select class="form-select js-product-select" name="Items[__index__].ProductId">
+                <option value="">اختر الصنف</option>
+                @foreach (var product in products)
+                {
+                    <option value="@product.Id" data-selling-price="@number(product.SellingPrice)" data-purchase-price="@number(product.PurchasePrice)" data-vat="@number(product.VatRate)">@product.SKU - @product.NameAr</option>
+                }
+            </select>
+        </td>
+        <td><input class="form-control js-qty" name="Items[__index__].Quantity" value="1" type="number" step="0.01" min="0" /></td>
+        <td><input class="form-control js-unit" name="Items[__index__].UnitPrice" value="0" type="number" step="0.01" min="0" /></td>
+        <td><input class="form-control js-discount" name="Items[__index__].Discount" value="0" type="number" step="0.01" min="0" /></td>
+        <td><input class="form-control js-vat" name="Items[__index__].VatRate" value="15" type="number" step="0.01" min="0" /></td>
+        <td><input class="form-control js-line-total" name="Items[__index__].LineTotal" value="0" type="number" step="0.01" readonly /></td>
+        <td><button class="btn btn-light text-danger js-remove-row" type="button" title="حذف"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+
+<div class="totals-box mt-4">
+    <div class="total-row"><span>الإجمالي قبل الضريبة</span><strong data-total="subtotal">@Model.Subtotal.ToString("N2")</strong></div>
+    <div class="total-row"><span>الخصومات</span><strong data-total="discount">@Model.DiscountTotal.ToString("N2")</strong></div>
+    <div class="total-row"><span>ضريبة القيمة المضافة</span><strong data-total="vat">@Model.VatTotal.ToString("N2")</strong></div>
+    <div class="total-row grand"><span>الإجمالي النهائي</span><strong data-total="grand">@Model.GrandTotal.ToString("N2")</strong></div>
+    <div class="mt-3">
+        <label asp-for="PaidAmount" class="form-label"></label>
+        <input asp-for="PaidAmount" class="form-control js-paid" type="number" step="0.01" min="0" />
+    </div>
+    <div class="total-row"><span>المتبقي</span><strong data-total="remaining">@Model.RemainingAmount.ToString("N2")</strong></div>
+    <input asp-for="Subtotal" type="hidden" data-hidden-total="subtotal" />
+    <input asp-for="DiscountTotal" type="hidden" data-hidden-total="discount" />
+    <input asp-for="VatTotal" type="hidden" data-hidden-total="vat" />
+    <input asp-for="GrandTotal" type="hidden" data-hidden-total="grand" />
+    <input asp-for="RemainingAmount" type="hidden" data-hidden-total="remaining" />
+</div>

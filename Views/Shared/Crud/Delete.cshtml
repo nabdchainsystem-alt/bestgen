@@ -1,0 +1,26 @@
+@model object
+@{
+    var controllerName = (string)ViewBag.ControllerName;
+    var title = (string)ViewBag.EntityTitle;
+    var entityType = Model.GetType();
+    var id = (int)(entityType.GetProperty("Id")?.GetValue(Model) ?? 0);
+    var properties = EntityDisplayHelper.GetListProperties(entityType).ToList();
+    ViewData["Title"] = $"حذف {title}";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel($"حذف {title}", "تأكيد حذف السجل المحدد من النظام."))" />
+
+<section class="details-panel">
+    <div class="alert alert-danger mb-4">هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع من داخل واجهة MVP.</div>
+    <dl class="row">
+        @foreach (var property in properties)
+        {
+            <dt class="col-md-3">@EntityDisplayHelper.Label(property.Name)</dt>
+            <dd class="col-md-9">@EntityDisplayHelper.FormatValue(property.GetValue(Model), property.Name)</dd>
+        }
+    </dl>
+    <form asp-action="Delete" asp-route-id="@id" method="post" class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> حذف</button>
+        <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+    </form>
+</section>

@@ -1,0 +1,50 @@
+@model IReadOnlyList<SalesInvoice>
+@{
+    ViewData["Title"] = "فواتير البيع";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("فواتير البيع", "إصدار ومتابعة فواتير العملاء والمدفوعات.", "Create", "SalesInvoices", "فاتورة بيع جديدة"))" />
+
+<section class="data-panel">
+    <partial name="_SearchBar" />
+
+    @if (!Model.Any())
+    {
+        <partial name="_EmptyState" model="@("لا توجد فواتير بيع مطابقة للفلاتر الحالية.")" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>التاريخ</th>
+                        <th>العميل</th>
+                        <th>الإجمالي</th>
+                        <th>المدفوع</th>
+                        <th>المتبقي</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in Model)
+                    {
+                        <tr>
+                            <td>@invoice.InvoiceNumber</td>
+                            <td>@invoice.InvoiceDate.ToString("yyyy/MM/dd")</td>
+                            <td>@invoice.Customer?.NameAr</td>
+                            <td>@EntityDisplayHelper.FormatValue(invoice.GrandTotal, nameof(invoice.GrandTotal))</td>
+                            <td>@EntityDisplayHelper.FormatValue(invoice.PaidAmount, nameof(invoice.PaidAmount))</td>
+                            <td>@EntityDisplayHelper.FormatValue(invoice.RemainingAmount, nameof(invoice.RemainingAmount))</td>
+                            <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(invoice.Status))" /></td>
+                            <td><partial name="_ActionButtons" model="@invoice.Id" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="text-muted small">ترقيم الصفحات placeholder للنسخة القادمة.</div>
+    }
+</section>

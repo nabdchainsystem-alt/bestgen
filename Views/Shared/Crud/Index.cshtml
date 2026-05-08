@@ -1,0 +1,63 @@
+@model IReadOnlyList<object>
+@{
+    var controllerName = (string)ViewBag.ControllerName;
+    var title = (string)ViewBag.EntityTitle;
+    var description = (string)ViewBag.EntityDescription;
+    var entityType = ViewBag.EntityType as Type ?? Model.FirstOrDefault()?.GetType();
+    var properties = entityType is null ? new List<System.Reflection.PropertyInfo>() : EntityDisplayHelper.GetListProperties(entityType).ToList();
+    ViewData["Title"] = title;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(title, description, "Create", controllerName, $"إضافة {title}"))" />
+
+<section class="data-panel">
+    <partial name="_SearchBar" />
+
+    @if (!Model.Any() || entityType is null)
+    {
+        <partial name="_EmptyState" model="@($"ابدأ بإضافة أول سجل في {title}.")" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        @foreach (var property in properties)
+                        {
+                            <th>@EntityDisplayHelper.Label(property.Name)</th>
+                        }
+                        <th class="text-nowrap">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model)
+                    {
+                        var id = (int)(entityType.GetProperty("Id")?.GetValue(row) ?? 0);
+                        <tr>
+                            @foreach (var property in properties)
+                            {
+                                var value = property.GetValue(row);
+                                <td>
+                                    @if (EntityDisplayHelper.IsStatusProperty(property.Name))
+                                    {
+                                        <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(value))" />
+                                    }
+                                    else
+                                    {
+                                        @EntityDisplayHelper.FormatValue(value, property.Name)
+                                    }
+                                </td>
+                            }
+                            <td><partial name="_ActionButtons" model="@id" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center text-muted small pt-2">
+            <span>إجمالي السجلات: @ViewBag.TotalRows</span>
+            <span>ترقيم الصفحات سيضاف في النسخة القادمة</span>
+        </div>
+    }
+</section>

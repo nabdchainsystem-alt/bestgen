@@ -1,0 +1,99 @@
+@model JournalEntryFormViewModel
+@{
+    var accounts = ViewBag.Accounts as List<Account> ?? new List<Account>();
+    var statuses = ViewBag.Statuses as JournalEntryStatus[] ?? Array.Empty<JournalEntryStatus>();
+    var invariant = System.Globalization.CultureInfo.InvariantCulture;
+    string number(decimal value) => value.ToString("0.##", invariant);
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="form-section-title">بيانات القيد</div>
+<div class="form-grid">
+    <div>
+        <label asp-for="EntryNumber" class="form-label"></label>
+        <input asp-for="EntryNumber" class="form-control" placeholder="تلقائي عند الحفظ" />
+    </div>
+    <div>
+        <label asp-for="EntryDate" class="form-label"></label>
+        <input asp-for="EntryDate" class="form-control" type="date" />
+        <span asp-validation-for="EntryDate" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="SourceModule" class="form-label"></label>
+        <input asp-for="SourceModule" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select">
+            @foreach (var status in statuses)
+            {
+                <option value="@status">@EntityDisplayHelper.TranslateEnum(status)</option>
+            }
+        </select>
+    </div>
+    <div class="full-width">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+    </div>
+</div>
+
+<div class="form-section-title mt-4">أطراف القيد</div>
+<div class="table-responsive">
+    <table class="table invoice-items">
+        <thead><tr><th>الحساب</th><th>الوصف</th><th>مدين</th><th>دائن</th><th></th></tr></thead>
+        <tbody data-journal-lines>
+            @for (var i = 0; i < Model.Lines.Count; i++)
+            {
+                <tr data-journal-row>
+                    <td>
+                        <select class="form-select" name="Lines[@i].AccountId">
+                            <option value="">اختر الحساب</option>
+                            @foreach (var account in accounts)
+                            {
+                                if (account.Id == Model.Lines[i].AccountId)
+                                {
+                                    <option value="@account.Id" selected>@account.AccountCode - @account.AccountNameAr</option>
+                                }
+                                else
+                                {
+                                    <option value="@account.Id">@account.AccountCode - @account.AccountNameAr</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td><input class="form-control" name="Lines[@i].Description" value="@Model.Lines[i].Description" /></td>
+                    <td><input class="form-control js-debit" name="Lines[@i].Debit" value="@number(Model.Lines[i].Debit)" type="number" step="0.01" min="0" /></td>
+                    <td><input class="form-control js-credit" name="Lines[@i].Credit" value="@number(Model.Lines[i].Credit)" type="number" step="0.01" min="0" /></td>
+                    <td><button class="btn btn-light text-danger js-remove-journal-row" type="button"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<button class="btn btn-outline-primary" type="button" data-add-journal-row><i class="bi bi-plus-lg"></i> إضافة سطر</button>
+
+<template data-journal-template>
+    <tr data-journal-row>
+        <td>
+            <select class="form-select" name="Lines[__index__].AccountId">
+                <option value="">اختر الحساب</option>
+                @foreach (var account in accounts)
+                {
+                    <option value="@account.Id">@account.AccountCode - @account.AccountNameAr</option>
+                }
+            </select>
+        </td>
+        <td><input class="form-control" name="Lines[__index__].Description" /></td>
+        <td><input class="form-control js-debit" name="Lines[__index__].Debit" value="0" type="number" step="0.01" min="0" /></td>
+        <td><input class="form-control js-credit" name="Lines[__index__].Credit" value="0" type="number" step="0.01" min="0" /></td>
+        <td><button class="btn btn-light text-danger js-remove-journal-row" type="button"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+
+<div class="totals-box mt-4">
+    <div class="total-row"><span>إجمالي المدين</span><strong data-journal-total="debit">@Model.TotalDebit.ToString("N2")</strong></div>
+    <div class="total-row"><span>إجمالي الدائن</span><strong data-journal-total="credit">@Model.TotalCredit.ToString("N2")</strong></div>
+    <div class="total-row grand"><span>الفرق</span><strong data-journal-total="difference">@((Model.TotalDebit - Model.TotalCredit).ToString("N2"))</strong></div>
+    <input asp-for="TotalDebit" type="hidden" data-hidden-journal-total="debit" />
+    <input asp-for="TotalCredit" type="hidden" data-hidden-journal-total="credit" />
+</div>

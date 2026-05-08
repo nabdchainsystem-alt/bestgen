@@ -1,0 +1,8 @@
+@model StatusBadgeViewModel
+@{
+    var status = Model.Status;
+    var text = status is Enum enumStatus
+        ? EntityDisplayHelper.TranslateEnum(enumStatus)
+        : EntityDisplayHelper.FormatValue(status);
+}
+<span class="@EntityDisplayHelper.StatusClass(status)">@text</span>

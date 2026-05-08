@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "المستخدمون والصلاحيات";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("المستخدمون والصلاحيات", "إدارة مستخدمي النظام والأدوار الأساسية."))" />
+
+<section class="details-panel">
+    <div class="summary-grid">
+        <div class="summary-card"><span>المستخدم الافتراضي</span><strong>admin@ledgerflow.local</strong></div>
+        <div class="summary-card"><span>الأدوار</span><strong>8</strong></div>
+        <div class="summary-card"><span>السياسات</span><strong>Placeholder</strong></div>
+        <div class="summary-card"><span>الصلاحيات التفصيلية</span><strong>MVP لاحقا</strong></div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>الدور</th><th>الاستخدام</th><th>الحالة</th></tr></thead>
+            <tbody>
+                @foreach (var role in new[] { "Owner", "Admin", "Accountant", "Sales", "Purchases", "Warehouse", "Cashier", "Viewer" })
+                {
+                    <tr><td>@role</td><td>صلاحيات أساسية قابلة للتوسعة</td><td><span class="badge bg-emerald-soft text-emerald">نشط</span></td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

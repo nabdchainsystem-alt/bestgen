@@ -1,0 +1,12 @@
+@model DashboardCardViewModel
+<div class="metric-card accent-@Model.Accent">
+    <div class="metric-icon"><i class="bi @Model.Icon"></i></div>
+    <div class="metric-body">
+        <span>@Model.Title</span>
+        <strong>@Model.Value</strong>
+        @if (!string.IsNullOrWhiteSpace(Model.Hint))
+        {
+            <small>@Model.Hint</small>
+        }
+    </div>
+</div>

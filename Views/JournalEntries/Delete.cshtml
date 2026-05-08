@@ -1,0 +1,14 @@
+@model JournalEntry
+@{
+    ViewData["Title"] = "حذف قيد يومية";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("حذف قيد يومية", "تأكيد حذف القيد المحدد."))" />
+
+<section class="details-panel">
+    <div class="alert alert-danger">هل تريد حذف القيد @Model.EntryNumber؟</div>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> حذف</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+    </form>
+</section>

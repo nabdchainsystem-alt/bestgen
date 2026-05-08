@@ -1,0 +1,60 @@
+@model PurchaseInvoice
+@{
+    ViewData["Title"] = $"فاتورة {Model.PurchaseInvoiceNumber}";
+}
+
+<div class="page-header">
+    <div>
+        <h1>@Model.PurchaseInvoiceNumber</h1>
+        <p>@Model.Supplier?.NameAr - @Model.InvoiceDate.ToString("yyyy/MM/dd")</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(Model.Status))" />
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="bi bi-pencil"></i> تعديل</a>
+    </div>
+</div>
+
+<section class="details-panel">
+    <div class="summary-grid">
+        <div class="summary-card"><span>الإجمالي قبل الضريبة</span><strong>@EntityDisplayHelper.FormatValue(Model.Subtotal, nameof(Model.Subtotal))</strong></div>
+        <div class="summary-card"><span>الضريبة</span><strong>@EntityDisplayHelper.FormatValue(Model.VatTotal, nameof(Model.VatTotal))</strong></div>
+        <div class="summary-card"><span>إجمالي الفاتورة</span><strong>@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</strong></div>
+        <div class="summary-card"><span>المتبقي</span><strong>@EntityDisplayHelper.FormatValue(Model.RemainingAmount, nameof(Model.RemainingAmount))</strong></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><strong>المورد:</strong> @Model.Supplier?.NameAr</div>
+        <div class="col-md-4"><strong>المستودع:</strong> @Model.Warehouse?.Name</div>
+        <div class="col-md-4"><strong>طريقة الدفع:</strong> @EntityDisplayHelper.TranslateEnum(Model.PaymentMethod)</div>
+        <div class="col-md-4"><strong>مرجع المورد:</strong> @(Model.SupplierInvoiceReference ?? "-")</div>
+        <div class="col-12"><strong>ملاحظات:</strong> @(Model.Notes ?? "-")</div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>الصنف</th><th>الكمية</th><th>التكلفة</th><th>الخصم</th><th>الضريبة</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.Product?.NameAr</td>
+                        <td>@item.Quantity.ToString("N2")</td>
+                        <td>@EntityDisplayHelper.FormatValue(item.UnitCost, nameof(item.UnitCost))</td>
+                        <td>@EntityDisplayHelper.FormatValue(item.Discount, nameof(item.Discount))</td>
+                        <td>@item.VatRate.ToString("N2")%</td>
+                        <td>@EntityDisplayHelper.FormatValue(item.LineTotal, nameof(item.LineTotal))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <ul class="nav nav-tabs mt-4">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#purchase-related" type="button">القيود والمدفوعات</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#purchase-files" type="button">المرفقات</button></li>
+    </ul>
+    <div class="tab-content pt-3">
+        <div id="purchase-related" class="tab-pane fade show active">سيتم عرض القيود ومدفوعات المورد المرتبطة هنا في مرحلة لاحقة.</div>
+        <div id="purchase-files" class="tab-pane fade">مرفقات الفاتورة placeholder.</div>
+    </div>
+</section>

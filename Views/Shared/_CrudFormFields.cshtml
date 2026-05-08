@@ -1,0 +1,92 @@
+@model object
+@{
+    var entityType = Model.GetType();
+    var properties = EntityDisplayHelper.GetFormProperties(entityType).ToList();
+    var lookupData = ViewBag.LookupData as Dictionary<string, List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>>
+        ?? new Dictionary<string, List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>>();
+    var invariant = System.Globalization.CultureInfo.InvariantCulture;
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="form-grid">
+    @foreach (var property in properties)
+    {
+        var value = property.GetValue(Model);
+        var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+        var isLongText = property.Name.Contains("Address", StringComparison.OrdinalIgnoreCase)
+            || property.Name.Contains("Notes", StringComparison.OrdinalIgnoreCase)
+            || property.Name.Contains("Description", StringComparison.OrdinalIgnoreCase);
+        var fieldClass = isLongText ? "full-width" : "";
+
+        <div class="@fieldClass">
+            <label class="form-label" for="@property.Name">@EntityDisplayHelper.Label(property.Name)</label>
+
+            @if (lookupData.TryGetValue(property.Name, out var options))
+            {
+                <select class="form-select" id="@property.Name" name="@property.Name">
+                    <option value="">اختر...</option>
+                    @foreach (var option in options)
+                    {
+                        if (option.Value == value?.ToString())
+                        {
+                            <option value="@option.Value" selected>@option.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@option.Value">@option.Text</option>
+                        }
+                    }
+                </select>
+            }
+            else if (type.IsEnum)
+            {
+                <select class="form-select" id="@property.Name" name="@property.Name">
+                    @foreach (Enum option in Enum.GetValues(type))
+                    {
+                        if (option.Equals(value))
+                        {
+                            <option value="@option" selected>@EntityDisplayHelper.TranslateEnum(option)</option>
+                        }
+                        else
+                        {
+                            <option value="@option">@EntityDisplayHelper.TranslateEnum(option)</option>
+                        }
+                    }
+                </select>
+            }
+            else if (type == typeof(bool))
+            {
+                <input type="hidden" name="@property.Name" value="false" />
+                <div class="form-check form-switch">
+                    @if (value is true)
+                    {
+                        <input class="form-check-input" type="checkbox" id="@property.Name" name="@property.Name" value="true" checked />
+                    }
+                    else
+                    {
+                        <input class="form-check-input" type="checkbox" id="@property.Name" name="@property.Name" value="true" />
+                    }
+                    <label class="form-check-label" for="@property.Name">تفعيل</label>
+                </div>
+            }
+            else if (isLongText)
+            {
+                <textarea class="form-control" id="@property.Name" name="@property.Name" rows="3">@value</textarea>
+            }
+            else
+            {
+                var inputType = EntityDisplayHelper.InputType(property);
+                var inputValue = value switch
+                {
+                    DateTime dateValue => dateValue.ToString("yyyy-MM-dd"),
+                    decimal decimalValue => decimalValue.ToString("0.##", invariant),
+                    _ => value
+                };
+                var step = type == typeof(decimal) ? "0.01" : "1";
+                <input class="form-control" id="@property.Name" name="@property.Name" type="@inputType" value="@inputValue" step="@step" />
+            }
+
+            <span class="text-danger" data-valmsg-for="@property.Name" data-valmsg-replace="true"></span>
+        </div>
+    }
+</div>

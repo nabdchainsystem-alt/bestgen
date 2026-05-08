@@ -1,0 +1,449 @@
+@using System.Text.Json
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "لوحة التحكم";
+    string money(decimal value) => $"{value:N2} ر.س";
+    var monthlyLabels = Model.MonthlyComparison.Select(x => x.Month);
+    var monthlySales = Model.MonthlyComparison.Select(x => x.Sales);
+    var monthlyPurchases = Model.MonthlyComparison.Select(x => x.Purchases);
+    var cashLabels = Model.CashFlow.Select(x => x.Month);
+    var cashInflow = Model.CashFlow.Select(x => x.Inflow);
+    var cashOutflow = Model.CashFlow.Select(x => x.Outflow);
+    var expenseLabels = Model.ExpensesByCategory.Select(x => x.Category);
+    var expenseValues = Model.ExpensesByCategory.Select(x => x.Total);
+    var inventoryLabels = Model.InventoryByValue.Select(x => x.Label);
+    var inventoryValues = Model.InventoryByValue.Select(x => x.Value);
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("لوحة التحكم", "نظرة شاملة على المبيعات والمشتريات والنقد والمخزون والتنبيهات الذكية."))" />
+
+<section class="metrics-grid">
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("إجمالي المبيعات", money(Model.TotalSales), "bi-receipt", "emerald", "خلال جميع الفترات"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("إجمالي المشتريات", money(Model.TotalPurchases), "bi-bag-check", "blue", "فواتير الموردين"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("صافي الربح", money(Model.NetProfit), "bi-graph-up-arrow", "navy", "مبيعات − مشتريات − مصروفات"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("رصيد الخزينة", money(Model.CashBalance), "bi-cash-coin", "warning", "إجمالي الصناديق النقدية"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("رصيد البنك", money(Model.BankBalance), "bi-bank", "blue", "إجمالي الحسابات البنكية"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("العملاء المدينون", money(Model.Receivables), "bi-people", "warning", "ذمم مدينة مفتوحة"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("الموردون الدائنون", money(Model.Payables), "bi-person-lines-fill", "navy", "ذمم دائنة مستحقة"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("قيمة المخزون", money(Model.InventoryValue), "bi-box-seam", "emerald", "بسعر تكلفة الشراء"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("منتجات منخفضة المخزون", Model.LowStockCount.ToString(), "bi-exclamation-triangle", "danger", "وصلت حد الطلب"))" />
+    <partial name="_DashboardCard" model="@(new DashboardCardViewModel("فواتير متأخرة", Model.OverdueInvoiceCount.ToString(), "bi-clock-history", "danger", "أكثر من 30 يوما بدون سداد"))" />
+</section>
+
+<section class="dashboard-grid">
+    <div class="chart-panel">
+        <div class="panel-title"><h2>المبيعات مقابل المشتريات</h2><span class="badge bg-blue-soft text-blue">آخر 6 أشهر</span></div>
+        <div id="salesPurchasesChart" class="echart" style="height:320px;"></div>
+    </div>
+    <div class="alerts-panel">
+        <div class="panel-title"><h2>تنبيهات ذكية</h2><span class="badge bg-emerald-soft text-emerald">حية</span></div>
+        <ul class="alerts-list">
+            @foreach (var alert in Model.Alerts)
+            {
+                <li class="alert-item @alert.Tone">
+                    <div class="alert-dot"><i class="bi @alert.Icon"></i></div>
+                    <div>
+                        <h4>@alert.Title</h4>
+                        <p>@alert.Message</p>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="chart-panel">
+        <div class="panel-title"><h2>التدفق النقدي</h2><span class="badge bg-emerald-soft text-emerald">داخل / خارج</span></div>
+        <div id="cashFlowChart" class="echart" style="height:320px;"></div>
+    </div>
+    <div class="chart-panel">
+        <div class="panel-title"><h2>المصروفات حسب التصنيف</h2><span class="badge bg-blue-soft text-blue">تحليل</span></div>
+        <div id="expensesChart" class="echart" style="height:320px;"></div>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="chart-panel">
+        <div class="panel-title"><h2>المخزون حسب القيمة</h2><span class="badge bg-blue-soft text-blue">@Model.InventoryByValue.Count تصنيف</span></div>
+        <div id="inventoryChart" class="echart" style="height:340px;"></div>
+    </div>
+    <div class="table-panel">
+        <div class="panel-title"><h2>المنتجات منخفضة المخزون</h2><a asp-controller="Products" asp-action="Index">إدارة المخزون</a></div>
+        @if (!Model.LowStockProducts.Any())
+        {
+            <p class="text-muted mb-0">لا توجد أصناف تحت حد الطلب حاليا.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr><th>الصنف</th><th>SKU</th><th>الحالي</th><th>الحد</th></tr></thead>
+                    <tbody>
+                        @foreach (var product in Model.LowStockProducts)
+                        {
+                            <tr>
+                                <td>@product.NameAr</td>
+                                <td><span class="text-muted small">@product.SKU</span></td>
+                                <td><span class="badge bg-danger-subtle text-danger">@product.CurrentStock</span></td>
+                                <td>@product.MinimumStockLevel</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="table-panel">
+        <div class="panel-title"><h2>آخر فواتير المبيعات</h2><a asp-controller="SalesInvoices" asp-action="Index">عرض الكل</a></div>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr><th>الفاتورة</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                <tbody>
+                    @foreach (var invoice in Model.RecentSalesInvoices)
+                    {
+                        <tr>
+                            <td><a asp-controller="SalesInvoices" asp-action="Details" asp-route-id="@invoice.Id">@invoice.InvoiceNumber</a></td>
+                            <td>@invoice.Customer?.NameAr</td>
+                            <td>@money(invoice.GrandTotal)</td>
+                            <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(invoice.Status))" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-panel">
+        <div class="panel-title"><h2>آخر فواتير المشتريات</h2><a asp-controller="PurchaseInvoices" asp-action="Index">عرض الكل</a></div>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr><th>الفاتورة</th><th>المورد</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                <tbody>
+                    @foreach (var invoice in Model.RecentPurchaseInvoices)
+                    {
+                        <tr>
+                            <td><a asp-controller="PurchaseInvoices" asp-action="Details" asp-route-id="@invoice.Id">@invoice.PurchaseInvoiceNumber</a></td>
+                            <td>@invoice.Supplier?.NameAr</td>
+                            <td>@money(invoice.GrandTotal)</td>
+                            <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(invoice.Status))" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="table-panel">
+        <div class="panel-title"><h2>العملاء الأعلى مديونية</h2><a asp-controller="Customers" asp-action="Index">العملاء</a></div>
+        @if (!Model.TopDebtorCustomers.Any())
+        {
+            <p class="text-muted mb-0">لا يوجد عملاء عليهم رصيد مفتوح.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr><th>العميل</th><th>المدينة</th><th>المتبقي</th></tr></thead>
+                    <tbody>
+                        @foreach (var customer in Model.TopDebtorCustomers)
+                        {
+                            <tr>
+                                <td>@customer.NameAr</td>
+                                <td>@(customer.City ?? "-")</td>
+                                <td><span class="badge bg-warning-subtle text-warning-emphasis">@money(customer.CurrentBalance)</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    <div class="table-panel">
+        <div class="panel-title"><h2>الموردون المستحق لهم</h2><a asp-controller="Suppliers" asp-action="Index">الموردون</a></div>
+        @if (!Model.TopCreditorSuppliers.Any())
+        {
+            <p class="text-muted mb-0">لا توجد مستحقات للموردين حاليا.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr><th>المورد</th><th>المدينة</th><th>المستحق</th></tr></thead>
+                    <tbody>
+                        @foreach (var supplier in Model.TopCreditorSuppliers)
+                        {
+                            <tr>
+                                <td>@supplier.NameAr</td>
+                                <td>@(supplier.City ?? "-")</td>
+                                <td><span class="badge bg-blue-soft text-blue">@money(supplier.CurrentBalance)</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="table-panel">
+    <div class="panel-title"><h2>خارطة الطريق</h2><span class="badge bg-secondary-subtle text-secondary">إصدارات قادمة</span></div>
+    <div class="roadmap-list">
+        <span>POS</span>
+        <span>ZATCA Phase 2</span>
+        <span>إرسال الفواتير عبر WhatsApp</span>
+        <span>مساعد محاسبي بالذكاء الاصطناعي</span>
+        <span>سير اعتمادات</span>
+        <span>مقارنة أسعار الموردين</span>
+        <span>اقتراحات إعادة الطلب</span>
+        <span>منشئ التقارير</span>
+        <span>تطبيق جوال</span>
+        <span>دعم متعدد الشركات</span>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const monthlyLabels = @Html.Raw(JsonSerializer.Serialize(monthlyLabels));
+            const monthlySales = @Html.Raw(JsonSerializer.Serialize(monthlySales));
+            const monthlyPurchases = @Html.Raw(JsonSerializer.Serialize(monthlyPurchases));
+            const cashLabels = @Html.Raw(JsonSerializer.Serialize(cashLabels));
+            const cashInflow = @Html.Raw(JsonSerializer.Serialize(cashInflow));
+            const cashOutflow = @Html.Raw(JsonSerializer.Serialize(cashOutflow));
+            const expenseLabels = @Html.Raw(JsonSerializer.Serialize(expenseLabels));
+            const expenseValues = @Html.Raw(JsonSerializer.Serialize(expenseValues));
+            const inventoryLabels = @Html.Raw(JsonSerializer.Serialize(inventoryLabels));
+            const inventoryValues = @Html.Raw(JsonSerializer.Serialize(inventoryValues));
+
+            const palette = ["#138a6b", "#2563eb", "#b7791f", "#0f766e", "#10243e", "#7c3aed", "#0284c7", "#dc3545"];
+            const isRtl = document.documentElement.dir === "rtl";
+            const fontFamily = getComputedStyle(document.body).fontFamily;
+            const textMuted = "#6f6a59";
+            const textStrong = "#1f1d18";
+            const gridLine = "#ebe5d3";
+
+            const baseTextStyle = { fontFamily, fontSize: 11, color: textMuted };
+            const baseTooltip = {
+                backgroundColor: "#ffffff",
+                borderColor: "#ebe5d3",
+                borderWidth: 1,
+                textStyle: { fontFamily, fontSize: 12, color: textStrong },
+                extraCssText: "box-shadow:0 8px 24px rgba(31,29,24,0.08); border-radius:8px;"
+            };
+            const baseLegend = {
+                bottom: 6,
+                icon: "roundRect",
+                itemWidth: 10,
+                itemHeight: 10,
+                itemGap: 18,
+                textStyle: baseTextStyle
+            };
+
+            // Split labels like "ذو القعدة 1447" → "ذو القعدة\n1447" so they fit horizontally without rotating.
+            const splitLabel = (value) => {
+                if (typeof value !== "string") return value;
+                const idx = value.lastIndexOf(" ");
+                return idx > 0 ? value.slice(0, idx) + "\n" + value.slice(idx + 1) : value;
+            };
+            const categoryAxisLabel = {
+                ...baseTextStyle,
+                rotate: 0,
+                interval: 0,
+                hideOverlap: true,
+                lineHeight: 14,
+                formatter: splitLabel
+            };
+
+            const charts = [];
+            function mount(id, option) {
+                const el = document.getElementById(id);
+                if (!el) return null;
+                const chart = echarts.init(el, null, { renderer: "canvas" });
+                chart.setOption(option);
+                charts.push(chart);
+                return chart;
+            }
+
+            // 1) Sales vs Purchases — smooth area lines
+            mount("salesPurchasesChart", {
+                color: ["#138a6b", "#2563eb"],
+                textStyle: baseTextStyle,
+                tooltip: { ...baseTooltip, trigger: "axis" },
+                legend: { ...baseLegend, data: ["المبيعات", "المشتريات"] },
+                grid: { left: 14, right: 14, top: 18, bottom: 64, containLabel: true },
+                xAxis: {
+                    type: "category",
+                    data: monthlyLabels,
+                    boundaryGap: false,
+                    inverse: isRtl,
+                    axisLine: { lineStyle: { color: gridLine } },
+                    axisTick: { show: false },
+                    axisLabel: categoryAxisLabel
+                },
+                yAxis: {
+                    type: "value",
+                    position: isRtl ? "right" : "left",
+                    splitLine: { lineStyle: { color: gridLine, type: "dashed" } },
+                    axisLabel: { ...baseTextStyle }
+                },
+                series: [
+                    {
+                        name: "المبيعات",
+                        type: "line",
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 6,
+                        showSymbol: false,
+                        data: monthlySales,
+                        lineStyle: { width: 2.5 },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: "rgba(19,138,107,0.28)" },
+                                { offset: 1, color: "rgba(19,138,107,0.02)" }
+                            ])
+                        }
+                    },
+                    {
+                        name: "المشتريات",
+                        type: "line",
+                        smooth: true,
+                        symbol: "circle",
+                        symbolSize: 6,
+                        showSymbol: false,
+                        data: monthlyPurchases,
+                        lineStyle: { width: 2.5 },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: "rgba(37,99,235,0.22)" },
+                                { offset: 1, color: "rgba(37,99,235,0.02)" }
+                            ])
+                        }
+                    }
+                ]
+            });
+
+            // 2) Cash Flow — grouped bars
+            mount("cashFlowChart", {
+                color: ["#138a6b", "#dc3545"],
+                textStyle: baseTextStyle,
+                tooltip: { ...baseTooltip, trigger: "axis", axisPointer: { type: "shadow" } },
+                legend: { ...baseLegend, data: ["تدفق داخل", "تدفق خارج"] },
+                grid: { left: 14, right: 14, top: 18, bottom: 64, containLabel: true },
+                xAxis: {
+                    type: "category",
+                    data: cashLabels,
+                    inverse: isRtl,
+                    axisLine: { lineStyle: { color: gridLine } },
+                    axisTick: { show: false },
+                    axisLabel: categoryAxisLabel
+                },
+                yAxis: {
+                    type: "value",
+                    position: isRtl ? "right" : "left",
+                    splitLine: { lineStyle: { color: gridLine, type: "dashed" } },
+                    axisLabel: { ...baseTextStyle }
+                },
+                series: [
+                    {
+                        name: "تدفق داخل",
+                        type: "bar",
+                        data: cashInflow,
+                        barMaxWidth: 22,
+                        itemStyle: { borderRadius: [6, 6, 0, 0] }
+                    },
+                    {
+                        name: "تدفق خارج",
+                        type: "bar",
+                        data: cashOutflow,
+                        barMaxWidth: 22,
+                        itemStyle: { borderRadius: [6, 6, 0, 0] }
+                    }
+                ]
+            });
+
+            // 3) Expenses — doughnut
+            const expenseDataset = (expenseLabels.length ? expenseLabels : ["لا يوجد بيانات"])
+                .map((label, i) => ({ name: label, value: (expenseValues.length ? expenseValues[i] : 1) }));
+
+            mount("expensesChart", {
+                color: palette,
+                textStyle: baseTextStyle,
+                tooltip: { ...baseTooltip, trigger: "item", formatter: "{b}: {c} ({d}%)" },
+                legend: { ...baseLegend, type: "scroll", padding: [4, 16] },
+                series: [{
+                    type: "pie",
+                    radius: ["46%", "70%"],
+                    center: ["50%", "42%"],
+                    avoidLabelOverlap: true,
+                    itemStyle: {
+                        borderColor: "#ffffff",
+                        borderWidth: 2,
+                        borderRadius: 4
+                    },
+                    label: { show: false },
+                    labelLine: { show: false },
+                    emphasis: {
+                        scaleSize: 6,
+                        label: { show: true, fontSize: 12, fontWeight: 600, color: textStrong, fontFamily }
+                    },
+                    data: expenseDataset
+                }]
+            });
+
+            // 4) Inventory by value — horizontal bars
+            const invLabels = inventoryLabels.length ? inventoryLabels : ["لا توجد بيانات"];
+            const invValues = inventoryValues.length ? inventoryValues : [0];
+
+            mount("inventoryChart", {
+                textStyle: baseTextStyle,
+                tooltip: { ...baseTooltip, trigger: "axis", axisPointer: { type: "shadow" } },
+                grid: { left: 14, right: 24, top: 14, bottom: 24, containLabel: true },
+                xAxis: {
+                    type: "value",
+                    position: isRtl ? "top" : "bottom",
+                    inverse: isRtl,
+                    splitLine: { lineStyle: { color: gridLine, type: "dashed" } },
+                    axisLabel: { ...baseTextStyle }
+                },
+                yAxis: {
+                    type: "category",
+                    data: invLabels,
+                    inverse: true,
+                    position: isRtl ? "right" : "left",
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: {
+                        ...baseTextStyle,
+                        color: textStrong,
+                        width: 110,
+                        overflow: "truncate",
+                        ellipsis: "…"
+                    }
+                },
+                series: [{
+                    type: "bar",
+                    data: invValues.map((v, i) => ({
+                        value: v,
+                        itemStyle: { color: palette[i % palette.length], borderRadius: 6 }
+                    })),
+                    barMaxWidth: 18
+                }]
+            });
+
+            // Resize all charts when the window or sidebar changes width
+            const resizeAll = () => charts.forEach(c => c && c.resize());
+            window.addEventListener("resize", resizeAll);
+
+            const shell = document.querySelector(".app-shell");
+            if (shell && "MutationObserver" in window) {
+                new MutationObserver(() => setTimeout(resizeAll, 450))
+                    .observe(shell, { attributes: true, attributeFilter: ["class"] });
+            }
+        })();
+    </script>
+}

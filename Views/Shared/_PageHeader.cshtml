@@ -1,0 +1,15 @@
+@model PageHeaderViewModel
+
+<div class="page-header">
+    <div>
+        <h1>@Model.Title</h1>
+        <p>@Model.Description</p>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.CreateAction) && !string.IsNullOrWhiteSpace(Model.CreateController))
+    {
+        <a class="btn btn-primary" asp-controller="@Model.CreateController" asp-action="@Model.CreateAction">
+            <i class="bi bi-plus-lg"></i>
+            <span>@(Model.CreateText ?? "إضافة جديد")</span>
+        </a>
+    }
+</div>

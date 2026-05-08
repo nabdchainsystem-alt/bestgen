@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NABD Chain System — Second Theme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Warm-neutral light palette */
+    --bg-app: oklch(0.965 0.006 80);
+    --bg-sidebar: oklch(0.985 0.004 80);
+    --bg-surface: oklch(1 0 0);
+    --bg-hover: oklch(0.955 0.008 80);
+    --bg-active: oklch(0.93 0.012 80);
+    --bg-canvas: oklch(0.97 0.005 80);
+
+    --border-soft: oklch(0.92 0.008 80);
+    --border-strong: oklch(0.86 0.012 80);
+
+    --text-strong: oklch(0.22 0.008 80);
+    --text-base: oklch(0.32 0.008 80);
+    --text-muted: oklch(0.52 0.008 80);
+    --text-faint: oklch(0.68 0.008 80);
+
+    --accent: oklch(0.55 0.10 150);
+    --accent-soft: oklch(0.94 0.04 150);
+    --accent-strong: oklch(0.42 0.10 150);
+
+    --shadow-sm: 0 1px 2px 0 oklch(0.2 0.01 80 / 0.04);
+    --shadow-md: 0 1px 3px 0 oklch(0.2 0.01 80 / 0.06), 0 1px 2px 0 oklch(0.2 0.01 80 / 0.04);
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --sidebar-w: 256px;
+    --topbar-h: 60px;
+
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text-base);
+    background: var(--bg-app);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.005em;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input { font-family: inherit; }
+
+  #root { height: 100vh; }
+
+  /* App layout */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    height: 100vh;
+    padding: 10px;
+    gap: 10px;
+    background: var(--bg-app);
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .workspace {
+    padding: 14px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .workspace-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+  }
+  .workspace-logo {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--text-strong);
+    color: white;
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+  }
+  .workspace-meta { flex: 1; min-width: 0; }
+  .workspace-label {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .workspace-name {
+    font-size: 13px;
+    color: var(--text-strong);
+    font-weight: 600;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .workspace-chevron {
+    color: var(--text-faint);
+    flex-shrink: 0;
+  }
+
+  .nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 10px;
+  }
+  .nav::-webkit-scrollbar { width: 6px; }
+  .nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  .nav-section + .nav-section { margin-top: 18px; }
+  .nav-heading {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    font-weight: 500;
+    padding: 0 8px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-base);
+    font-size: 13px;
+    font-weight: 450;
+    width: 100%;
+    text-align: left;
+    transition: background 120ms ease, color 120ms ease;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg-hover); color: var(--text-strong); }
+  .nav-item span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-item.active {
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font-weight: 550;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-soft);
+    padding: 6px 7px;
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -4px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .nav-icon {
+    width: 16px; height: 16px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--bg-active);
+    color: var(--text-muted);
+  }
+  .nav-badge.accent {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .profile {
+    padding: 10px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .profile-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    width: 100%;
+    text-align: left;
+    transition: background 120ms ease;
+  }
+  .profile-card:hover { background: var(--bg-hover); }
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, oklch(0.7 0.08 150), oklch(0.55 0.10 150));
+    color: white;
+    display: grid; place-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .profile-meta { flex: 1; min-width: 0; }
+  .profile-name {
+    font-size: 13px;
+    color: var(--text-strong);
+    font-weight: 550;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .profile-role {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ============ MAIN ============ */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  /* Topbar */
+  .topbar {
+    height: var(--topbar-h);
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    min-width: 0;
+  }
+  .breadcrumb-item { color: var(--text-muted); }
+  .breadcrumb-item.current { color: var(--text-strong); font-weight: 550; }
+  .breadcrumb-sep { color: var(--text-faint); }
+
+  .search {
+    flex: 1;
+    max-width: 380px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    padding: 0 60px 0 34px;
+    font-size: 13px;
+    color: var(--text-strong);
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  .search input::placeholder { color: var(--text-faint); }
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .search-icon {
+    position: absolute;
+    left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+  .search-kbd {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 2px;
+  }
+  .kbd {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-muted);
+    background: var(--bg-app);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.4;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-md);
+    display: grid; place-items: center;
+    color: var(--text-muted);
+    transition: background 120ms ease, color 120ms ease;
+    position: relative;
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-strong); }
+  .icon-btn .dot {
+    position: absolute;
+    top: 8px; right: 9px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 1.5px solid var(--bg-sidebar);
+  }
+  .topbar-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--border-soft);
+    margin: 0 6px;
+  }
+  .topbar-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, oklch(0.7 0.08 150), oklch(0.55 0.10 150));
+    color: white;
+    display: grid; place-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 6px;
+    border: 1px solid var(--border-soft);
+    cursor: pointer;
+  }
+
+  /* Content / empty canvas */
+  .content {
+    flex: 1;
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    background-image: radial-gradient(oklch(0.85 0.012 80) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -1px -1px;
+  }
+  .content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, var(--bg-canvas) 90%);
+    pointer-events: none;
+  }
+  .empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
+    z-index: 1;
+  }
+  .empty-mark {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-soft);
+    display: grid; place-items: center;
+    color: var(--text-faint);
+    box-shadow: var(--shadow-sm);
+  }
+  .empty-title {
+    font-size: 15px;
+    font-weight: 550;
+    color: var(--text-strong);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .empty-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+  .empty-meta {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.02em;
+  }
+
+  /* Theme toggle subtle indicator */
+  .theme-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 10.5px;
+    font-weight: 550;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .theme-pill .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState } = React;
+
+    /* ---------- Inline icon set (1.5px stroke, 16px) ---------- */
+    const Icon = ({ d, size = 16, fill = false }) => (
+      <svg className="nav-icon" width={size} height={size} viewBox="0 0 24 24"
+           fill={fill ? "currentColor" : "none"}
+           stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        {Array.isArray(d) ? d.map((p, i) => <path key={i} d={p} />) : <path d={d} />}
+      </svg>
+    );
+
+    const ICONS = {
+      dashboard: ["M3 13h8V3H3v10z", "M13 21h8V11h-8v10z", "M3 21h8v-6H3v6z", "M13 9h8V3h-8v6z"],
+      package: ["M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z", "M3.27 6.96 12 12l8.73-5.04", "M12 22V12"],
+      truck: ["M10 17h4V5H2v12h3", "M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5", "M14 17h1", "M5.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z", "M18.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"],
+      warehouse: ["M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z", "M6 18h12", "M6 14h12", "M6 10h12"],
+      chart: ["M3 3v18h18", "M7 16l4-4 4 4 5-5"],
+      users: ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"],
+      message: ["M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"],
+      bell: ["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10.3 21a1.94 1.94 0 0 0 3.4 0"],
+      help: ["M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z", "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3", "M12 17h.01"],
+      sun: ["M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", "M12 1v2", "M12 21v2", "M4.22 4.22l1.42 1.42", "M18.36 18.36l1.42 1.42", "M1 12h2", "M21 12h2", "M4.22 19.78l1.42-1.42", "M18.36 5.64l1.42-1.42"],
+      mail: ["M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z", "M22 6l-10 7L2 6"],
+      search: ["M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z", "M21 21l-4.35-4.35"],
+      shield: ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"],
+      card: ["M2 7h20v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z", "M2 7l2-3h16l2 3", "M6 15h4"],
+      plug: ["M9 2v6", "M15 2v6", "M6 8h12v3a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z", "M12 17v5"],
+      cog: ["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"],
+      life: ["M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z", "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M4.93 4.93l4.24 4.24", "M14.83 14.83l4.24 4.24", "M14.83 9.17l4.24-4.24", "M14.83 9.17l3.53-3.53", "M4.93 19.07l4.24-4.24"],
+      chevron: ["M8 9l4-4 4 4", "M16 15l-4 4-4-4"],
+      box: ["M21 8L12 3 3 8l9 5 9-5z", "M3 8v8l9 5 9-5V8", "M12 13v8"],
+      receipt: ["M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z", "M14 2v6h6", "M8 12h8", "M8 16h6"],
+    };
+
+    /* ---------- Sidebar ---------- */
+    const NAV = [
+      {
+        heading: "Operations",
+        items: [
+          { label: "Dashboard", icon: "dashboard", active: true },
+          { label: "Orders", icon: "receipt", badge: "12" },
+          { label: "Shipments", icon: "truck" },
+          { label: "Inventory", icon: "package" },
+          { label: "Warehouses", icon: "warehouse" },
+        ],
+      },
+      {
+        heading: "Suppliers",
+        items: [
+          { label: "Vendors", icon: "users" },
+          { label: "Procurement", icon: "box" },
+          { label: "Contracts", icon: "shield" },
+        ],
+      },
+      {
+        heading: "Insights",
+        items: [
+          { label: "Analytics", icon: "chart" },
+          { label: "Reports", icon: "card", badge: "New", accent: true },
+        ],
+      },
+      {
+        heading: "Workspace",
+        items: [
+          { label: "Integrations", icon: "plug" },
+          { label: "Help Center", icon: "life" },
+          { label: "Settings", icon: "cog" },
+        ],
+      },
+    ];
+
+    function Sidebar() {
+      return (
+        <aside className="sidebar">
+          <div className="workspace">
+            <button className="workspace-card" aria-label="Switch workspace">
+              <div className="workspace-logo">N</div>
+              <div className="workspace-meta">
+                <div className="workspace-label">Workspace</div>
+                <div className="workspace-name">NABD Chain System</div>
+              </div>
+              <svg className="workspace-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 9l4-4 4 4" /><path d="M16 15l-4 4-4-4" />
+              </svg>
+            </button>
+          </div>
+
+          <nav className="nav">
+            {NAV.map((sec) => (
+              <div className="nav-section" key={sec.heading}>
+                <div className="nav-heading">{sec.heading}</div>
+                {sec.items.map((it) => (
+                  <button key={it.label} className={`nav-item${it.active ? " active" : ""}`}>
+                    <Icon d={ICONS[it.icon]} />
+                    <span>{it.label}</span>
+                    {it.badge && (
+                      <span className={`nav-badge${it.accent ? " accent" : ""}`}>{it.badge}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </nav>
+
+          <div className="profile">
+            <button className="profile-card">
+              <div className="avatar">MA</div>
+              <div className="profile-meta">
+                <div className="profile-name">Mohamed Ali</div>
+                <div className="profile-role">Supply Chain Specialist</div>
+              </div>
+              <svg className="workspace-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 9l4-4 4 4" /><path d="M16 15l-4 4-4-4" />
+              </svg>
+            </button>
+          </div>
+        </aside>
+      );
+    }
+
+    /* ---------- Topbar ---------- */
+    function Topbar() {
+      return (
+        <header className="topbar">
+          <div className="breadcrumb">
+            <span className="breadcrumb-item">Operations</span>
+            <span className="breadcrumb-sep">/</span>
+            <span className="breadcrumb-item current">Dashboard</span>
+            <span className="theme-pill"><span className="pill-dot" />Theme 02</span>
+          </div>
+
+          <div className="search">
+            <svg className="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input placeholder="Search orders, shipments, vendors…" />
+            <div className="search-kbd">
+              <span className="kbd">⌘</span><span className="kbd">K</span>
+            </div>
+          </div>
+
+          <div className="topbar-actions">
+            <button className="icon-btn" aria-label="Toggle theme">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            </button>
+            <button className="icon-btn" aria-label="Help">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" />
+              </svg>
+            </button>
+            <div className="topbar-divider" />
+            <button className="icon-btn" aria-label="Messages">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <path d="M22 6l-10 7L2 6" />
+              </svg>
+              <span className="dot" />
+            </button>
+            <button className="icon-btn" aria-label="Notifications">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              </svg>
+              <span className="dot" />
+            </button>
+            <button className="topbar-avatar" aria-label="Account">MA</button>
+          </div>
+        </header>
+      );
+    }
+
+    /* ---------- Content / Empty ---------- */
+    function Content() {
+      return (
+        <section className="content">
+          <div className="empty-state">
+            <div className="empty-mark">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <path d="M3 9h18" /><path d="M9 21V9" />
+              </svg>
+            </div>
+            <h2 className="empty-title">Layout shell ready</h2>
+            <p className="empty-sub">Topbar and sidebar are styled to the second theme. Drop your views, dashboards, and forms into this canvas.</p>
+            <div className="empty-meta">// content area · {`{/* your component goes here */}`}</div>
+          </div>
+        </section>
+      );
+    }
+
+    function App() {
+      return (
+        <div className="app">
+          <Sidebar />
+          <div className="main">
+            <Topbar />
+            <Content />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

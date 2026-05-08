@@ -1,0 +1,26 @@
+@{
+    var currentSearch = ViewBag.CurrentSearch as string;
+    var currentStatus = ViewBag.CurrentStatus as string;
+    var statusOptions = ViewBag.StatusOptions as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+}
+<form method="get" class="list-toolbar">
+    <div class="search-input">
+        <i class="bi bi-search"></i>
+        <input name="q" value="@currentSearch" placeholder="بحث..." />
+    </div>
+    <select name="status" class="form-select">
+        <option value="">كل الحالات</option>
+        @foreach (var option in statusOptions)
+        {
+            if (option.Value == currentStatus)
+            {
+                <option value="@option.Value" selected>@option.Text</option>
+            }
+            else
+            {
+                <option value="@option.Value">@option.Text</option>
+            }
+        }
+    </select>
+    <button class="btn btn-outline-primary" type="submit">تصفية</button>
+</form>

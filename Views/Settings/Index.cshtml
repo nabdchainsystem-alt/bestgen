@@ -1,0 +1,78 @@
+@model CompanySettings
+@{
+    ViewData["Title"] = "الإعدادات";
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel("الإعدادات", "اضبط بيانات شركتك وقواعد الفوترة والترقيم والعملات وصلاحيات المستخدمين.", "Edit", "Settings", "تعديل ملف الشركة"))" />
+
+<section class="details-panel mb-4">
+    <div class="panel-title">
+        <h2>ملف الشركة</h2>
+        <span class="badge bg-emerald-soft text-emerald">معتمد</span>
+    </div>
+    <div class="summary-grid">
+        <div class="summary-card"><span>اسم الشركة</span><strong>@(string.IsNullOrWhiteSpace(Model.CompanyNameAr) ? "-" : Model.CompanyNameAr)</strong></div>
+        <div class="summary-card"><span>الرقم الضريبي</span><strong>@(Model.VatNumber ?? "-")</strong></div>
+        <div class="summary-card"><span>المدينة</span><strong>@(Model.City ?? "-")</strong></div>
+        <div class="summary-card"><span>نسبة الضريبة الافتراضية</span><strong>@Model.DefaultVatRate.ToString("N2")%</strong></div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <tbody>
+                <tr><th style="width:240px">الاسم عربي</th><td>@(Model.CompanyNameAr ?? "-")</td></tr>
+                <tr><th>الاسم إنجليزي</th><td>@(Model.CompanyNameEn ?? "-")</td></tr>
+                <tr><th>السجل التجاري</th><td>@(Model.CommercialRegistrationNumber ?? "-")</td></tr>
+                <tr><th>العنوان</th><td>@(Model.Address ?? "-")</td></tr>
+                <tr><th>الدولة</th><td>@Model.Country</td></tr>
+                <tr><th>بادئة فواتير البيع</th><td>@Model.InvoicePrefix</td></tr>
+                <tr><th>بادئة فواتير الشراء</th><td>@Model.PurchaseInvoicePrefix</td></tr>
+                <tr><th>مسار الشعار</th><td>@(Model.LogoPath ?? "-")</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="panel-title"><h2>أقسام الإعدادات</h2><span class="badge bg-blue-soft text-blue">8 أقسام</span></div>
+<section class="settings-grid mb-4">
+    <a class="settings-card" asp-controller="Settings" asp-action="Edit">
+        <div class="icon"><i class="bi bi-buildings"></i></div>
+        <h3>ملف الشركة</h3>
+        <p>اسم الشركة، الرقم الضريبي، السجل التجاري، الشعار.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="TaxSettings">
+        <div class="icon"><i class="bi bi-percent"></i></div>
+        <h3>إعدادات الضريبة</h3>
+        <p>نسبة الضريبة الافتراضية وجاهزية الفوترة الإلكترونية ZATCA.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="InvoiceSettings">
+        <div class="icon"><i class="bi bi-receipt"></i></div>
+        <h3>إعدادات الفواتير</h3>
+        <p>بادئات الترقيم، تذييل الفاتورة، وقوالب الطباعة.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="UsersRoles">
+        <div class="icon"><i class="bi bi-shield-lock"></i></div>
+        <h3>المستخدمون والصلاحيات</h3>
+        <p>إدارة الأدوار والمستخدمين وحدود الصلاحيات.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="Branches">
+        <div class="icon"><i class="bi bi-geo-alt"></i></div>
+        <h3>الفروع</h3>
+        <p>إدارة فروع المنشأة وربطها بالمستودعات.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="NumberingSettings">
+        <div class="icon"><i class="bi bi-hash"></i></div>
+        <h3>إعدادات الترقيم</h3>
+        <p>أنماط ترقيم تلقائية للفواتير والإيصالات والقيود.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="CurrencySettings">
+        <div class="icon"><i class="bi bi-currency-exchange"></i></div>
+        <h3>إعدادات العملات</h3>
+        <p>العملة الأساسية وعملات إضافية وأسعار الصرف.</p>
+    </a>
+    <a class="settings-card" asp-controller="Settings" asp-action="FutureIntegrations">
+        <div class="icon"><i class="bi bi-plug"></i></div>
+        <h3>التكاملات المستقبلية</h3>
+        <p>الدفع، البنوك، WhatsApp، ZATCA، أنظمة التوصيل.</p>
+    </a>
+</section>

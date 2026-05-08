@@ -1,0 +1,77 @@
+@model object
+@{
+    var controllerName = (string)ViewBag.ControllerName;
+    var title = (string)ViewBag.EntityTitle;
+    var entityType = Model.GetType();
+    var id = (int)(entityType.GetProperty("Id")?.GetValue(Model) ?? 0);
+    var properties = EntityDisplayHelper.GetFormProperties(entityType).ToList();
+    var statusProperty = entityType.GetProperty("Status") ?? entityType.GetProperty("IsActive");
+    var statusValue = statusProperty?.GetValue(Model);
+    ViewData["Title"] = $"تفاصيل {title}";
+}
+
+<div class="page-header">
+    <div>
+        <h1>تفاصيل @title</h1>
+        <p>عرض بيانات السجل والبيانات المرتبطة به.</p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (statusProperty is not null)
+        {
+            <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(statusValue))" />
+        }
+        <a asp-controller="@controllerName" asp-action="Edit" asp-route-id="@id" class="btn btn-primary"><i class="bi bi-pencil"></i> تعديل</a>
+    </div>
+</div>
+
+<section class="details-panel">
+    <div class="summary-grid">
+        @foreach (var property in properties.Where(property => EntityDisplayHelper.IsMoneyProperty(property.Name)).Take(4))
+        {
+            <div class="summary-card">
+                <span>@EntityDisplayHelper.Label(property.Name)</span>
+                <strong>@EntityDisplayHelper.FormatValue(property.GetValue(Model), property.Name)</strong>
+            </div>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <tbody>
+                @foreach (var property in properties)
+                {
+                    var value = property.GetValue(Model);
+                    <tr>
+                        <th style="width: 260px">@EntityDisplayHelper.Label(property.Name)</th>
+                        <td>
+                            @if (EntityDisplayHelper.IsStatusProperty(property.Name))
+                            {
+                                <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(value))" />
+                            }
+                            else
+                            {
+                                @EntityDisplayHelper.FormatValue(value, property.Name)
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <ul class="nav nav-tabs mt-4" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#related" type="button">بيانات مرتبطة</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit" type="button">سجل النشاط</button></li>
+    </ul>
+    <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="related">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr><th>النوع</th><th>الوصف</th><th>الحالة</th></tr></thead>
+                    <tbody><tr><td>Placeholder</td><td>سيتم عرض الحركات المرتبطة في مرحلة لاحقة.</td><td><span class="badge bg-secondary-subtle text-secondary">MVP</span></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="audit">سجل النشاط التفصيلي placeholder.</div>
+    </div>
+</section>

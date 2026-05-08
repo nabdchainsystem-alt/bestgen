@@ -1,0 +1,9 @@
+@model ReportCardViewModel
+<a class="report-card" asp-controller="Reports" asp-action="Details" asp-route-id="@Model.ReportKey">
+    <div class="report-icon"><i class="bi @Model.Icon"></i></div>
+    <div>
+        <span>@Model.Category</span>
+        <h3>@Model.Title</h3>
+        <p>@Model.Description</p>
+    </div>
+</a>
