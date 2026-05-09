@@ -9,6 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
+// Npgsql 6+ enforces UTC for `timestamp with time zone`. Bestgen's entities use
+// DateTime.Today / DateTime.Now in many places (invoice dates, seeded data),
+// which have Kind=Unspecified/Local and would be rejected. The legacy switch
+// keeps the pre-6.0 behavior of treating DateTime as `timestamp without time
+// zone` regardless of Kind. Must be set before any Npgsql type loads.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Render injects PORT — bind Kestrel to it when present.
