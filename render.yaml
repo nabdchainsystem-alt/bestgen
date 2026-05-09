@@ -1,0 +1,35 @@
+# Render blueprint: web service + free Postgres database.
+# Deploy via Render's "Blueprint" flow or just connect the repo and Render will
+# auto-detect this file.
+#
+# Free-tier notes:
+#   - The web service sleeps after 15 min idle and takes ~30 s to wake up.
+#   - The free Postgres instance expires after 90 days (Render emails you).
+#     Upgrade to a paid plan before that, or export and recreate.
+
+services:
+  - type: web
+    name: bestgen
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DatabaseProvider
+        value: Postgres
+      - key: SeedDatabase
+        value: true
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: bestgen-db
+          property: connectionString
+
+databases:
+  - name: bestgen-db
+    plan: free
+    databaseName: bestgen
+    user: bestgen
+    region: oregon

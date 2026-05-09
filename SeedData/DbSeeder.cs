@@ -38,6 +38,8 @@ public static class DbSeeder
         }
 
         await EnsureAdminAsync(userManager, "max@bestgen.com", "123", "ماكس");
+        await EnsureAdminAsync(userManager, "sam@bestgen.com", "123", "سام");
+        await EnsureAdminAsync(userManager, "badwy@bestgen.com", "123", "بدوي");
         await EnsureAdminAsync(userManager, "admin@ledgerflow.local", "Admin@12345", "مدير النظام");
 
         await SeedCompanySettingsAsync(context);

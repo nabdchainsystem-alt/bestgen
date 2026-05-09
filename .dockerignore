@@ -1,0 +1,27 @@
+**/bin
+**/obj
+**/.vs
+**/.vscode
+**/.idea
+**/*.user
+**/*.suo
+
+# Local dev artifacts
+bestgen.db
+bestgen.db-journal
+bestgen.db-wal
+bestgen.db-shm
+
+# Source control
+.git
+.gitignore
+.gitattributes
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Docs / images we don't ship in the container
+*.md
+Logo.png
+Logo Transparent.png

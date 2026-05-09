@@ -3,21 +3,63 @@ using bestgen.Data;
 using bestgen.Models;
 using bestgen.SeedData;
 using bestgen.Services;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Render injects PORT — bind Kestrel to it when present.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+
+// DatabaseProvider: "Sqlite" (default, local dev) or "Postgres" (production).
+var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
+var isPostgres = string.Equals(dbProvider, "Postgres", StringComparison.OrdinalIgnoreCase);
+
+if (isPostgres)
+{
+    // Render's database property emits a URL-style connection string
+    // (postgres://user:pass@host:port/db). Convert to Npgsql key=value form.
+    connectionString = NormalizePostgresConnectionString(connectionString);
+}
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
-    options.UseSqlite(connectionString);
+    if (isPostgres)
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
     options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+});
+
+// Persist Data Protection keys to the database so auth cookies survive redeploys
+// on hosts with ephemeral filesystems (e.g. Render).
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>()
+    .SetApplicationName("Bestgen");
+
+// Trust X-Forwarded-* headers from Render/other proxies so the app sees the
+// original scheme (https) and client IP for cookie security and logging.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -101,6 +143,10 @@ builder.Services.AddScoped<ReportService>();
 
 var app = builder.Build();
 
+// Forwarded headers must run before any middleware that depends on
+// Request.Scheme / Request.IsHttps (auth, cookie security, redirects).
+app.UseForwardedHeaders();
+
 // Force ar-SA to parse dates/numbers identically to en-US so HTML5 form values
 // (yyyy-MM-dd dates, dot-decimal numbers) bind correctly under Arabic UI culture.
 // Without this, ar-SA's default UmAlQura/Hijri calendar rejects ISO dates and
@@ -127,10 +173,8 @@ else
     app.UseHsts();
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+// HTTPS redirect intentionally omitted: Render terminates SSL at the edge.
+// Forwarded headers above make the app see the original https scheme for cookies.
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
@@ -147,3 +191,23 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+static string NormalizePostgresConnectionString(string raw)
+{
+    if (string.IsNullOrWhiteSpace(raw)) return raw;
+    if (!raw.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        && !raw.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        // Already in Npgsql key=value form — leave it alone.
+        return raw;
+    }
+
+    var uri = new Uri(raw);
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var user = Uri.UnescapeDataString(userInfo[0]);
+    var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+    var db = uri.AbsolutePath.TrimStart('/');
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
+    return $"Host={uri.Host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Require;Trust Server Certificate=true";
+}
