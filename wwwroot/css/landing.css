@@ -1453,3 +1453,30 @@ html.nav-open .mobile-drawer { display: flex; }
     .pillars, .modules, .reports, .why, .pricing, .testimonials, .faq, .cta, .integrations { padding: 70px 0; }
     .brand-logo { height: 50px; }
 }
+
+/* ---------- Bilingual (EN/AR) toggle ---------- */
+html[dir="rtl"] .i-en,
+html:not([dir="rtl"]) .i-ar { display: none !important; }
+
+html[dir="rtl"] body,
+html[dir="rtl"] input,
+html[dir="rtl"] button,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select { font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+
+/* Keep brand-text and decorative numerics latin even in AR */
+html[dir="rtl"] .brand-logo,
+html[dir="rtl"] .device-url,
+html[dir="rtl"] .price-num,
+html[dir="rtl"] .currency,
+html[dir="rtl"] .stat strong[data-count],
+html[dir="rtl"] .logo-mark { font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+/* Flip auto-margins for RTL flex layouts */
+html[dir="rtl"] .topnav { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .cta p { margin-left: auto; margin-right: auto; }
+
+/* Lang toggle button */
+.lang-toggle { font-weight: 700; letter-spacing: .02em; }
+.lang-toggle .bi-translate { margin-inline-end: 6px; }
+

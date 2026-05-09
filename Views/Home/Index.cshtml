@@ -4,84 +4,219 @@
 
     var pillars = new[]
     {
-        (Icon: "bi-graph-up-arrow", Title: "Full Accounting",
-         Body: "Chart of accounts, manual entries, P&L, balance sheet, and opening balances — every transaction wired automatically to the correct journal entry.",
+        (Icon: "bi-graph-up-arrow",
+         TitleEn: "Full Accounting", TitleAr: "محاسبة كاملة",
+         BodyEn: "Chart of accounts, manual entries, P&L, balance sheet, and opening balances — every transaction wired automatically to the correct journal entry.",
+         BodyAr: "شجرة حسابات، قيود يدوية، قائمة دخل، ميزانية عمومية، وأرصدة افتتاحية — كل معاملة مربوطة تلقائياً بالقيد المحاسبي الصحيح.",
          Tone: "indigo"),
-        (Icon: "bi-boxes", Title: "Connected Inventory",
-         Body: "Products and warehouses, counts and transfers, with movement tied live to invoices, returns, and adjustments. No double entry, ever.",
+        (Icon: "bi-boxes",
+         TitleEn: "Connected Inventory", TitleAr: "مخزون متصل",
+         BodyEn: "Products and warehouses, counts and transfers, with movement tied live to invoices, returns, and adjustments. No double entry, ever.",
+         BodyAr: "منتجات ومستودعات، جرد وتحويلات، مع حركة مرتبطة مباشرة بالفواتير والمرتجعات والتسويات. لا إدخال مزدوج، أبداً.",
          Tone: "emerald"),
-        (Icon: "bi-bar-chart-steps", Title: "Smart Reporting",
-         Body: "General ledger, trial balance, aging reports, VAT returns, and bilingual customer/supplier statements at a single click.",
+        (Icon: "bi-bar-chart-steps",
+         TitleEn: "Smart Reporting", TitleAr: "تقارير ذكية",
+         BodyEn: "General ledger, trial balance, aging reports, VAT returns, and bilingual customer/supplier statements at a single click.",
+         BodyAr: "دفتر الأستاذ، ميزان المراجعة، تقارير الأعمار، إقرارات الضريبة، وكشوف حسابات العملاء والموردين ثنائية اللغة بنقرة واحدة.",
          Tone: "amber")
     };
 
     var modules = new[]
     {
-        (Icon: "bi-grid-1x2-fill",       Tone: "navy",    Title: "Dashboard",        Sub: "Real-time pulse of your finances and operations", Items: new[] { "Live KPIs", "Overdue invoices", "Stock alerts", "Latest activity" }),
-        (Icon: "bi-cart-check-fill",     Tone: "emerald", Title: "Sales",            Sub: "From customer to collection in one connected flow", Items: new[] { "Customers", "Quotations", "Sales invoices", "Receipts", "Credit notes", "Delivery notes" }),
-        (Icon: "bi-truck",               Tone: "blue",    Title: "Purchases",        Sub: "Orders, payments, and supplier balances unified", Items: new[] { "Suppliers", "Purchase orders", "Purchase invoices", "Supplier payments", "Debit notes", "Goods receipts" }),
-        (Icon: "bi-box-seam-fill",       Tone: "amber",   Title: "Inventory",        Sub: "Real-time tracking of quantities, costs, and movement", Items: new[] { "Categories", "Products", "Warehouses", "Stock counts", "Transfers" }),
-        (Icon: "bi-building-fill-gear",  Tone: "navy",    Title: "Fixed Assets",     Sub: "Asset register, depreciation, and rental contracts", Items: new[] { "Asset register", "Asset tags", "Rental contracts", "Operating status" }),
-        (Icon: "bi-journal-text",        Tone: "blue",    Title: "Accounting",       Sub: "Balanced entries with flexible reporting dimensions", Items: new[] { "Chart of accounts", "Manual entries", "General receipts", "Opening balances", "Cost centers" }),
-        (Icon: "bi-people-fill",         Tone: "emerald", Title: "Human Resources",  Sub: "Employees, payroll, and benefits in one module", Items: new[] { "Employees", "Documents", "Payroll", "Deductions", "Bonuses", "Loans" }),
-        (Icon: "bi-bar-chart-line-fill", Tone: "amber",   Title: "Reports Center",   Sub: "Professional financial and operational insights", Items: new[] { "General ledger", "Trial balance", "Income statement", "Balance sheet", "Aging", "VAT return" }),
-        (Icon: "bi-sliders2",            Tone: "navy",    Title: "Settings",         Sub: "Permissions, branches, and document numbering", Items: new[] { "Company profile", "Branches", "Numbering policies", "Users & roles" })
+        (Icon: "bi-grid-1x2-fill", Tone: "navy",
+         TitleEn: "Dashboard", TitleAr: "لوحة التحكم",
+         SubEn: "Real-time pulse of your finances and operations",
+         SubAr: "نبض لحظي لوضع شركتك المالي والتشغيلي",
+         ItemsEn: new[] { "Live KPIs", "Overdue invoices", "Stock alerts", "Latest activity" },
+         ItemsAr: new[] { "مؤشرات حية", "فواتير متأخرة", "تنبيهات المخزون", "آخر النشاطات" }),
+        (Icon: "bi-cart-check-fill", Tone: "emerald",
+         TitleEn: "Sales", TitleAr: "المبيعات",
+         SubEn: "From customer to collection in one connected flow",
+         SubAr: "من العميل إلى التحصيل في تدفق واحد متصل",
+         ItemsEn: new[] { "Customers", "Quotations", "Sales invoices", "Receipts", "Credit notes", "Delivery notes" },
+         ItemsAr: new[] { "العملاء", "عروض الأسعار", "فواتير المبيعات", "سندات القبض", "إشعارات دائنة", "سندات تسليم" }),
+        (Icon: "bi-truck", Tone: "blue",
+         TitleEn: "Purchases", TitleAr: "المشتريات",
+         SubEn: "Orders, payments, and supplier balances unified",
+         SubAr: "أوامر الشراء والمدفوعات وأرصدة الموردين في مكان واحد",
+         ItemsEn: new[] { "Suppliers", "Purchase orders", "Purchase invoices", "Supplier payments", "Debit notes", "Goods receipts" },
+         ItemsAr: new[] { "الموردون", "أوامر الشراء", "فواتير المشتريات", "مدفوعات الموردين", "إشعارات مدينة", "إيصالات استلام" }),
+        (Icon: "bi-box-seam-fill", Tone: "amber",
+         TitleEn: "Inventory", TitleAr: "المخزون",
+         SubEn: "Real-time tracking of quantities, costs, and movement",
+         SubAr: "تتبع لحظي للكميات والتكاليف والحركة",
+         ItemsEn: new[] { "Categories", "Products", "Warehouses", "Stock counts", "Transfers" },
+         ItemsAr: new[] { "تصنيفات المنتجات", "المنتجات", "المستودعات", "جرد المخزون", "تحويلات" }),
+        (Icon: "bi-building-fill-gear", Tone: "navy",
+         TitleEn: "Fixed Assets", TitleAr: "الأصول الثابتة",
+         SubEn: "Asset register, depreciation, and rental contracts",
+         SubAr: "سجل الأصول والإهلاك وعقود التأجير",
+         ItemsEn: new[] { "Asset register", "Asset tags", "Rental contracts", "Operating status" },
+         ItemsAr: new[] { "سجل الأصول", "بطاقات الأصول", "عقود التأجير", "الحالة التشغيلية" }),
+        (Icon: "bi-journal-text", Tone: "blue",
+         TitleEn: "Accounting", TitleAr: "المحاسبة",
+         SubEn: "Balanced entries with flexible reporting dimensions",
+         SubAr: "قيود متوازنة مع أبعاد تقارير مرنة",
+         ItemsEn: new[] { "Chart of accounts", "Manual entries", "General receipts", "Opening balances", "Cost centers" },
+         ItemsAr: new[] { "شجرة الحسابات", "قيود يدوية", "سندات قبض عامة", "أرصدة افتتاحية", "مراكز التكلفة" }),
+        (Icon: "bi-people-fill", Tone: "emerald",
+         TitleEn: "Human Resources", TitleAr: "الموارد البشرية",
+         SubEn: "Employees, payroll, and benefits in one module",
+         SubAr: "الموظفون والرواتب والمزايا في وحدة واحدة",
+         ItemsEn: new[] { "Employees", "Documents", "Payroll", "Deductions", "Bonuses", "Loans" },
+         ItemsAr: new[] { "الموظفون", "المستندات", "الرواتب", "الخصومات", "المكافآت", "السلف" }),
+        (Icon: "bi-bar-chart-line-fill", Tone: "amber",
+         TitleEn: "Reports Center", TitleAr: "مركز التقارير",
+         SubEn: "Professional financial and operational insights",
+         SubAr: "رؤى مالية وتشغيلية احترافية",
+         ItemsEn: new[] { "General ledger", "Trial balance", "Income statement", "Balance sheet", "Aging", "VAT return" },
+         ItemsAr: new[] { "دفتر الأستاذ", "ميزان المراجعة", "قائمة الدخل", "الميزانية العمومية", "تقارير الأعمار", "إقرار الضريبة" }),
+        (Icon: "bi-sliders2", Tone: "navy",
+         TitleEn: "Settings", TitleAr: "الإعدادات",
+         SubEn: "Permissions, branches, and document numbering",
+         SubAr: "الصلاحيات والفروع وترقيم المستندات",
+         ItemsEn: new[] { "Company profile", "Branches", "Numbering policies", "Users & roles" },
+         ItemsAr: new[] { "ملف الشركة", "الفروع", "سياسات الترقيم", "المستخدمون والصلاحيات" })
     };
 
     var reports = new[]
     {
-        (Icon: "bi-journal-bookmark-fill", Title: "General Ledger"),
-        (Icon: "bi-list-check",            Title: "Trial Balance"),
-        (Icon: "bi-graph-up",               Title: "Income Statement"),
-        (Icon: "bi-columns-gap",            Title: "Balance Sheet"),
-        (Icon: "bi-receipt-cutoff",         Title: "Customer Statement"),
-        (Icon: "bi-receipt",                Title: "Supplier Statement"),
-        (Icon: "bi-hourglass-split",        Title: "Receivables Aging"),
-        (Icon: "bi-percent",                Title: "VAT Return"),
-        (Icon: "bi-boxes",                  Title: "Current Stock"),
-        (Icon: "bi-arrow-left-right",       Title: "Inventory Movement"),
-        (Icon: "bi-cash-coin",              Title: "General Receipts"),
-        (Icon: "bi-grid-3x3-gap-fill",      Title: "Reporting Dimensions")
+        (Icon: "bi-journal-bookmark-fill", TitleEn: "General Ledger",        TitleAr: "دفتر الأستاذ"),
+        (Icon: "bi-list-check",            TitleEn: "Trial Balance",         TitleAr: "ميزان المراجعة"),
+        (Icon: "bi-graph-up",              TitleEn: "Income Statement",      TitleAr: "قائمة الدخل"),
+        (Icon: "bi-columns-gap",           TitleEn: "Balance Sheet",         TitleAr: "الميزانية العمومية"),
+        (Icon: "bi-receipt-cutoff",        TitleEn: "Customer Statement",    TitleAr: "كشف حساب العميل"),
+        (Icon: "bi-receipt",               TitleEn: "Supplier Statement",    TitleAr: "كشف حساب المورد"),
+        (Icon: "bi-hourglass-split",       TitleEn: "Receivables Aging",     TitleAr: "أعمار الذمم المدينة"),
+        (Icon: "bi-percent",               TitleEn: "VAT Return",            TitleAr: "إقرار ضريبة القيمة المضافة"),
+        (Icon: "bi-boxes",                 TitleEn: "Current Stock",         TitleAr: "المخزون الحالي"),
+        (Icon: "bi-arrow-left-right",      TitleEn: "Inventory Movement",    TitleAr: "حركة المخزون"),
+        (Icon: "bi-cash-coin",             TitleEn: "General Receipts",      TitleAr: "سندات القبض العامة"),
+        (Icon: "bi-grid-3x3-gap-fill",     TitleEn: "Reporting Dimensions",  TitleAr: "أبعاد التقارير")
     };
 
     var integrations = new[]
     {
-        (Icon: "bi-translate",       Title: "Bilingual UI",       Body: "Arabic RTL and English LTR — every screen, every report."),
-        (Icon: "bi-shield-check",    Title: "Granular Permissions", Body: "9 roles ready out of the box, fully customizable."),
-        (Icon: "bi-cloud-arrow-up",  Title: "Cloud-Native",        Body: "Run locally, self-host, or deploy to any cloud."),
-        (Icon: "bi-percent",         Title: "VAT Compliance",      Body: "Saudi 15% VAT baked in with a ready-to-file return."),
-        (Icon: "bi-diagram-3-fill",  Title: "Extensible",          Body: "Generic CRUD framework — new modules in minutes."),
-        (Icon: "bi-moon-stars-fill", Title: "Dark Mode",           Body: "Built-in dark theme for teams that work long hours."),
-        (Icon: "bi-file-earmark-spreadsheet", Title: "Excel I/O",  Body: "Bulk import customers, products, opening balances."),
-        (Icon: "bi-clock-history",   Title: "Audit Trail",         Body: "Every change tracked with user, timestamp, and diff.")
+        (Icon: "bi-translate",
+         TitleEn: "Bilingual UI",         TitleAr: "واجهة ثنائية اللغة",
+         BodyEn: "Arabic RTL and English LTR — every screen, every report.",
+         BodyAr: "عربي من اليمين لليسار وإنجليزي من اليسار لليمين — في كل شاشة وكل تقرير."),
+        (Icon: "bi-shield-check",
+         TitleEn: "Granular Permissions", TitleAr: "صلاحيات تفصيلية",
+         BodyEn: "9 roles ready out of the box, fully customizable.",
+         BodyAr: "9 أدوار جاهزة من البداية، قابلة للتخصيص بالكامل."),
+        (Icon: "bi-cloud-arrow-up",
+         TitleEn: "Cloud-Native",         TitleAr: "سحابي بطبيعته",
+         BodyEn: "Run locally, self-host, or deploy to any cloud.",
+         BodyAr: "شغّله محلياً، أو استضفه ذاتياً، أو انشره على أي سحابة."),
+        (Icon: "bi-percent",
+         TitleEn: "VAT Compliance",       TitleAr: "متوافق مع ضريبة القيمة المضافة",
+         BodyEn: "Saudi 15% VAT baked in with a ready-to-file return.",
+         BodyAr: "ضريبة 15% السعودية مدمجة مع إقرار جاهز للتقديم."),
+        (Icon: "bi-diagram-3-fill",
+         TitleEn: "Extensible",           TitleAr: "قابل للتوسعة",
+         BodyEn: "Generic CRUD framework — new modules in minutes.",
+         BodyAr: "إطار عمل CRUD عام — وحدات جديدة في دقائق."),
+        (Icon: "bi-moon-stars-fill",
+         TitleEn: "Dark Mode",            TitleAr: "الوضع الداكن",
+         BodyEn: "Built-in dark theme for teams that work long hours.",
+         BodyAr: "ثيم داكن مدمج للفرق التي تعمل ساعات طويلة."),
+        (Icon: "bi-file-earmark-spreadsheet",
+         TitleEn: "Excel I/O",            TitleAr: "استيراد وتصدير Excel",
+         BodyEn: "Bulk import customers, products, opening balances.",
+         BodyAr: "استيراد جماعي للعملاء والمنتجات والأرصدة الافتتاحية."),
+        (Icon: "bi-clock-history",
+         TitleEn: "Audit Trail",          TitleAr: "سجل التدقيق",
+         BodyEn: "Every change tracked with user, timestamp, and diff.",
+         BodyAr: "كل تغيير مسجّل مع المستخدم والتوقيت والتفاصيل.")
     };
 
     var pillars2 = new[]
     {
-        (Icon: "bi-translate",       Title: "Truly bilingual",   Body: "Full Arabic RTL + English LTR with native-quality support across every screen, document, and report."),
-        (Icon: "bi-shield-check",    Title: "Role-based access", Body: "Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer — ready and customizable."),
-        (Icon: "bi-cloud-arrow-up",  Title: "Cloud-ready stack", Body: "ASP.NET Core 8 + Entity Framework Core. Run locally, self-host, or deploy to your favorite cloud."),
-        (Icon: "bi-percent",         Title: "VAT compliance",    Body: "Saudi 15% VAT calculation across invoices, with a ready-to-file VAT return report."),
-        (Icon: "bi-diagram-3-fill",  Title: "Extensible by design", Body: "A generic CRUD framework lets you add new modules in minutes — not days, not weeks."),
-        (Icon: "bi-moon-stars-fill", Title: "Dark mode included", Body: "Built-in dark theme for teams that spend long hours staring at screens.")
+        (Icon: "bi-translate",
+         TitleEn: "Truly bilingual",       TitleAr: "ثنائي اللغة بحق",
+         BodyEn: "Full Arabic RTL + English LTR with native-quality support across every screen, document, and report.",
+         BodyAr: "دعم كامل للعربية من اليمين لليسار والإنجليزية من اليسار لليمين بجودة أصلية في كل شاشة ومستند وتقرير."),
+        (Icon: "bi-shield-check",
+         TitleEn: "Role-based access",     TitleAr: "صلاحيات حسب الدور",
+         BodyEn: "Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer — ready and customizable.",
+         BodyAr: "مالك، مدير، محاسب، مبيعات، مشتريات، مستودع، موارد بشرية، أمين صندوق، مشاهد — جاهزة وقابلة للتخصيص."),
+        (Icon: "bi-cloud-arrow-up",
+         TitleEn: "Cloud-ready stack",     TitleAr: "تقنية جاهزة للسحابة",
+         BodyEn: "ASP.NET Core 8 + Entity Framework Core. Run locally, self-host, or deploy to your favorite cloud.",
+         BodyAr: "ASP.NET Core 8 و Entity Framework Core. شغّله محلياً، أو استضفه ذاتياً، أو انشره على سحابتك المفضلة."),
+        (Icon: "bi-percent",
+         TitleEn: "VAT compliance",        TitleAr: "متوافق مع ضريبة القيمة المضافة",
+         BodyEn: "Saudi 15% VAT calculation across invoices, with a ready-to-file VAT return report.",
+         BodyAr: "احتساب ضريبة 15% السعودية في الفواتير مع تقرير إقرار ضريبي جاهز للتقديم."),
+        (Icon: "bi-diagram-3-fill",
+         TitleEn: "Extensible by design",  TitleAr: "قابل للتوسعة بالتصميم",
+         BodyEn: "A generic CRUD framework lets you add new modules in minutes — not days, not weeks.",
+         BodyAr: "إطار عمل CRUD عام يتيح لك إضافة وحدات جديدة في دقائق — وليس أيام أو أسابيع."),
+        (Icon: "bi-moon-stars-fill",
+         TitleEn: "Dark mode included",    TitleAr: "الوضع الداكن متضمَّن",
+         BodyEn: "Built-in dark theme for teams that spend long hours staring at screens.",
+         BodyAr: "ثيم داكن مدمج للفرق التي تقضي ساعات طويلة أمام الشاشات.")
     };
 
     var pricing = new[]
     {
-        (Name: "Starter",  PriceMonth: "19",  PriceYear: "180", For: "Small businesses getting organized for the first time", Features: new[] { "Sales & purchase invoices", "Customers & suppliers", "Basic reports", "1 user", "Email support" }, Highlight: false),
-        (Name: "Growth",   PriceMonth: "49",  PriceYear: "470", For: "Mid-size companies that need real inventory clarity",   Features: new[] { "Everything in Starter", "Products & warehouses", "Stock counts & transfers", "Cash & bank", "Up to 3 users", "Advanced reports" }, Highlight: true),
-        (Name: "Business", PriceMonth: "99",  PriceYear: "950", For: "Established companies with deeper accounting needs",    Features: new[] { "Everything in Growth", "Full advanced accounting", "Fixed assets", "Human resources", "Reporting dimensions", "Granular permissions", "Up to 10 users" }, Highlight: false)
+        (NameEn: "Starter",  NameAr: "ابتدائية", PriceMonth: "19", PriceYear: "180",
+         ForEn: "Small businesses getting organized for the first time",
+         ForAr: "الأعمال الصغيرة التي تنظم نفسها لأول مرة",
+         FeaturesEn: new[] { "Sales & purchase invoices", "Customers & suppliers", "Basic reports", "1 user", "Email support" },
+         FeaturesAr: new[] { "فواتير مبيعات ومشتريات", "العملاء والموردون", "تقارير أساسية", "مستخدم واحد", "دعم بالبريد الإلكتروني" },
+         Highlight: false),
+        (NameEn: "Growth",   NameAr: "متنامية",  PriceMonth: "49", PriceYear: "470",
+         ForEn: "Mid-size companies that need real inventory clarity",
+         ForAr: "الشركات المتوسطة التي تحتاج وضوحاً حقيقياً للمخزون",
+         FeaturesEn: new[] { "Everything in Starter", "Products & warehouses", "Stock counts & transfers", "Cash & bank", "Up to 3 users", "Advanced reports" },
+         FeaturesAr: new[] { "كل ما في الباقة الابتدائية", "المنتجات والمستودعات", "جرد المخزون والتحويلات", "النقدية والبنوك", "حتى 3 مستخدمين", "تقارير متقدمة" },
+         Highlight: true),
+        (NameEn: "Business", NameAr: "تجارية",   PriceMonth: "99", PriceYear: "950",
+         ForEn: "Established companies with deeper accounting needs",
+         ForAr: "الشركات الراسخة ذات احتياجات محاسبية أعمق",
+         FeaturesEn: new[] { "Everything in Growth", "Full advanced accounting", "Fixed assets", "Human resources", "Reporting dimensions", "Granular permissions", "Up to 10 users" },
+         FeaturesAr: new[] { "كل ما في الباقة المتنامية", "محاسبة متقدمة كاملة", "الأصول الثابتة", "الموارد البشرية", "أبعاد التقارير", "صلاحيات تفصيلية", "حتى 10 مستخدمين" },
+         Highlight: false)
     };
 
     var faqs = new[]
     {
-        (Q: "Is Bestgen a good fit for my business?", A: "Bestgen is built for small and mid-size businesses across trading, services, and retail. It starts simple and scales with you — no need to migrate to another system as you grow."),
-        (Q: "Does it support Arabic and VAT?", A: "Yes. The UI is fully bilingual (Arabic RTL + English LTR), and Saudi 15% VAT is built into invoices, line items, and the dedicated VAT return report."),
-        (Q: "Can I manage multiple branches and warehouses?", A: "Yes. Run multiple branches and separate warehouses, with stock transfers between them and per-warehouse balance tracking."),
-        (Q: "How do user roles work?", A: "Bestgen ships with 9 roles (Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer) and supports custom role creation when you need finer control."),
-        (Q: "Can I import existing data?", A: "Yes. You can bulk-import customers, suppliers, products, and opening balances from Excel files — and we offer onboarding help for the initial migration."),
-        (Q: "What platforms are supported?", A: "Bestgen runs on any modern browser (Windows, Mac, iPad, mobile) and is built on a cloud-ready architecture for fast, secure access from anywhere.")
+        (QEn: "Is Bestgen a good fit for my business?",
+         QAr: "هل Bestgen مناسب لأعمالي؟",
+         AEn: "Bestgen is built for small and mid-size businesses across trading, services, and retail. It starts simple and scales with you — no need to migrate to another system as you grow.",
+         AAr: "Bestgen مصمم للشركات الصغيرة والمتوسطة في قطاعات التجارة والخدمات والتجزئة. يبدأ بسيطاً ويتوسع معك — دون حاجة للهجرة إلى نظام آخر مع نموك."),
+        (QEn: "Does it support Arabic and VAT?",
+         QAr: "هل يدعم اللغة العربية وضريبة القيمة المضافة؟",
+         AEn: "Yes. The UI is fully bilingual (Arabic RTL + English LTR), and Saudi 15% VAT is built into invoices, line items, and the dedicated VAT return report.",
+         AAr: "نعم. الواجهة ثنائية اللغة بالكامل (عربي من اليمين لليسار وإنجليزي من اليسار لليمين)، وضريبة 15% السعودية مدمجة في الفواتير وبنودها وتقرير الإقرار الضريبي المخصص."),
+        (QEn: "Can I manage multiple branches and warehouses?",
+         QAr: "هل يمكنني إدارة عدة فروع ومستودعات؟",
+         AEn: "Yes. Run multiple branches and separate warehouses, with stock transfers between them and per-warehouse balance tracking.",
+         AAr: "نعم. شغّل عدة فروع ومستودعات منفصلة، مع تحويلات مخزون بينها وتتبع الأرصدة لكل مستودع."),
+        (QEn: "How do user roles work?",
+         QAr: "كيف تعمل أدوار المستخدمين؟",
+         AEn: "Bestgen ships with 9 roles (Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer) and supports custom role creation when you need finer control.",
+         AAr: "يأتي Bestgen مع 9 أدوار (مالك، مدير، محاسب، مبيعات، مشتريات، مستودع، موارد بشرية، أمين صندوق، مشاهد) ويدعم إنشاء أدوار مخصصة عند الحاجة لتحكم أدق."),
+        (QEn: "Can I import existing data?",
+         QAr: "هل يمكنني استيراد بياناتي الحالية؟",
+         AEn: "Yes. You can bulk-import customers, suppliers, products, and opening balances from Excel files — and we offer onboarding help for the initial migration.",
+         AAr: "نعم. يمكنك استيراد العملاء والموردين والمنتجات والأرصدة الافتتاحية بشكل جماعي من ملفات Excel — ونوفر مساعدة في الإعداد للهجرة الأولية."),
+        (QEn: "What platforms are supported?",
+         QAr: "ما المنصات المدعومة؟",
+         AEn: "Bestgen runs on any modern browser (Windows, Mac, iPad, mobile) and is built on a cloud-ready architecture for fast, secure access from anywhere.",
+         AAr: "يعمل Bestgen على أي متصفح حديث (Windows و Mac و iPad والجوال) ومبني على بنية جاهزة للسحابة للوصول السريع والآمن من أي مكان.")
     };
+}
+@functions {
+    Microsoft.AspNetCore.Html.HtmlString Bi(string en, string ar)
+    {
+        var enEsc = System.Net.WebUtility.HtmlEncode(en ?? string.Empty);
+        var arEsc = System.Net.WebUtility.HtmlEncode(ar ?? string.Empty);
+        return new Microsoft.AspNetCore.Html.HtmlString(
+            $"<span class=\"i-en\">{enEsc}</span><span class=\"i-ar\">{arEsc}</span>");
+    }
 }
 <!doctype html>
 <html lang="en" dir="ltr">
@@ -96,7 +231,7 @@
     <link rel="apple-touch-icon" href="/img/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
 </head>
@@ -109,21 +244,26 @@
             </a>
 
             <nav class="topnav" aria-label="Main navigation">
-                <a href="#features">Features</a>
-                <a href="#preview">Live Preview</a>
-                <a href="#modules">Modules</a>
-                <a href="#reports">Reports</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#faq">FAQ</a>
+                <a href="#features">@Bi("Features", "المميزات")</a>
+                <a href="#preview">@Bi("Live Preview", "معاينة مباشرة")</a>
+                <a href="#modules">@Bi("Modules", "الوحدات")</a>
+                <a href="#reports">@Bi("Reports", "التقارير")</a>
+                <a href="#pricing">@Bi("Pricing", "الأسعار")</a>
+                <a href="#faq">@Bi("FAQ", "الأسئلة الشائعة")</a>
             </nav>
 
             <div class="topactions">
+                <button class="btn btn-ghost lang-toggle" type="button" id="lang-toggle" aria-label="Switch language">
+                    <i class="bi bi-translate"></i>
+                    <span class="i-en">AR</span>
+                    <span class="i-ar">EN</span>
+                </button>
                 <a class="btn btn-ghost" href="/Identity/Account/Login">
                     <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Sign in</span>
+                    <span>@Bi("Sign in", "تسجيل الدخول")</span>
                 </a>
                 <a class="btn btn-primary" href="/Identity/Account/Register">
-                    <span>Get started</span>
+                    <span>@Bi("Get started", "ابدأ الآن")</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -133,15 +273,20 @@
             </button>
         </div>
         <div class="mobile-drawer">
-            <a href="#features" onclick="document.documentElement.classList.remove('nav-open')">Features</a>
-            <a href="#preview" onclick="document.documentElement.classList.remove('nav-open')">Live Preview</a>
-            <a href="#modules" onclick="document.documentElement.classList.remove('nav-open')">Modules</a>
-            <a href="#reports" onclick="document.documentElement.classList.remove('nav-open')">Reports</a>
-            <a href="#pricing" onclick="document.documentElement.classList.remove('nav-open')">Pricing</a>
-            <a href="#faq" onclick="document.documentElement.classList.remove('nav-open')">FAQ</a>
+            <a href="#features" onclick="document.documentElement.classList.remove('nav-open')">@Bi("Features", "المميزات")</a>
+            <a href="#preview" onclick="document.documentElement.classList.remove('nav-open')">@Bi("Live Preview", "معاينة مباشرة")</a>
+            <a href="#modules" onclick="document.documentElement.classList.remove('nav-open')">@Bi("Modules", "الوحدات")</a>
+            <a href="#reports" onclick="document.documentElement.classList.remove('nav-open')">@Bi("Reports", "التقارير")</a>
+            <a href="#pricing" onclick="document.documentElement.classList.remove('nav-open')">@Bi("Pricing", "الأسعار")</a>
+            <a href="#faq" onclick="document.documentElement.classList.remove('nav-open')">@Bi("FAQ", "الأسئلة الشائعة")</a>
             <div class="mobile-actions">
-                <a class="btn btn-ghost" href="/Identity/Account/Login">Sign in</a>
-                <a class="btn btn-primary" href="/Identity/Account/Register">Get started</a>
+                <button class="btn btn-ghost lang-toggle" type="button" id="lang-toggle-mobile" aria-label="Switch language">
+                    <i class="bi bi-translate"></i>
+                    <span class="i-en">العربية</span>
+                    <span class="i-ar">English</span>
+                </button>
+                <a class="btn btn-ghost" href="/Identity/Account/Login">@Bi("Sign in", "تسجيل الدخول")</a>
+                <a class="btn btn-primary" href="/Identity/Account/Register">@Bi("Get started", "ابدأ الآن")</a>
             </div>
         </div>
     </header>
@@ -172,32 +317,41 @@
                 <div class="hero-copy">
                     <span class="eyebrow">
                         <span class="eyebrow-dot"></span>
-                        All-in-one ERP · 2026 release
+                        @Bi("All-in-one ERP · 2026 release", "نظام ERP متكامل · إصدار 2026")
                     </span>
-                    <h1 class="hero-title">
+                    <h1 class="hero-title i-en">
                         <span class="line">Run your entire</span>
                         <span class="line"><span class="grad-text">business</span> on one</span>
                         <span class="line">elegant platform.</span>
                     </h1>
-                    <p class="hero-lead">
+                    <h1 class="hero-title i-ar">
+                        <span class="line">أدر كامل</span>
+                        <span class="line"><span class="grad-text">أعمالك</span> على منصة</span>
+                        <span class="line">واحدة وأنيقة.</span>
+                    </h1>
+                    <p class="hero-lead i-en">
                         Bestgen ERP unifies sales, purchasing, inventory, accounting, and HR into a single
                         delightful experience — built on .NET 8 for the performance your business deserves,
                         and bilingual from day one.
                     </p>
+                    <p class="hero-lead i-ar">
+                        يوحّد Bestgen ERP المبيعات والمشتريات والمخزون والمحاسبة والموارد البشرية في تجربة
+                        واحدة ممتعة — مبني على .NET 8 ليقدم الأداء الذي تستحقه أعمالك، وثنائي اللغة من اليوم الأول.
+                    </p>
                     <div class="hero-cta">
                         <a class="btn btn-primary btn-lg btn-shimmer" href="/Identity/Account/Register">
-                            <span>Start free</span>
+                            <span>@Bi("Start free", "ابدأ مجاناً")</span>
                             <i class="bi bi-arrow-right"></i>
                         </a>
                         <a class="btn btn-outline-light btn-lg" href="#preview">
                             <i class="bi bi-play-circle"></i>
-                            <span>Watch dashboard</span>
+                            <span>@Bi("Watch dashboard", "شاهد لوحة التحكم")</span>
                         </a>
                     </div>
                     <ul class="hero-trust">
-                        <li><i class="bi bi-check2-circle"></i><span>No credit card</span></li>
-                        <li><i class="bi bi-check2-circle"></i><span>14-day trial</span></li>
-                        <li><i class="bi bi-check2-circle"></i><span>Arabic + English</span></li>
+                        <li><i class="bi bi-check2-circle"></i><span>@Bi("No credit card", "بدون بطاقة ائتمان")</span></li>
+                        <li><i class="bi bi-check2-circle"></i><span>@Bi("14-day trial", "تجربة 14 يوماً")</span></li>
+                        <li><i class="bi bi-check2-circle"></i><span>@Bi("Arabic + English", "عربي + إنجليزي")</span></li>
                     </ul>
                 </div>
 
@@ -222,17 +376,17 @@
                                 <div class="device-stage">
                                     <div class="device-row">
                                         <div class="kpi kpi-emerald">
-                                            <span>Total Sales</span>
+                                            <span>@Bi("Total Sales", "إجمالي المبيعات")</span>
                                             <strong>$128,450</strong>
                                             <em><i class="bi bi-arrow-up"></i> 12.4%</em>
                                         </div>
                                         <div class="kpi kpi-blue">
-                                            <span>Net Profit</span>
+                                            <span>@Bi("Net Profit", "صافي الربح")</span>
                                             <strong>$31,940</strong>
                                             <em><i class="bi bi-arrow-up"></i> 5.1%</em>
                                         </div>
                                         <div class="kpi kpi-amber">
-                                            <span>Overdue</span>
+                                            <span>@Bi("Overdue", "متأخرة")</span>
                                             <strong>4</strong>
                                             <em><i class="bi bi-arrow-down"></i> 2</em>
                                         </div>
@@ -244,19 +398,19 @@
                                         <div class="device-row-item">
                                             <span class="dot dot-emerald"></span>
                                             <span class="lbl">INV-1042 · Acme Co.</span>
-                                            <em class="status status-paid">Paid</em>
+                                            <em class="status status-paid">@Bi("Paid", "مدفوعة")</em>
                                             <strong>$4,820</strong>
                                         </div>
                                         <div class="device-row-item">
                                             <span class="dot dot-blue"></span>
                                             <span class="lbl">INV-1041 · Beta LLC</span>
-                                            <em class="status status-issued">Issued</em>
+                                            <em class="status status-issued">@Bi("Issued", "صادرة")</em>
                                             <strong>$2,310</strong>
                                         </div>
                                         <div class="device-row-item">
                                             <span class="dot dot-amber"></span>
                                             <span class="lbl">INV-1040 · Gamma Co.</span>
-                                            <em class="status status-due">Due</em>
+                                            <em class="status status-due">@Bi("Due", "مستحقة")</em>
                                             <strong>$6,470</strong>
                                         </div>
                                     </div>
@@ -268,10 +422,10 @@
                         <div class="float-card float-card-1">
                             <div class="float-card-head">
                                 <i class="bi bi-percent"></i>
-                                <span>VAT Return</span>
+                                <span>@Bi("VAT Return", "إقرار الضريبة")</span>
                             </div>
                             <strong>15%</strong>
-                            <em>auto-calculated</em>
+                            <em>@Bi("auto-calculated", "محسوبة تلقائياً")</em>
                             <div class="float-spark">
                                 <svg viewBox="0 0 60 20" preserveAspectRatio="none">
                                     <polyline points="0,16 10,12 20,14 30,8 40,10 50,4 60,6" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
@@ -281,10 +435,10 @@
                         <div class="float-card float-card-2">
                             <div class="float-card-head">
                                 <i class="bi bi-bell-fill"></i>
-                                <span>Stock Alert</span>
+                                <span>@Bi("Stock Alert", "تنبيه مخزون")</span>
                             </div>
-                            <strong>3 items</strong>
-                            <em>at reorder threshold</em>
+                            <strong>@Bi("3 items", "3 أصناف")</strong>
+                            <em>@Bi("at reorder threshold", "عند حد إعادة الطلب")</em>
                             <div class="float-bars">
                                 <span style="height: 30%"></span>
                                 <span style="height: 55%"></span>
@@ -296,8 +450,8 @@
                         <div class="float-donut" aria-hidden="true">
                             <canvas id="hero-donut" width="160" height="160"></canvas>
                             <div class="float-donut-label">
-                                <small>Mix</small>
-                                <strong>Revenue</strong>
+                                <small>@Bi("Mix", "التوزيع")</small>
+                                <strong>@Bi("Revenue", "الإيرادات")</strong>
                             </div>
                         </div>
                     </div>
@@ -310,7 +464,7 @@
         <!-- ============================================================ -->
         <section class="logo-strip">
             <div class="container-x logo-strip-inner">
-                <span class="logo-strip-label">Crafted for modern teams across the region</span>
+                <span class="logo-strip-label">@Bi("Crafted for modern teams across the region", "مصمم للفرق العصرية في المنطقة")</span>
                 <div class="logo-strip-marks">
                     <span class="logo-mark"><i class="bi bi-shop"></i> Trading Co.</span>
                     <span class="logo-mark"><i class="bi bi-buildings"></i> AlBina Group</span>
@@ -329,23 +483,23 @@
             <div class="container-x stats-grid">
                 <div class="stat">
                     <strong data-count="9" data-suffix="">0</strong>
-                    <span>Core modules</span>
+                    <span>@Bi("Core modules", "وحدات أساسية")</span>
                 </div>
                 <div class="stat">
                     <strong data-count="60" data-suffix="+">0</strong>
-                    <span>Pre-built screens</span>
+                    <span>@Bi("Pre-built screens", "شاشات جاهزة")</span>
                 </div>
                 <div class="stat">
                     <strong data-count="15" data-suffix="+">0</strong>
-                    <span>Financial reports</span>
+                    <span>@Bi("Financial reports", "تقارير مالية")</span>
                 </div>
                 <div class="stat">
                     <strong data-count="100" data-suffix="%">0</strong>
-                    <span>Bilingual coverage</span>
+                    <span>@Bi("Bilingual coverage", "تغطية ثنائية اللغة")</span>
                 </div>
                 <div class="stat">
                     <strong>.NET 8</strong>
-                    <span>Modern stack</span>
+                    <span>@Bi("Modern stack", "تقنية حديثة")</span>
                 </div>
             </div>
         </section>
@@ -356,9 +510,9 @@
         <section class="pillars" id="features">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-diamond-half"></i> Why Bestgen</span>
-                    <h2>One system that replaces five</h2>
-                    <p>Sales, purchasing, inventory, accounting, and reports — all linked in a single workflow you'll actually enjoy using.</p>
+                    <span class="section-eyebrow"><i class="bi bi-diamond-half"></i> @Bi("Why Bestgen", "لماذا Bestgen")</span>
+                    <h2>@Bi("One system that replaces five", "نظام واحد يحلّ محل خمسة")</h2>
+                    <p>@Bi("Sales, purchasing, inventory, accounting, and reports — all linked in a single workflow you'll actually enjoy using.", "المبيعات والمشتريات والمخزون والمحاسبة والتقارير — كلها مترابطة في تدفق عمل واحد ستستمتع باستخدامه فعلاً.")</p>
                 </div>
                 <div class="pillars-grid">
                     @foreach (var p in pillars)
@@ -367,9 +521,9 @@
                             <div class="pillar-icon">
                                 <i class="bi @p.Icon"></i>
                             </div>
-                            <h3>@p.Title</h3>
-                            <p>@p.Body</p>
-                            <a href="#modules" class="pillar-link">Learn more <i class="bi bi-arrow-right"></i></a>
+                            <h3>@Bi(p.TitleEn, p.TitleAr)</h3>
+                            <p>@Bi(p.BodyEn, p.BodyAr)</p>
+                            <a href="#modules" class="pillar-link">@Bi("Learn more", "اعرف المزيد") <i class="bi bi-arrow-right"></i></a>
                         </article>
                     }
                 </div>
@@ -382,21 +536,21 @@
         <section class="preview" id="preview">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-broadcast"></i> Live Preview</span>
-                    <h2>Your real numbers, rendered beautifully</h2>
-                    <p>Everything you need to read your company's pulse in a single glance — KPIs, charts, alerts, and the latest activity.</p>
+                    <span class="section-eyebrow"><i class="bi bi-broadcast"></i> @Bi("Live Preview", "معاينة مباشرة")</span>
+                    <h2>@Bi("Your real numbers, rendered beautifully", "أرقامك الحقيقية، معروضة بجمال")</h2>
+                    <p>@Bi("Everything you need to read your company's pulse in a single glance — KPIs, charts, alerts, and the latest activity.", "كل ما تحتاجه لقراءة نبض شركتك بنظرة واحدة — مؤشرات الأداء، والرسوم البيانية، والتنبيهات، وآخر النشاطات.")</p>
                 </div>
 
                 <div class="preview-grid">
                     <div class="preview-main glass-card">
                         <header class="preview-head">
                             <div>
-                                <h3>Sales vs. Purchases</h3>
-                                <small>Trailing 12 months · USD</small>
+                                <h3>@Bi("Sales vs. Purchases", "المبيعات مقابل المشتريات")</h3>
+                                <small>@Bi("Trailing 12 months · USD", "آخر 12 شهراً · دولار")</small>
                             </div>
                             <div class="legend">
-                                <span><i class="dot dot-emerald"></i>Sales</span>
-                                <span><i class="dot dot-indigo"></i>Purchases</span>
+                                <span><i class="dot dot-emerald"></i>@Bi("Sales", "المبيعات")</span>
+                                <span><i class="dot dot-indigo"></i>@Bi("Purchases", "المشتريات")</span>
                             </div>
                         </header>
                         <div class="preview-chart-wrap">
@@ -404,16 +558,16 @@
                         </div>
                         <footer class="preview-foot">
                             <div class="foot-stat">
-                                <small>Avg. monthly sales</small>
+                                <small>@Bi("Avg. monthly sales", "متوسط المبيعات الشهرية")</small>
                                 <strong>$96.4K</strong>
                             </div>
                             <div class="foot-stat">
-                                <small>Margin trend</small>
+                                <small>@Bi("Margin trend", "اتجاه الهامش")</small>
                                 <strong class="positive"><i class="bi bi-arrow-up-right"></i> 8.2%</strong>
                             </div>
                             <div class="foot-stat">
-                                <small>Top month</small>
-                                <strong>December · $138K</strong>
+                                <small>@Bi("Top month", "أعلى شهر")</small>
+                                <strong>@Bi("December · $138K", "ديسمبر · 138 ألف دولار")</strong>
                             </div>
                         </footer>
                     </div>
@@ -422,30 +576,30 @@
                         <div class="glass-card preview-donut glow-card">
                             <header class="preview-head">
                                 <div>
-                                    <h4>Revenue Mix</h4>
-                                    <small>By product category</small>
+                                    <h4>@Bi("Revenue Mix", "توزيع الإيرادات")</h4>
+                                    <small>@Bi("By product category", "حسب فئة المنتج")</small>
                                 </div>
                             </header>
                             <div class="donut-stack">
                                 <canvas id="donut-chart" width="220" height="220"></canvas>
                                 <div class="donut-center">
-                                    <small>Total</small>
+                                    <small>@Bi("Total", "الإجمالي")</small>
                                     <strong>$128.4K</strong>
                                 </div>
                             </div>
                             <ul class="donut-legend">
-                                <li><i class="dot dot-emerald"></i><span>Electronics</span><strong>42%</strong></li>
-                                <li><i class="dot dot-indigo"></i><span>Tools</span><strong>28%</strong></li>
-                                <li><i class="dot dot-amber"></i><span>Stationery</span><strong>18%</strong></li>
-                                <li><i class="dot dot-navy"></i><span>Other</span><strong>12%</strong></li>
+                                <li><i class="dot dot-emerald"></i><span>@Bi("Electronics", "إلكترونيات")</span><strong>42%</strong></li>
+                                <li><i class="dot dot-indigo"></i><span>@Bi("Tools", "أدوات")</span><strong>28%</strong></li>
+                                <li><i class="dot dot-amber"></i><span>@Bi("Stationery", "قرطاسية")</span><strong>18%</strong></li>
+                                <li><i class="dot dot-navy"></i><span>@Bi("Other", "أخرى")</span><strong>12%</strong></li>
                             </ul>
                         </div>
 
                         <div class="glass-card preview-bars glow-card">
                             <header class="preview-head">
                                 <div>
-                                    <h4>Receivables Aging</h4>
-                                    <small>Outstanding balances</small>
+                                    <h4>@Bi("Receivables Aging", "أعمار الذمم المدينة")</h4>
+                                    <small>@Bi("Outstanding balances", "الأرصدة القائمة")</small>
                                 </div>
                             </header>
                             <canvas id="aging-chart" height="180"></canvas>
@@ -461,9 +615,9 @@
         <section class="modules" id="modules">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-grid-3x3-gap-fill"></i> Nine modules · One experience</span>
-                    <h2>Everything your business needs</h2>
-                    <p>From the moment you make a sale to the moment you close the books, Bestgen walks beside you.</p>
+                    <span class="section-eyebrow"><i class="bi bi-grid-3x3-gap-fill"></i> @Bi("Nine modules · One experience", "تسع وحدات · تجربة واحدة")</span>
+                    <h2>@Bi("Everything your business needs", "كل ما تحتاجه أعمالك")</h2>
+                    <p>@Bi("From the moment you make a sale to the moment you close the books, Bestgen walks beside you.", "من لحظة إتمام البيع إلى لحظة إقفال الدفاتر، يسير معك Bestgen خطوة بخطوة.")</p>
                 </div>
                 <div class="modules-grid">
                     @foreach (var m in modules)
@@ -475,12 +629,12 @@
                                 </div>
                                 <span class="module-badge"><i class="bi bi-arrow-up-right"></i></span>
                             </div>
-                            <h3>@m.Title</h3>
-                            <p>@m.Sub</p>
+                            <h3>@Bi(m.TitleEn, m.TitleAr)</h3>
+                            <p>@Bi(m.SubEn, m.SubAr)</p>
                             <ul class="module-list">
-                                @foreach (var item in m.Items)
+                                @for (var k = 0; k < m.ItemsEn.Length; k++)
                                 {
-                                    <li><i class="bi bi-check2"></i><span>@item</span></li>
+                                    <li><i class="bi bi-check2"></i><span>@Bi(m.ItemsEn[k], m.ItemsAr[k])</span></li>
                                 }
                             </ul>
                         </article>
@@ -495,17 +649,17 @@
         <section class="integrations">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-plug-fill"></i> Built right in</span>
-                    <h2>Everything you'd expect, plus a little more</h2>
-                    <p>You don't need plugins, marketplaces, or upsells. The features that matter ship with the product.</p>
+                    <span class="section-eyebrow"><i class="bi bi-plug-fill"></i> @Bi("Built right in", "مدمج في النظام")</span>
+                    <h2>@Bi("Everything you'd expect, plus a little more", "كل ما تتوقعه، وأكثر قليلاً")</h2>
+                    <p>@Bi("You don't need plugins, marketplaces, or upsells. The features that matter ship with the product.", "لا تحتاج إضافات أو متاجر إضافية أو ترقيات مدفوعة. المميزات المهمة تأتي مع المنتج.")</p>
                 </div>
                 <div class="integrations-grid">
                     @foreach (var i in integrations)
                     {
                         <article class="integration-card">
                             <i class="bi @i.Icon"></i>
-                            <strong>@i.Title</strong>
-                            <p>@i.Body</p>
+                            <strong>@Bi(i.TitleEn, i.TitleAr)</strong>
+                            <p>@Bi(i.BodyEn, i.BodyAr)</p>
                         </article>
                     }
                 </div>
@@ -518,16 +672,16 @@
         <section class="reports" id="reports">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-bar-chart-line"></i> Reports Center</span>
-                    <h2>Professional financial reports</h2>
-                    <p>Reports that satisfy both the business owner and the accountant — ready at a single click.</p>
+                    <span class="section-eyebrow"><i class="bi bi-bar-chart-line"></i> @Bi("Reports Center", "مركز التقارير")</span>
+                    <h2>@Bi("Professional financial reports", "تقارير مالية احترافية")</h2>
+                    <p>@Bi("Reports that satisfy both the business owner and the accountant — ready at a single click.", "تقارير ترضي صاحب العمل والمحاسب معاً — جاهزة بنقرة واحدة.")</p>
                 </div>
                 <div class="reports-grid">
                     @foreach (var r in reports)
                     {
                         <a class="report-card" href="#preview">
                             <i class="bi @r.Icon"></i>
-                            <span>@r.Title</span>
+                            <span>@Bi(r.TitleEn, r.TitleAr)</span>
                             <em><i class="bi bi-arrow-up-right"></i></em>
                         </a>
                     }
@@ -541,16 +695,16 @@
         <section class="why">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-stars"></i> Why teams pick Bestgen</span>
-                    <h2>Built for modern businesses, with global standards</h2>
+                    <span class="section-eyebrow"><i class="bi bi-stars"></i> @Bi("Why teams pick Bestgen", "لماذا تختار الفرق Bestgen")</span>
+                    <h2>@Bi("Built for modern businesses, with global standards", "مبني للشركات العصرية، بمعايير عالمية")</h2>
                 </div>
                 <div class="why-grid">
                     @foreach (var p in pillars2)
                     {
                         <article class="why-card glow-card">
                             <div class="why-icon"><i class="bi @p.Icon"></i></div>
-                            <h3>@p.Title</h3>
-                            <p>@p.Body</p>
+                            <h3>@Bi(p.TitleEn, p.TitleAr)</h3>
+                            <p>@Bi(p.BodyEn, p.BodyAr)</p>
                         </article>
                     }
                 </div>
@@ -563,14 +717,14 @@
         <section class="pricing" id="pricing">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-tag-fill"></i> Pricing</span>
-                    <h2>Transparent plans that grow with you</h2>
-                    <p>Start small, move up whenever you need to — without painful data migrations.</p>
+                    <span class="section-eyebrow"><i class="bi bi-tag-fill"></i> @Bi("Pricing", "الأسعار")</span>
+                    <h2>@Bi("Transparent plans that grow with you", "باقات شفافة تنمو معك")</h2>
+                    <p>@Bi("Start small, move up whenever you need to — without painful data migrations.", "ابدأ صغيراً، وارتقِ متى أردت — دون هجرات بيانات مؤلمة.")</p>
                     <div class="billing-toggle" role="tablist" aria-label="Billing period">
-                        <button class="bt-option active" data-billing="month">Monthly</button>
+                        <button class="bt-option active" data-billing="month">@Bi("Monthly", "شهرياً")</button>
                         <button class="bt-option" data-billing="year">
-                            Yearly
-                            <span class="bt-save">save 20%</span>
+                            @Bi("Yearly", "سنوياً")
+                            <span class="bt-save">@Bi("save 20%", "وفر 20%")</span>
                         </button>
                     </div>
                 </div>
@@ -580,26 +734,29 @@
                         <article class="plan @(plan.Highlight ? "plan-featured" : "")">
                             @if (plan.Highlight)
                             {
-                                <div class="plan-ribbon"><i class="bi bi-stars"></i> Most popular</div>
+                                <div class="plan-ribbon"><i class="bi bi-stars"></i> @Bi("Most popular", "الأكثر شعبية")</div>
                             }
-                            <h3>@plan.Name</h3>
-                            <p class="plan-for">@plan.For</p>
+                            <h3>@Bi(plan.NameEn, plan.NameAr)</h3>
+                            <p class="plan-for">@Bi(plan.ForEn, plan.ForAr)</p>
                             <div class="plan-price">
                                 <span class="currency">$</span>
                                 <strong class="price-num"
                                         data-price-month="@plan.PriceMonth"
                                         data-price-year="@plan.PriceYear">@plan.PriceMonth</strong>
-                                <span class="period">/month</span>
+                                <span class="period">@Bi("/month", "/شهر")</span>
                             </div>
-                            <p class="plan-billed">Billed <span class="bill-period">monthly</span> · cancel anytime</p>
+                            <p class="plan-billed">
+                                <span class="i-en">Billed <span class="bill-period">monthly</span> · cancel anytime</span>
+                                <span class="i-ar">فوترة <span class="bill-period">شهرية</span> · إلغاء في أي وقت</span>
+                            </p>
                             <ul class="plan-features">
-                                @foreach (var f in plan.Features)
+                                @for (var k = 0; k < plan.FeaturesEn.Length; k++)
                                 {
-                                    <li><i class="bi bi-check2-circle"></i><span>@f</span></li>
+                                    <li><i class="bi bi-check2-circle"></i><span>@Bi(plan.FeaturesEn[k], plan.FeaturesAr[k])</span></li>
                                 }
                             </ul>
                             <a class="btn @(plan.Highlight ? "btn-primary" : "btn-outline") btn-block" href="/Identity/Account/Register">
-                                <span>Choose @plan.Name</span>
+                                <span>@Bi($"Choose {plan.NameEn}", $"اختر {plan.NameAr}")</span>
                                 <i class="bi bi-arrow-right"></i>
                             </a>
                         </article>
@@ -607,7 +764,7 @@
                 </div>
                 <p class="pricing-note">
                     <i class="bi bi-shield-check"></i>
-                    All plans include automatic updates, daily backups, and bilingual support.
+                    @Bi("All plans include automatic updates, daily backups, and bilingual support.", "تتضمن جميع الباقات تحديثات تلقائية ونسخاً احتياطية يومية ودعماً ثنائي اللغة.")
                 </p>
             </div>
         </section>
@@ -618,20 +775,21 @@
         <section class="testimonials">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-chat-quote-fill"></i> Customer voices</span>
-                    <h2>What teams say about Bestgen</h2>
+                    <span class="section-eyebrow"><i class="bi bi-chat-quote-fill"></i> @Bi("Customer voices", "أصوات العملاء")</span>
+                    <h2>@Bi("What teams say about Bestgen", "ماذا تقول الفرق عن Bestgen")</h2>
                 </div>
                 <div class="testimonials-grid">
                     <article class="testimonial">
                         <div class="t-stars">
                             <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                         </div>
-                        <p>"I need to see sales, inventory, and collections on one screen before any purchase decision. Bestgen does exactly that — and the dashboard is genuinely beautiful to look at."</p>
+                        <p class="i-en">"I need to see sales, inventory, and collections on one screen before any purchase decision. Bestgen does exactly that — and the dashboard is genuinely beautiful to look at."</p>
+                        <p class="i-ar">"أحتاج أن أرى المبيعات والمخزون والتحصيل في شاشة واحدة قبل أي قرار شراء. Bestgen يفعل ذلك بالضبط — ولوحة التحكم جميلة فعلاً."</p>
                         <footer>
                             <div class="avatar avatar-emerald">A</div>
                             <div>
-                                <strong>Ahmed A.</strong>
-                                <small>Owner · Trading Co.</small>
+                                <strong>@Bi("Ahmed A.", "أحمد ع.")</strong>
+                                <small>@Bi("Owner · Trading Co.", "مالك · شركة تجارية")</small>
                             </div>
                         </footer>
                     </article>
@@ -639,12 +797,13 @@
                         <div class="t-stars">
                             <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                         </div>
-                        <p>"What matters most to me is invoices, journal entries, and reports being connected — without manual re-entry. Bestgen saved me hours every week, and our month-end is finally smooth."</p>
+                        <p class="i-en">"What matters most to me is invoices, journal entries, and reports being connected — without manual re-entry. Bestgen saved me hours every week, and our month-end is finally smooth."</p>
+                        <p class="i-ar">"أهم ما يعنيني هو ترابط الفواتير والقيود والتقارير — دون إعادة إدخال يدوية. وفر لي Bestgen ساعات كل أسبوع، وأصبح إقفال الشهر سلساً أخيراً."</p>
                         <footer>
                             <div class="avatar avatar-indigo">N</div>
                             <div>
-                                <strong>Nouf Q.</strong>
-                                <small>Senior Accountant · Mid-size company</small>
+                                <strong>@Bi("Nouf Q.", "نوف ق.")</strong>
+                                <small>@Bi("Senior Accountant · Mid-size company", "محاسبة أولى · شركة متوسطة")</small>
                             </div>
                         </footer>
                     </article>
@@ -652,12 +811,13 @@
                         <div class="t-stars">
                             <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                         </div>
-                        <p>"Stock alerts and overdue-invoice nudges push the team to act before issues compound. Practical, no-nonsense, and clearly designed by people who've actually run a business."</p>
+                        <p class="i-en">"Stock alerts and overdue-invoice nudges push the team to act before issues compound. Practical, no-nonsense, and clearly designed by people who've actually run a business."</p>
+                        <p class="i-ar">"تنبيهات المخزون وإشعارات الفواتير المتأخرة تدفع الفريق للتصرف قبل تفاقم المشاكل. عملي ومباشر، ومصمَّم بوضوح من أشخاص أداروا أعمالاً فعلاً."</p>
                         <footer>
                             <div class="avatar avatar-amber">M</div>
                             <div>
-                                <strong>Mohammed Z.</strong>
-                                <small>Operations Manager</small>
+                                <strong>@Bi("Mohammed Z.", "محمد ز.")</strong>
+                                <small>@Bi("Operations Manager", "مدير عمليات")</small>
                             </div>
                         </footer>
                     </article>
@@ -671,18 +831,18 @@
         <section class="faq" id="faq">
             <div class="container-x">
                 <div class="section-head">
-                    <span class="section-eyebrow"><i class="bi bi-patch-question-fill"></i> Frequently asked</span>
-                    <h2>Answers to what's on your mind</h2>
+                    <span class="section-eyebrow"><i class="bi bi-patch-question-fill"></i> @Bi("Frequently asked", "الأسئلة الشائعة")</span>
+                    <h2>@Bi("Answers to what's on your mind", "إجابات لما يدور في ذهنك")</h2>
                 </div>
                 <div class="faq-list">
                     @foreach (var f in faqs)
                     {
                         <details class="faq-item">
                             <summary>
-                                <span>@f.Q</span>
+                                <span>@Bi(f.QEn, f.QAr)</span>
                                 <i class="bi bi-plus-lg"></i>
                             </summary>
-                            <div class="faq-body">@f.A</div>
+                            <div class="faq-body">@Bi(f.AEn, f.AAr)</div>
                         </details>
                     }
                 </div>
@@ -707,16 +867,16 @@
                         </svg>
                     </span>
                 </div>
-                <h2>Ready to upgrade your accounting?</h2>
-                <p>Start your trial today — no credit card required, no commitment, no migration headaches.</p>
+                <h2>@Bi("Ready to upgrade your accounting?", "هل أنت مستعد لترقية محاسبتك؟")</h2>
+                <p>@Bi("Start your trial today — no credit card required, no commitment, no migration headaches.", "ابدأ تجربتك اليوم — بدون بطاقة ائتمان، بدون التزام، وبدون متاعب الهجرة.")</p>
                 <div class="cta-actions">
                     <a class="btn btn-primary btn-lg btn-shimmer" href="/Identity/Account/Register">
-                        <span>Create free account</span>
+                        <span>@Bi("Create free account", "أنشئ حساباً مجانياً")</span>
                         <i class="bi bi-arrow-right"></i>
                     </a>
                     <a class="btn btn-ghost-light btn-lg" href="/Identity/Account/Login">
                         <i class="bi bi-box-arrow-in-right"></i>
-                        <span>I have an account</span>
+                        <span>@Bi("I have an account", "لديّ حساب بالفعل")</span>
                     </a>
                 </div>
             </div>
@@ -731,7 +891,7 @@
                     <a class="brand" href="#top">
                         <img src="/img/logo.png" alt="Bestgen ERP" class="brand-logo">
                     </a>
-                    <p>The all-in-one cloud ERP platform for modern businesses — accounting, inventory, and operations in one place.</p>
+                    <p>@Bi("The all-in-one cloud ERP platform for modern businesses — accounting, inventory, and operations in one place.", "منصة ERP السحابية المتكاملة للشركات العصرية — المحاسبة والمخزون والعمليات في مكان واحد.")</p>
                     <div class="footer-social">
                         <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
                         <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
@@ -740,42 +900,68 @@
                     </div>
                 </div>
                 <div>
-                    <h5>Product</h5>
+                    <h5>@Bi("Product", "المنتج")</h5>
                     <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#modules">Modules</a></li>
-                        <li><a href="#reports">Reports</a></li>
-                        <li><a href="#pricing">Pricing</a></li>
-                        <li><a href="/Identity/Account/Register">Get started</a></li>
+                        <li><a href="#features">@Bi("Features", "المميزات")</a></li>
+                        <li><a href="#modules">@Bi("Modules", "الوحدات")</a></li>
+                        <li><a href="#reports">@Bi("Reports", "التقارير")</a></li>
+                        <li><a href="#pricing">@Bi("Pricing", "الأسعار")</a></li>
+                        <li><a href="/Identity/Account/Register">@Bi("Get started", "ابدأ الآن")</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h5>Company</h5>
+                    <h5>@Bi("Company", "الشركة")</h5>
                     <ul>
-                        <li><a href="#">About Bestgen</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Customers</a></li>
-                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">@Bi("About Bestgen", "عن Bestgen")</a></li>
+                        <li><a href="#">@Bi("Blog", "المدونة")</a></li>
+                        <li><a href="#">@Bi("Customers", "العملاء")</a></li>
+                        <li><a href="#">@Bi("Contact", "تواصل معنا")</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h5>Legal</h5>
+                    <h5>@Bi("Legal", "قانوني")</h5>
                     <ul>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Service Agreement</a></li>
-                        <li><a href="#">Security</a></li>
+                        <li><a href="#">@Bi("Terms of Service", "شروط الخدمة")</a></li>
+                        <li><a href="#">@Bi("Privacy Policy", "سياسة الخصوصية")</a></li>
+                        <li><a href="#">@Bi("Service Agreement", "اتفاقية الخدمة")</a></li>
+                        <li><a href="#">@Bi("Security", "الأمان")</a></li>
                     </ul>
                 </div>
             </div>
             <div class="container-x footer-bottom">
-                <span>© @DateTime.Now.Year Bestgen ERP. All rights reserved.</span>
-                <span class="footer-mini">Made with attention to detail · Built on .NET 8</span>
+                <span>@Bi($"© {DateTime.Now.Year} Bestgen ERP. All rights reserved.", $"© {DateTime.Now.Year} Bestgen ERP. جميع الحقوق محفوظة.")</span>
+                <span class="footer-mini">@Bi("Made with attention to detail · Built on .NET 8", "صُنع بعناية للتفاصيل · مبني على .NET 8")</span>
             </div>
         </footer>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        // Language toggle (EN <-> AR). Persists choice in localStorage.
+        (function () {
+            var KEY = 'bestgen.lang';
+            var html = document.documentElement;
+            var titles = { en: 'Bestgen ERP — The all-in-one cloud ERP platform',
+                            ar: 'Bestgen ERP — منصة ERP السحابية المتكاملة' };
+            function apply(lang) {
+                var isAr = (lang === 'ar');
+                html.setAttribute('lang', isAr ? 'ar' : 'en');
+                html.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+                document.title = titles[isAr ? 'ar' : 'en'];
+            }
+            var saved = null;
+            try { saved = localStorage.getItem(KEY); } catch (e) {}
+            if (saved === 'ar' || saved === 'en') apply(saved);
+            function toggle() {
+                var next = (html.getAttribute('dir') === 'rtl') ? 'en' : 'ar';
+                apply(next);
+                try { localStorage.setItem(KEY, next); } catch (e) {}
+            }
+            document.querySelectorAll('.lang-toggle').forEach(function (el) {
+                el.addEventListener('click', function (e) { e.preventDefault(); toggle(); });
+            });
+        })();
+    </script>
     <script src="~/js/landing.js" asp-append-version="true"></script>
 </body>
 </html>
