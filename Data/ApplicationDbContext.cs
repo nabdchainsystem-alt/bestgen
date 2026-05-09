@@ -69,6 +69,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<EmployeeRequest> EmployeeRequests => Set<EmployeeRequest>();
 
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
+    public DbSet<Branch> Branches => Set<Branch>();
+    public DbSet<NumberingPolicy> NumberingPolicies => Set<NumberingPolicy>();
+    public DbSet<TaxRate> TaxRates => Set<TaxRate>();
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -111,6 +115,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Employee>().HasIndex(x => x.EmployeeCode).IsUnique();
         modelBuilder.Entity<PayrollEntry>().HasIndex(x => x.PayrollNumber).IsUnique();
         modelBuilder.Entity<EmployeeReceipt>().HasIndex(x => x.ReceiptNumber).IsUnique();
+        modelBuilder.Entity<Branch>().HasIndex(x => x.BranchCode).IsUnique();
+        modelBuilder.Entity<NumberingPolicy>().HasIndex(x => x.DocumentType).IsUnique();
 
         // Existing relationships
         modelBuilder.Entity<SalesInvoice>()

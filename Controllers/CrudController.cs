@@ -20,6 +20,8 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
 
     protected virtual IQueryable<TEntity> Query() => Context.Set<TEntity>().AsNoTracking();
 
+    protected const int DefaultPageSize = 50;
+
     public virtual async Task<IActionResult> Index(string? q, string? status, int page = 1)
     {
         PrepareModuleViewData(q, status);
@@ -44,9 +46,17 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
             rows = FilterByStatus(rows, status);
         }
 
-        ViewBag.TotalRows = rows.Count;
+        var total = rows.Count;
+        if (page < 1) page = 1;
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)DefaultPageSize));
+        if (page > totalPages) page = totalPages;
+        var paged = rows.Skip((page - 1) * DefaultPageSize).Take(DefaultPageSize).ToList();
+
+        ViewBag.TotalRows = total;
         ViewBag.Page = page;
-        return View("~/Views/Shared/Crud/Index.cshtml", rows.Cast<object>().ToList());
+        ViewBag.PageSize = DefaultPageSize;
+        ViewBag.TotalPages = totalPages;
+        return View("~/Views/Shared/Crud/Index.cshtml", paged.Cast<object>().ToList());
     }
 
     public virtual async Task<IActionResult> Details(int id)
@@ -58,6 +68,14 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
         {
             return NotFound();
         }
+
+        var entityName = typeof(TEntity).Name;
+        var key = id.ToString();
+        ViewBag.AuditEntries = await Context.AuditEntries.AsNoTracking()
+            .Where(a => a.EntityName == entityName && a.EntityKey == key)
+            .OrderByDescending(a => a.At)
+            .Take(50)
+            .ToListAsync();
 
         return View("~/Views/Shared/Crud/Details.cshtml", entity);
     }
@@ -86,6 +104,7 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
         Context.Set<TEntity>().Add(entity);
         await AfterAddBeforeSaveAsync(entity);
         await Context.SaveChangesAsync();
+        await AfterSaveAsync(entity, isCreate: true);
 
         return RedirectToAction(nameof(Index));
     }
@@ -127,6 +146,7 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
         SetUpdatedAt(entity);
         await BeforeEditSaveAsync(entity);
         await Context.SaveChangesAsync();
+        await AfterSaveAsync(entity, isCreate: false);
 
         return RedirectToAction(nameof(Index));
     }
@@ -164,6 +184,14 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
     protected virtual Task AfterAddBeforeSaveAsync(TEntity entity) => Task.CompletedTask;
 
     protected virtual Task BeforeEditSaveAsync(TEntity entity) => Task.CompletedTask;
+
+    /// <summary>
+    /// Fires after the primary SaveChanges has committed. Use this for post-commit
+    /// side effects that need the entity Id to exist (party balance recalc, applying
+    /// the document to a related parent, etc). The override is responsible for
+    /// committing any further changes it makes via Context.SaveChangesAsync().
+    /// </summary>
+    protected virtual Task AfterSaveAsync(TEntity entity, bool isCreate) => Task.CompletedTask;
 
     protected virtual async Task PopulateLookupsAsync()
     {
@@ -243,15 +271,17 @@ public abstract class CrudController<TEntity> : Controller where TEntity : class
             .ToList();
     }
 
-    private static List<SelectListItem> GetStatusOptions()
+    private List<SelectListItem> GetStatusOptions()
     {
+        var isArabic = System.Globalization.CultureInfo.CurrentUICulture.Name
+            .StartsWith("ar", StringComparison.OrdinalIgnoreCase);
         var isActiveProperty = typeof(TEntity).GetProperty("IsActive");
         if (isActiveProperty is not null)
         {
             return new List<SelectListItem>
             {
-                new() { Text = "نشط", Value = "active" },
-                new() { Text = "غير نشط", Value = "inactive" }
+                new() { Text = isArabic ? "نشط" : "Active", Value = "active" },
+                new() { Text = isArabic ? "غير نشط" : "Inactive", Value = "inactive" }
             };
         }
 

@@ -1,16 +1,21 @@
+@using System.Globalization
 @model JournalEntryFormViewModel
 @{
-    ViewData["Title"] = "قيد يومية جديد";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("New Journal Entry", "قيد يومية جديد");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("قيد يومية جديد", "أدخل أطراف القيد وتأكد من توازن المدين والدائن قبل الترحيل."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("New Journal Entry", "قيد يومية جديد"),
+    T("Enter the journal lines and verify debit/credit balance before posting.", "أدخل أطراف القيد وتأكد من توازن المدين والدائن قبل الترحيل.")))" />
 
 <section class="form-panel">
     <form asp-action="Create" method="post" data-journal-form>
         <partial name="_Form" model="@Model" />
         <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> حفظ القيد</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> @T("Save entry", "حفظ القيد")</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
         </div>
     </form>
 </section>

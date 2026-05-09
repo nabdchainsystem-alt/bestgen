@@ -11,17 +11,20 @@ public class SalesInvoiceService
     private readonly InvoiceCalculationService _calculationService;
     private readonly InventoryService _inventoryService;
     private readonly AccountingService _accountingService;
+    private readonly PartyBalanceService _partyBalanceService;
 
     public SalesInvoiceService(
         ApplicationDbContext context,
         InvoiceCalculationService calculationService,
         InventoryService inventoryService,
-        AccountingService accountingService)
+        AccountingService accountingService,
+        PartyBalanceService partyBalanceService)
     {
         _context = context;
         _calculationService = calculationService;
         _inventoryService = inventoryService;
         _accountingService = accountingService;
+        _partyBalanceService = partyBalanceService;
     }
 
     public async Task<SalesInvoice> CreateAsync(SalesInvoiceFormViewModel model)
@@ -59,9 +62,12 @@ public class SalesInvoiceService
         _context.SalesInvoices.Add(invoice);
         if (invoice.Status is InvoiceStatus.Issued or InvoiceStatus.PartiallyPaid or InvoiceStatus.Paid)
         {
-            await _inventoryService.ReduceStockAsync(invoice.Items);
+            await _inventoryService.ReduceStockAsync(invoice);
         }
         await _accountingService.CreateSalesJournalEntryAsync(invoice);
+        await _context.SaveChangesAsync();
+
+        await _partyBalanceService.RecalculateCustomerAsync(invoice.CustomerId);
         await _context.SaveChangesAsync();
         return invoice;
     }
@@ -106,6 +112,9 @@ public class SalesInvoiceService
         }).ToList();
         await _context.SalesInvoiceItems.AddRangeAsync(newItems);
 
+        await _context.SaveChangesAsync();
+
+        await _partyBalanceService.RecalculateCustomerAsync(invoice.CustomerId);
         await _context.SaveChangesAsync();
     }
 

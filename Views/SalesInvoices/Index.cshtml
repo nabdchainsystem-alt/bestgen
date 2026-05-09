@@ -1,16 +1,23 @@
+@using System.Globalization
 @model IReadOnlyList<SalesInvoice>
 @{
-    ViewData["Title"] = "فواتير البيع";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Sales Invoices", "فواتير البيع");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("فواتير البيع", "إصدار ومتابعة فواتير العملاء والمدفوعات.", "Create", "SalesInvoices", "فاتورة بيع جديدة"))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Sales Invoices", "فواتير البيع"),
+    T("Issue and track customer invoices and payments.", "إصدار ومتابعة فواتير العملاء والمدفوعات."),
+    "Create", "SalesInvoices", T("New sales invoice", "فاتورة بيع جديدة")))" />
 
 <section class="data-panel">
     <partial name="_SearchBar" />
 
     @if (!Model.Any())
     {
-        <partial name="_EmptyState" model="@("لا توجد فواتير بيع مطابقة للفلاتر الحالية.")" />
+        <partial name="_EmptyState" model="@(T("No sales invoices match the current filters.", "لا توجد فواتير بيع مطابقة للفلاتر الحالية."))" />
     }
     else
     {
@@ -18,14 +25,14 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>رقم الفاتورة</th>
-                        <th>التاريخ</th>
-                        <th>العميل</th>
-                        <th>الإجمالي</th>
-                        <th>المدفوع</th>
-                        <th>المتبقي</th>
-                        <th>الحالة</th>
-                        <th>الإجراءات</th>
+                        <th>@T("Invoice No.", "رقم الفاتورة")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th>@T("Customer", "العميل")</th>
+                        <th>@T("Total", "الإجمالي")</th>
+                        <th>@T("Paid", "المدفوع")</th>
+                        <th>@T("Outstanding", "المتبقي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th>@T("Actions", "الإجراءات")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,7 +41,7 @@
                         <tr>
                             <td>@invoice.InvoiceNumber</td>
                             <td>@invoice.InvoiceDate.ToString("yyyy/MM/dd")</td>
-                            <td>@invoice.Customer?.NameAr</td>
+                            <td>@(invoice.Customer == null ? "-" : pickName(invoice.Customer.NameAr, invoice.Customer.NameEn))</td>
                             <td>@EntityDisplayHelper.FormatValue(invoice.GrandTotal, nameof(invoice.GrandTotal))</td>
                             <td>@EntityDisplayHelper.FormatValue(invoice.PaidAmount, nameof(invoice.PaidAmount))</td>
                             <td>@EntityDisplayHelper.FormatValue(invoice.RemainingAmount, nameof(invoice.RemainingAmount))</td>
@@ -45,6 +52,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="text-muted small">ترقيم الصفحات placeholder للنسخة القادمة.</div>
+        <div class="text-muted small">@T($"Total invoices: {Model.Count}", $"إجمالي الفواتير: {Model.Count}")</div>
     }
 </section>

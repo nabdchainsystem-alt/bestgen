@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<title>بيستجن — وثيقة المشروع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/earlyaccess/droidarabickufi.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 18mm 20mm 18mm 20mm; }
+  @page cover { size: A4; margin: 0; }
+  :root {
+    --canvas:#f7f6f1; --surface:#ffffff; --border:#e4e4e1; --text:#0f172a; --muted:#64748b;
+    --navy:#0f172a; --emerald:#10b981; --blue:#4f46e5; --warning:#f59e0b; --danger:#ef4444;
+    --tint:#eef2ff;
+  }
+  * { box-sizing:border-box; overflow-wrap:break-word; word-wrap:break-word; }
+  html, body { background:#fff; color:var(--text); font-family:'Droid Arabic Kufi','Segoe UI Arabic','Tahoma',sans-serif; font-size:11pt; line-height:1.9; margin:0; padding:0; }
+  h1,h2,h3,h4 { color:var(--navy); margin:0 0 .5em; line-height:1.3; }
+  h1 { font-size:30pt; letter-spacing:-.02em; }
+  h2 { font-size:18pt; padding-bottom:6px; border-bottom:2px solid var(--border); margin-top:18pt; }
+  h3 { font-size:14pt; margin-top:14pt; color:#1e293b; }
+  h4 { font-size:11.5pt; color:#334155; margin-top:10pt; }
+  p { margin:.5em 0 1em; }
+  ul, ol { margin:.4em 0 .8em 0; padding-right:1.4em; padding-left:0; }
+  li { margin:.22em 0; }
+  code, pre { font-family:'JetBrains Mono','SFMono-Regular',Menlo,monospace; font-size:9.5pt; direction:ltr; unicode-bidi:embed; }
+  pre { background:#0f172a; color:#e2e8f0; padding:14px 16px; border-radius:8px; overflow:hidden; white-space:pre-wrap; word-break:break-word; text-align:left; }
+  code { background:#eef2ff; color:#3730a3; padding:1px 6px; border-radius:4px; }
+  pre code { background:transparent; color:inherit; padding:0; }
+  .cover { page:cover; page-break-after:always; width:210mm; height:297mm; margin:0; padding:0; background:linear-gradient(155deg,#0f172a 0%,#1e293b 55%,#312e81 100%); color:#fff; position:relative; overflow:hidden; display:flex; }
+  .cover::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 80% 18%, rgba(79,70,229,.45) 0%, transparent 48%), radial-gradient(circle at 18% 88%, rgba(16,185,129,.28) 0%, transparent 52%); pointer-events:none; }
+  .cover-inner { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; padding:26mm 22mm; text-align:center; }
+  .cover-header { flex:0 0 auto; }
+  .cover-main { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+  .cover-footer { flex:0 0 auto; }
+  .cover .brand { display:flex; flex-direction:column; align-items:center; gap:10pt; }
+  .cover .brand .logo { width:70mm; max-width:85%; padding:14pt 18pt; background:linear-gradient(180deg,#ffffff 0%,#f1f5f9 100%); border-radius:18px; box-shadow:0 16px 40px rgba(15,23,42,.45), inset 0 0 0 1px rgba(255,255,255,.4); }
+  .cover .brand .logo img { width:100%; height:auto; display:block; }
+  .cover .kicker { color:#a5b4fc; font-size:9.5pt; font-weight:700; letter-spacing:.06em; margin-top:6pt; }
+  .cover h1 { color:#fff; font-size:42pt; line-height:1.1; margin:0 0 14pt; text-align:center; letter-spacing:-.01em; }
+  .cover .cover-tag { color:#818cf8; display:block; font-size:22pt; font-weight:600; margin-top:6pt; line-height:1.25; }
+  .cover .subtitle { color:#cbd5e1; font-size:12pt; line-height:1.85; max-width:160mm; margin:8pt auto 0; text-align:center; }
+  .cover .meta { display:grid; grid-template-columns:repeat(4,1fr); gap:10pt; }
+  .cover .meta div { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:10px; padding:10pt 12pt; text-align:center; backdrop-filter:blur(2px); }
+  .cover .meta div span { display:block; font-size:8pt; color:#a5b4fc; letter-spacing:.06em; margin-bottom:4pt; font-weight:600; }
+  .cover .meta div strong { font-size:10.5pt; color:#fff; font-weight:600; }
+  .toc { page-break-after:always; }
+  .toc ol { columns:1; counter-reset:toc; list-style:none; margin:0; padding:0; }
+  .toc ol li { counter-increment:toc; padding:6pt 0; border-bottom:1px dashed #d4d4d8; display:flex; justify-content:space-between; }
+  .toc ol li:before { content:counter(toc,decimal-leading-zero); color:var(--blue); font-weight:700; min-width:36px; }
+  .toc ol li span { color:var(--muted); }
+  .callout { background:#f1f5f9; border-right:4px solid var(--blue); padding:10pt 14pt; border-radius:6px; margin:10pt 0; }
+  .callout.warn { background:#fef3c7; border-color:var(--warning); }
+  .callout.success { background:#ecfdf5; border-color:var(--emerald); }
+  .callout strong { color:var(--navy); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12pt; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10pt; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8pt; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10pt 12pt; }
+  .card .icon { width:32px; height:32px; border-radius:8px; background:var(--tint); color:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:6pt; font-size:11pt; }
+  .card h4 { margin:0 0 4pt; font-size:10.5pt; color:#1e293b; }
+  .card p { margin:0; font-size:9.5pt; color:var(--muted); line-height:1.6; }
+  .pill { display:inline-block; padding:2pt 9pt; border-radius:999px; font-size:8.5pt; font-weight:600; background:var(--tint); color:var(--blue); margin:0 0 3pt 3pt; }
+  .pill.green { background:#dcfce7; color:#166534; }
+  .pill.amber { background:#fef3c7; color:#92400e; }
+  .pill.red   { background:#fee2e2; color:#991b1b; }
+  .pill.gray  { background:#f1f5f9; color:#475569; }
+  table.matrix { width:100%; border-collapse:collapse; font-size:9.5pt; margin:8pt 0; }
+  table.matrix th, table.matrix td { border:1px solid #e2e8f0; padding:6pt 8pt; text-align:right; vertical-align:top; }
+  table.matrix th { background:#f8fafc; font-weight:700; color:var(--navy); }
+  table.matrix tr:nth-child(2n) td { background:#fafafa; }
+  .figure { page-break-inside:avoid; margin:12pt 0; text-align:center; }
+  .figure img { max-width:100%; max-height:200mm; border:1px solid var(--border); border-radius:8px; box-shadow:0 6px 18px rgba(15,23,42,.08); }
+  .figure .caption { font-size:9pt; color:var(--muted); margin-top:6pt; }
+  .arch { background:#fafafa; border:1px solid var(--border); border-radius:10px; padding:14pt; }
+  .palette { display:grid; grid-template-columns:repeat(8,1fr); gap:6pt; }
+  .swatch { aspect-ratio:1.4/1; border-radius:8px; display:flex; align-items:flex-end; padding:6pt; font-size:8pt; font-weight:600; color:#fff; direction:ltr; text-align:left; }
+  .swatch small { display:block; opacity:.7; font-weight:500; font-size:7.5pt; }
+  .module-row { display:grid; grid-template-columns:42mm 1fr auto; gap:10pt; padding:8pt 0; border-bottom:1px solid #e2e8f0; align-items:start; }
+  .module-row strong { color:var(--navy); font-size:10.5pt; }
+  .module-row em { color:var(--muted); font-style:normal; font-size:9pt; }
+  .phase { background:#f8fafc; border:1px solid #e2e8f0; border-right:4px solid var(--blue); padding:10pt 14pt; border-radius:8px; margin:10pt 0; page-break-inside:avoid; }
+  .phase.done { border-right-color:var(--emerald); background:#f0fdf4; }
+  .phase.pending { border-right-color:var(--warning); background:#fffbeb; }
+  .phase h4 { display:flex; align-items:center; justify-content:space-between; margin:0 0 4pt; }
+  hr { border:0; border-top:1px solid var(--border); margin:18pt 0; }
+  .keyline { font-size:8.5pt; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="cover-inner">
+    <header class="cover-header">
+      <div class="brand">
+        <div class="logo"><img src="img/logo.png" alt="Bestgen ERP" /></div>
+        <div class="kicker">وثيقة المشروع</div>
+      </div>
+    </header>
+    <div class="cover-main">
+      <h1>بيستجن<span class="cover-tag">منصة محاسبة ومخزون عربية<br/>جاهزة للإنتاج</span></h1>
+      <p class="subtitle">تطبيق ويب ثنائي اللغة مبني على ‎ASP.NET Core MVC ومُصمَّم للسوق السعودي. قيود محاسبية مزدوجة، مخزون فوري، فوترة جاهزة لمعايير ZATCA، صلاحيات قائمة على الأدوار، ومركز تقارير حي مدعوم بقاعدة بيانات حقيقية.</p>
+    </div>
+    <footer class="cover-footer">
+      <div class="meta">
+        <div><span>إطار العمل</span><strong>‎.NET 8 · ASP.NET Core</strong></div>
+        <div><span>قاعدة البيانات</span><strong>‎EF Core 8 + SQLite</strong></div>
+        <div><span>اللغات</span><strong>عربي · إنجليزي</strong></div>
+        <div><span>الإصدار</span><strong>‎1.0 · مايو 2026</strong></div>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<section class="toc">
+<h2 style="border:0;margin-top:0;">جدول المحتويات</h2>
+<ol>
+<li>الملخص التنفيذي <span>3</span></li>
+<li>الحزمة التقنية وإجراءات التشغيل <span>4</span></li>
+<li>هندسة النظام <span>6</span></li>
+<li>الواجهة الأمامية ونظام التصميم <span>9</span></li>
+<li>الخدمات الخلفية ومحرك القيود <span>13</span></li>
+<li>سجل الوحدات (الشريط الجانبي) <span>17</span></li>
+<li>مركز التقارير <span>22</span></li>
+<li>الإعدادات وإدارة الهوية <span>25</span></li>
+<li>نموذج البيانات وشجرة الحسابات <span>27</span></li>
+<li>الحالة الحالية والمتبقي من المهام <span>30</span></li>
+<li>تشغيل التطبيق وتوصيات يومية <span>34</span></li>
+</ol>
+</section>
+
+<h2>1 · الملخص التنفيذي</h2>
+<p><strong>بيستجن</strong> منصة محاسبة ومخزون عربية مصممة لخدمة الشركات الصغيرة والمتوسطة في السوق السعودي. يُستبدل المنتج مجموعة من جداول البيانات المتفرقة وأدوات نقاط البيع المبتدئة بنظام واحد متكامل يدير دورة الأعمال كاملة — من عرض السعر إلى التسليم والفوترة والتحصيل والترحيل إلى دفتر الأستاذ — بتجربة استخدام عربية أصيلة وقواعد فوترة متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك.</p>
+
+<div class="grid-3">
+  <div class="card"><div class="icon">⚖︎</div><h4>قيود مزدوجة</h4><p>كل مستند تجاري يولّد قيدًا متوازنًا تلقائيًا: لكل مدين دائن يقابله، ويُتحقق من التوازن قبل الحفظ.</p></div>
+  <div class="card"><div class="icon">📦</div><h4>مخزون فوري</h4><p>كل عمليات البيع والشراء والنقل والجرد تُعدِّل المخزون عبر سجل تدقيق <code>StockMovement</code>.</p></div>
+  <div class="card"><div class="icon">🇸🇦</div><h4>تجربة عربية أصيلة</h4><p>تخطيط من اليمين لليسار، خط عربي حقيقي، تسميات ثنائية، وعملات وتواريخ متوافقة مع المنطقة.</p></div>
+  <div class="card"><div class="icon">🔐</div><h4>صلاحيات بالأدوار</h4><p>تسعة أدوار جاهزة: المالك، المدير، المحاسب، المبيعات، المشتريات، المستودع، الموارد البشرية، الكاشير، والمستعرض — موصولة بنظام الهوية.</p></div>
+  <div class="card"><div class="icon">📊</div><h4>تقارير حية</h4><p>‏١٣ تقريرًا مدعومًا باستعلامات حقيقية: ميزان المراجعة، قائمة الدخل، الميزانية العمومية، أعمار الديون، الإقرار الضريبي، كشوف العملاء والموردين.</p></div>
+  <div class="card"><div class="icon">🧩</div><h4>إطار CRUD عام</h4><p>الجداول الرئيسية تعتمد على وحدة تحكم عامة <code>CrudController&lt;T&gt;</code> — إضافة كيان جديد لا تتطلب أكثر من ٥ أسطر.</p></div>
+</div>
+
+<div class="callout"><strong>أين يلائم بيستجن؟</strong> الشركة الصغيرة التي تتبنى بيستجن تستبدل ثلاث أدوات في وقت واحد: الدفاتر اليدوية (أو ملفات Excel)، أداة المخزون المنفصلة، وعملية إصدار التقارير الجاهزة للضريبة. كل شيء في منتج واحد، بلغتين، على خادم واحد.</div>
+
+<h2>2 · الحزمة التقنية وإجراءات التشغيل</h2>
+
+<div class="grid-2">
+  <div>
+    <h3>بيئة التشغيل</h3>
+    <ul>
+      <li><strong>‎.NET 8</strong> (الإطار المستهدف <code>net8.0</code>)</li>
+      <li><strong>ASP.NET Core MVC</strong> مع صفحات Razor</li>
+      <li>‎C# مع تفعيل <code>Nullable</code> و <code>ImplicitUsings</code></li>
+      <li>الفضاء <code>bestgen</code> · اسم التجميعة <code>Bestgen</code></li>
+    </ul>
+    <h3>الاستمرارية</h3>
+    <ul>
+      <li><strong>EF Core 8</strong></li>
+      <li>قاعدة <strong>SQLite</strong> في الملف <code>bestgen.db</code></li>
+      <li><code>EnsureCreatedAsync()</code> عند الإقلاع — يُعاد إنشاء المخطط إذا حُذف الملف</li>
+      <li>دقة <code>decimal(18,2)</code> مفعّلة لكل الحقول المالية</li>
+    </ul>
+  </div>
+  <div>
+    <h3>الواجهة الأمامية</h3>
+    <ul>
+      <li><strong>Bootstrap 5 RTL</strong> لأساسيات التخطيط</li>
+      <li><strong>Bootstrap Icons</strong> للأيقونات</li>
+      <li><strong>Chart.js 4</strong> للرسوم البيانية في لوحة التحكم</li>
+      <li>الخطوط: <strong>Inter</strong> + <strong>Droid Arabic Kufi</strong></li>
+      <li>ملف أنماط مخصص واحد <code>wwwroot/css/site.css</code></li>
+    </ul>
+    <h3>الهوية والأمان</h3>
+    <ul>
+      <li><strong>ASP.NET Core Identity</strong> مع <code>ApplicationUser</code> مخصص</li>
+      <li>تسعة أدوار جاهزة عبر <code>RoleManager</code></li>
+      <li><code>[Authorize]</code> افتراضي على كل <code>CrudController</code></li>
+      <li><code>[ValidateAntiForgeryToken]</code> على كل عملية POST</li>
+    </ul>
+  </div>
+</div>
+
+<h3>البناء والتشغيل</h3>
+<pre><code>dotnet clean
+dotnet restore
+dotnet build
+dotnet run            # المنفذ الافتراضي 5000</code></pre>
+
+<h3>الحسابات الافتراضية</h3>
+<table class="matrix">
+  <thead><tr><th>البريد</th><th>كلمة المرور</th><th>الأدوار</th><th>ملاحظات</th></tr></thead>
+  <tbody>
+    <tr><td><code>max@bestgen.com</code></td><td><code>123</code></td><td>Owner, Admin</td><td>الحساب الأساسي للمطوّر</td></tr>
+    <tr><td><code>admin@ledgerflow.local</code></td><td><code>Admin@12345</code></td><td>Owner, Admin</td><td>حساب قديم متبقي للتوافق</td></tr>
+  </tbody>
+</table>
+<p>يستدعي البذرة <code>ResetPasswordAsync</code> في كل تشغيل ليبقى تسجيل الدخول صالحًا حتى لو شُدِّدت قواعد كلمات المرور لاحقًا.</p>
+
+<h3>دورة حياة قاعدة البيانات</h3>
+<div class="callout warn"><strong>لا توجد ترحيلات (Migrations) محفوظة.</strong> يعتمد بيستجن حاليًا على <code>EnsureCreatedAsync()</code>. عند تعديل أي كيان، تُحذف <code>bestgen.db</code> ويُعاد التشغيل لإنشاء المخطط من النماذج. هذا الأسلوب مناسب للتطوير السريع ويجب استبداله بـ EF Migrations قبل الانتقال للإنتاج ببيانات عملاء حقيقية.</div>
+
+<div class="figure">
+  <img src="img/login-ar.png" alt="شاشة تسجيل الدخول" />
+  <div class="caption">الشكل ١ — شاشة تسجيل الدخول. قواعد كلمات المرور حاليًا مرنة لأغراض التطوير، وستُشدَّد ضمن المرحلة ٩.</div>
+</div>
+
+<h2>2 · هندسة النظام</h2>
+
+<div class="arch">
+<svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;direction:ltr;">
+  <rect x="20" y="20" width="840" height="80" rx="10" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="40" y="48" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#312e81">Browser layer · طبقة المتصفح</text>
+  <text x="40" y="68" font-family="Inter,Arial" font-size="11" fill="#4338ca">Razor Views · Bootstrap 5 RTL · Chart.js · site.css · site.js</text>
+
+  <rect x="20" y="120" width="840" height="120" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="40" y="148" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#0f172a">ASP.NET Core MVC pipeline · أنبوب المعالجة</text>
+  <g font-family="Inter,Arial" font-size="10.5" fill="#1e293b">
+    <rect x="40" y="160" width="170" height="64" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+    <text x="50" y="180" font-weight="700">Controllers</text>
+    <text x="50" y="198" fill="#78350f">CrudController&lt;T&gt;</text>
+    <text x="50" y="214" fill="#78350f">SalesInvoices · JE · Reports</text>
+
+    <rect x="222" y="160" width="180" height="64" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+    <text x="232" y="180" font-weight="700">Services</text>
+    <text x="232" y="198" fill="#1e3a8a">Posting · Inventory · HR</text>
+    <text x="232" y="214" fill="#1e3a8a">DocumentNumbering</text>
+
+    <rect x="414" y="160" width="180" height="64" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text x="424" y="180" font-weight="700">Reports dispatcher</text>
+    <text x="424" y="198" fill="#14532d">Ledger · Party · Inventory</text>
+    <text x="424" y="214" fill="#14532d">Tax (VAT)</text>
+
+    <rect x="606" y="160" width="234" height="64" rx="8" fill="#ede9fe" stroke="#c4b5fd"/>
+    <text x="616" y="180" font-weight="700">Identity</text>
+    <text x="616" y="198" fill="#5b21b6">UserManager · RoleManager</text>
+    <text x="616" y="214" fill="#5b21b6">9 roles</text>
+  </g>
+
+  <rect x="20" y="260" width="840" height="100" rx="10" fill="#0f172a"/>
+  <text x="40" y="288" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#fff">Persistence · طبقة الاستمرارية</text>
+  <text x="40" y="308" font-family="Inter,Arial" font-size="11" fill="#a5b4fc">EF Core 8 · ApplicationDbContext · SQLite (bestgen.db)</text>
+  <text x="40" y="326" font-family="Inter,Arial" font-size="10" fill="#94a3b8">~70 entities · enums as strings · decimal(18,2) · paired stock movements</text>
+</svg>
+</div>
+
+<h3>توزيع المسؤوليات بين الطبقات</h3>
+<ul>
+  <li><strong>طبقة المتصفح</strong> تعرض صفحات Razor المُترجَمة من ASP.NET. الشريط الجانبي اليميني والشريط العلوي الثابت ولوحات النماذج كلها مشتركة بين الشاشات عبر القوالب الجزئية.</li>
+  <li><strong>وحدات التحكم</strong> رفيعة عمدًا. تتعامل <code>CrudController&lt;TEntity&gt;</code> مع نحو ٣٠ وحدة بسيطة، فيما تحتفظ فواتير المبيعات والمشتريات والقيود والتقارير والإعدادات بوحدات تحكم مخصصة.</li>
+  <li><strong>الخدمات</strong> تحتوي على القواعد المالية. لكل نوع مستند خدمة مخصصة تنسّق بين الحساب وحركات المخزون وقيود الأستاذ.</li>
+  <li><strong>موزّع التقارير</strong> يستدعي ١٣ تقريرًا حيًا عبر <code>ReportService.RunAsync(key, filters)</code> وينتج <code>ReportResult</code> موحّد التنسيق.</li>
+  <li><strong>طبقة الاستمرارية</strong> هي <code>DbContext</code> واحد يكتب إلى SQLite، وتُضبَط فيه دقّة الأرقام والقيود وعلاقات المفاتيح والفهارس الفريدة.</li>
+</ul>
+
+<h3>دورة حياة عمليات الترحيل</h3>
+<p>كل وحدة معاملات تحدث تأثيرًا على الأستاذ أو المخزون تتبع نفس الدورة من ثلاث خطوات عبر مرشّحات داخل <code>CrudController</code>:</p>
+
+<table class="matrix">
+  <thead><tr><th>المرشح</th><th>متى يعمل</th><th>عقد الخدمة</th></tr></thead>
+  <tbody>
+    <tr><td><code>BeforeCreateSaveAsync</code></td><td>قبل إضافة الصف لمتعقّب التغييرات</td><td><code>service.PrepareAsync(entity)</code> — توليد رقم المستند والقيم الافتراضية</td></tr>
+    <tr><td><code>AfterAddBeforeSaveAsync</code></td><td>بعد الإضافة وقبل <code>SaveChanges</code></td><td><code>service.PostAsync(entity)</code> — إنشاء سطور القيد وحركات المخزون</td></tr>
+    <tr><td><code>AfterSaveAsync(entity, isCreate)</code></td><td>بعد إصدار المعرّف</td><td><code>service.ApplyAsync(entity)</code> — إعادة احتساب رصيد الطرف</td></tr>
+  </tbody>
+</table>
+
+<p>هذا النمط يضمن أن المعاملة ذرية: المستند والقيد والحركة وإعادة احتساب الرصيد إمّا أن تُحفظ معًا أو لا يُحفظ شيء.</p>
+
+<h2>4 · الواجهة الأمامية ونظام التصميم</h2>
+
+<p>الواجهة هادئة ومحترفة، تعتمد لوحة ألوان مميزة قائمة على الأزرق الكحلي والأخضر الزمردي مع مساحات بيضاء واسعة وتدرّج طباعي صارم. لا توجد أي عناصر مقتبسة من منتجات محاسبية موجودة في السوق.</p>
+
+<h3>لوحة الألوان (متغيرات CSS)</h3>
+<div class="palette">
+  <div class="swatch" style="background:#f7f6f1;color:#0f172a;">--canvas<small>#f7f6f1</small></div>
+  <div class="swatch" style="background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;">--surface<small>#ffffff</small></div>
+  <div class="swatch" style="background:#0f172a;">--navy<small>#0f172a</small></div>
+  <div class="swatch" style="background:#10b981;">--emerald<small>#10b981</small></div>
+  <div class="swatch" style="background:#4f46e5;">--blue<small>#4f46e5</small></div>
+  <div class="swatch" style="background:#f59e0b;">--warning<small>#f59e0b</small></div>
+  <div class="swatch" style="background:#ef4444;">--danger<small>#ef4444</small></div>
+  <div class="swatch" style="background:#64748b;">--muted<small>#64748b</small></div>
+</div>
+
+<h3>قواعد التخطيط</h3>
+<ul>
+  <li><strong>الشريط الجانبي اليميني</strong> بمجموعات قابلة للطيّ ورموز فرعية، يتقلّص لشكل عمودي بعرض ٦٤ بكسل ويتمدد عند المرور بالماوس.</li>
+  <li><strong>شريط علوي ثابت</strong> يحوي بحث المنطقة، شريحة اللغة (AR/EN)، شريحة الوضع الداكن، وقائمة المستخدم.</li>
+  <li><strong>عنوان الصفحة</strong> في كل شاشة عبر القالب الجزئي <code>_PageHeader</code>: عنوان + وصف + زر إنشاء اختياري.</li>
+  <li><strong>شبكة المؤشرات</strong> للوحة التحكم، <strong>لوحة البيانات</strong> للجداول، <strong>لوحة النموذج</strong> للإنشاء والتعديل، <strong>لوحة التفاصيل</strong> للعرض، <strong>شبكة التقارير</strong> لمركز التقارير.</li>
+</ul>
+
+<h3>القوالب الجزئية المعاد استخدامها</h3>
+<div class="grid-3">
+  <div class="card"><h4>‎_PageHeader</h4><p>عنوان ووصف وزر إنشاء اختياري — في أعلى كل صفحة.</p></div>
+  <div class="card"><h4>‎_DashboardCard</h4><p>كروت المؤشرات مع خط بياني صغير ونسبة تغير شهرية.</p></div>
+  <div class="card"><h4>‎_StatusBadge</h4><p>شارة ملوّنة مرتبطة بـ <code>EntityDisplayHelper.StatusClass</code>.</p></div>
+  <div class="card"><h4>‎_SearchBar</h4><p>بحث وفلتر حالة وزر تطبيق فوق قوائم البيانات.</p></div>
+  <div class="card"><h4>‎_EmptyState</h4><p>رسالة ودودة حين لا توجد سجلات.</p></div>
+  <div class="card"><h4>‎_ActionButtons</h4><p>عرض/تعديل/حذف مع رمز مكافحة التزوير في الحذف.</p></div>
+</div>
+
+<h3>العرض ثنائي اللغة</h3>
+<p>كل عرض يبدأ من <code>CultureInfo.CurrentUICulture</code>، ودالة <code>T(en, ar)</code> داخلية تختار الترجمة المناسبة. أسماء الحقول وعناوين الوحدات وترجمات حالات الحالة وأسماء أعمدة التقارير محفوظة في <code>Helpers/EntityDisplayHelper.cs</code> كقواميس ثنائية اللغة، فإضافة لغة جديدة تحتاج فقط قاموسًا إضافيًا — لا عروض جديدة.</p>
+
+<div class="figure">
+  <img src="img/dashboard-ar.png" alt="لوحة التحكم بالعربية" />
+  <div class="caption">الشكل ٢ — لوحة التحكم بنمط RTL. كل المؤشرات والرسوم البيانية مولّدة من بيانات حية في الأستاذ والمخزون.</div>
+</div>
+
+<div class="figure">
+  <img src="img/dashboard.png" alt="لوحة التحكم بالإنجليزية" />
+  <div class="caption">الشكل ٣ — اللوحة نفسها بالإنجليزية LTR. التخطيط والعملات والتسميات تتقلب فورًا عند تبديل اللغة.</div>
+</div>
+
+<h2>5 · الخدمات الخلفية ومحرك القيود</h2>
+
+<p>البنية الخلفية موجّهة بالخدمات: تحتفظ وحدات التحكم بالحجم الصغير وتفوّض كل المعاملات إلى خدمة مخصّصة. تشترك الخدمات في طبقة أساس صغيرة تَعبر منها كل العمليات.</p>
+
+<h3>خدمات الأساس</h3>
+<table class="matrix">
+  <thead><tr><th>الخدمة</th><th>المسؤولية</th></tr></thead>
+  <tbody>
+    <tr><td><code>ChartOfAccounts</code></td><td>المرجع الأوحد لرموز شجرة الحسابات (1000 صندوق، 1100 ذمم مدينة، 1200 مخزون، 2000 ذمم دائنة، 2100/2110 ضريبة، 4000 مبيعات، 5000 تكلفة بضاعة …). يطلق <code>MissingAccountException</code> إذا فُقد رمز.</td></tr>
+    <tr><td><code>StockMovementService</code></td><td>المسار الوحيد الذي يُعدِّل المخزون. يكتب صفوف تدقيق متزاوجة بإشارة (موجب = داخل، سالب = خارج) ومرجع نوعيّ من نوع <code>EntityName:Id</code>.</td></tr>
+    <tr><td><code>AccountingService</code></td><td>تركيب القيود والتحقق من توازنها. <code>BuildAndAddEntryAsync(date, sourceModule, description, lines)</code> يتأكد أن مجموع المدين = مجموع الدائن قبل الإضافة.</td></tr>
+    <tr><td><code>PartyBalanceService</code></td><td>إعادة احتساب رصيد العميل/المورد من المستندات الأساسية: الفواتير ناقص الإيصالات والإشعارات والاستردادات بإضافة الرصيد الافتتاحي.</td></tr>
+    <tr><td><code>InvoiceCalculationService</code></td><td>حساب أمامي وخلفي للإجمالي والخصم والضريبة لفواتير المبيعات والمشتريات.</td></tr>
+    <tr><td><code>DocumentNumberingService</code></td><td>توليد الأرقام لكل نوع مستند بقوالب (<code>{prefix}-{yyyy}-{0000}</code>) وإعادة سنوية وتسلسل محفوظ.</td></tr>
+  </tbody>
+</table>
+
+<h3>تدفق الترحيل — مثال فاتورة مبيعات</h3>
+<div class="arch">
+<svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;direction:ltr;">
+  <g font-family="Inter,Arial" font-size="10.5">
+    <rect x="20" y="20" width="160" height="60" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="30" y="42" font-weight="700" fill="#312e81">يحفظ المستخدم</text>
+    <text x="30" y="60" fill="#4338ca">Controller</text>
+
+    <rect x="200" y="20" width="170" height="60" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+    <text x="210" y="42" font-weight="700" fill="#78350f">حساب الإجماليات</text>
+    <text x="210" y="60" fill="#78350f">InvoiceCalc</text>
+
+    <rect x="390" y="20" width="170" height="60" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+    <text x="400" y="42" font-weight="700" fill="#1e3a8a">خصم المخزون</text>
+    <text x="400" y="60" fill="#1e3a8a">StockMovement</text>
+
+    <rect x="580" y="20" width="170" height="60" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text x="590" y="42" font-weight="700" fill="#14532d">ترحيل القيد</text>
+    <text x="590" y="60" fill="#14532d">AccountingService</text>
+
+    <rect x="770" y="20" width="90" height="60" rx="8" fill="#fde68a" stroke="#fbbf24"/>
+    <text x="780" y="42" font-weight="700" fill="#78350f">حفظ</text>
+    <text x="780" y="60" fill="#78350f">EF Core</text>
+
+    <rect x="20" y="120" width="320" height="80" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="30" y="142" font-weight="700" fill="#0f172a">سطور القيد المُرحَّل</text>
+    <text x="30" y="162" fill="#1e293b">DR 1100 الذمم المدينة      · الإجمالي</text>
+    <text x="30" y="178" fill="#1e293b">CR 4000 إيرادات المبيعات    · الإجمالي قبل الضريبة</text>
+    <text x="30" y="194" fill="#1e293b">CR 2100 ضريبة المخرجات      · الضريبة</text>
+
+    <rect x="360" y="120" width="320" height="80" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="370" y="142" font-weight="700" fill="#0f172a">سطور تكلفة البضاعة</text>
+    <text x="370" y="162" fill="#1e293b">DR 5000 تكلفة البضاعة     · التكلفة</text>
+    <text x="370" y="178" fill="#1e293b">CR 1200 المخزون            · التكلفة</text>
+    <text x="370" y="194" fill="#1e293b">+ سجلات حركة مخزون متزاوجة</text>
+  </g>
+</svg>
+</div>
+
+<h3>الخدمات بحسب القسم</h3>
+<div class="grid-2">
+  <div>
+    <h4>المبيعات</h4>
+    <ul>
+      <li><code>SalesInvoiceService</code> — DR ذمم مدينة، CR مبيعات + ضريبة، مع زوج تكلفة/مخزون</li>
+      <li><code>SalesReceiptService</code> — DR صندوق/بنك، CR ذمم مدينة</li>
+      <li><code>SalesRefundReceiptService</code> — DR مرتجع مبيعات، CR صندوق/بنك</li>
+      <li><code>CreditNoteService</code> — DR مرتجع مبيعات + ضريبة، CR ذمم مدينة</li>
+      <li><code>DeliveryNoteService</code> — توليد الرقم فقط</li>
+    </ul>
+  </div>
+  <div>
+    <h4>المشتريات</h4>
+    <ul>
+      <li><code>PurchaseInvoiceService</code> — DR مخزون + ضريبة، CR ذمم دائنة</li>
+      <li><code>SupplierPaymentService</code> — DR ذمم دائنة، CR صندوق/بنك</li>
+      <li><code>PurchaseRefundReceiptService</code> — DR صندوق/بنك، CR مرتجع مشتريات</li>
+      <li><code>DebitNoteService</code> — DR ذمم دائنة، CR مرتجع مشتريات + ضريبة</li>
+      <li><code>GoodsReceiptService</code> — توليد الرقم فقط</li>
+    </ul>
+  </div>
+  <div>
+    <h4>عمليات المخزون</h4>
+    <ul>
+      <li><code>StockTransferService</code> — حركتان متزاوجتان دون أثر محاسبي</li>
+      <li><code>InventoryCountService</code> — قيد فروقات على <code>5800</code></li>
+      <li><code>OpeningBalanceService</code> — تأسيس ضد <code>3200</code></li>
+    </ul>
+  </div>
+  <div>
+    <h4>الموارد البشرية والأصول</h4>
+    <ul>
+      <li><code>PayrollService</code> · <code>EmployeeBonusService</code> · <code>EmployeeDeductionService</code></li>
+      <li><code>EmployeeLoanService</code> — DR ذمم موظفين، CR صندوق</li>
+      <li><code>EmployeeReceiptService</code> — DR رواتب مستحقة، CR صندوق</li>
+      <li><code>FixedAssetService</code> — DR أصول، CR صندوق عند الشراء</li>
+      <li><code>AssetRentalService</code> — توليد الرقم فقط حتى الآن</li>
+    </ul>
+  </div>
+</div>
+
+<h2>6 · سجل الوحدات (الشريط الجانبي)</h2>
+
+<p>الشريط الجانبي يضم كل الوحدات في تسعة أقسام معيارية. كل رابط يقود إلى صفحة عاملة، وحتى الوحدات الفارغة ترسم حالة فارغة أنيقة بدلًا من خطأ ٤٠٤.</p>
+
+<div class="module-row"><strong>‎1 · لوحة التحكم</strong><em>شبكة مؤشرات: المبيعات، المصروفات، الربح الإجمالي، الذمم، تنبيهات المخزون. مدعومة بـ <code>DashboardService</code>.</em><span><span class="pill green">جاهز</span></span></div>
+
+<div class="module-row"><strong>‎2 · المبيعات</strong><em>العملاء · عروض الأسعار · فواتير المبيعات · إيصالات القبض · إيصالات الاسترداد · الإشعارات الدائنة · سندات التسليم · سياسات التسعير.</em><span><span class="pill green">قيود مرحّلة</span></span></div>
+
+<div class="module-row"><strong>‎3 · المشتريات</strong><em>الموردون · أوامر الشراء · فواتير المشتريات · دفعات الموردين · إيصالات الاسترداد · الإشعارات المدينة · سندات الاستلام · سياسات تسعير الشراء.</em><span><span class="pill green">قيود مرحّلة</span></span></div>
+
+<div class="module-row"><strong>‎4 · المنتجات والمخزون</strong><em>تصنيفات المنتجات · المنتجات · المستودعات · جرد المخزون · نقل المخزون.</em><span><span class="pill green">حركات مدقّقة</span></span></div>
+
+<div class="module-row"><strong>‎5 · الأصول الثابتة</strong><em>الأصول الثابتة · وسوم الأصول · تأجيرات الأصول.</em><span><span class="pill green">شراء يرحَّل</span><span class="pill amber">إهلاك مرحلة 9</span></span></div>
+
+<div class="module-row"><strong>‎6 · المحاسبة المتقدمة</strong><em>شجرة الحسابات · القيود اليدوية · الإيصالات العامة · الأرصدة الافتتاحية · أبعاد التقارير.</em><span><span class="pill green">حي</span></span></div>
+
+<div class="module-row"><strong>‎7 · الموارد البشرية</strong><em>الموظفون · المستندات · قيود الرواتب · الخصومات · المكافآت · القروض · الإيصالات · الطلبات.</em><span><span class="pill green">كل شيء يرحَّل</span></span></div>
+
+<div class="module-row"><strong>‎8 · مركز التقارير</strong><em>‏١٣ تقريرًا حيًا في خمسة أقسام: محاسبة، مبيعات، مشتريات، مخزون، موارد بشرية.</em><span><span class="pill green">بيانات مباشرة</span></span></div>
+
+<div class="module-row"><strong>‎9 · الإعدادات</strong><em>ملف الشركة · ضريبة · فواتير · عملة · ترقيم · فروع · مستخدمون وصلاحيات · تكاملات مستقبلية.</em><span><span class="pill green">نماذج حقيقية</span></span></div>
+
+<div class="figure">
+  <img src="img/sales-list-ar.png" alt="قائمة فواتير المبيعات" />
+  <div class="caption">الشكل ٤ — قائمة فواتير المبيعات بنمط RTL. تستخدم القالب العام <em>data-panel</em> مع <code>_SearchBar</code> و <code>_ActionButtons</code>.</div>
+</div>
+
+<div class="figure">
+  <img src="img/sales-create-ar.png" alt="إنشاء فاتورة مبيعات" />
+  <div class="caption">الشكل ٥ — نموذج إنشاء فاتورة مبيعات متعدد البنود. يقوم <code>SalesInvoiceService</code> بتنسيق الحساب والمخزون والقيد في صفقة واحدة.</div>
+</div>
+
+<div class="figure">
+  <img src="img/products-ar.png" alt="المنتجات" />
+  <div class="caption">الشكل ٦ — قائمة المنتجات مع الكميات وأسعار البيع وحدود التنبيه.</div>
+</div>
+
+<div class="figure">
+  <img src="img/journal-ar.png" alt="القيود اليدوية" />
+  <div class="caption">الشكل ٧ — وحدة القيود اليدوية. كل قيد يمر عبر <code>JournalEntryService</code> الذي يرفض القيود غير المتوازنة قبل الحفظ.</div>
+</div>
+
+<h2>7 · مركز التقارير</h2>
+
+<p>يستبدل مركز التقارير ٢٦ بطاقة وهمية كانت موجودة سابقًا بنمط موزِّع: <code>ReportService.RunAsync(string key, ReportFilters)</code> يعيد <code>ReportResult</code> موحّدًا يعرضه قالب Razor واحد. إضافة تقرير جديد لا تتطلب أكثر من حالة جديدة في <code>switch</code> ودالة جديدة.</p>
+
+<h3>التقارير الحية (المرحلة ٧ — مكتملة)</h3>
+<div class="grid-2">
+  <div class="card"><h4>دفتر الأستاذ</h4><p>كشف حركة كل حساب مع رصيد متراكم خلال الفترة.</p></div>
+  <div class="card"><h4>ميزان المراجعة</h4><p>مجاميع المدين والدائن لكل حساب — تأكيد توازن الدفاتر.</p></div>
+  <div class="card"><h4>قائمة الدخل</h4><p>الإيرادات ناقص المصروفات لأي فترة.</p></div>
+  <div class="card"><h4>الميزانية العمومية</h4><p>الأصول مقابل الخصوم وحقوق الملكية في تاريخ معيّن، مع نقل صافي الربح إلى الأرباح المحتجزة.</p></div>
+  <div class="card"><h4>كشف حساب</h4><p>حركة ورصيد أي حساب فردي.</p></div>
+  <div class="card"><h4>ملخص الإيصالات العامة</h4><p>إيصالات القبض والصرف مجمّعة حسب التصنيف.</p></div>
+  <div class="card"><h4>كشف عميل / مورد</h4><p>تاريخ المستندات لكل طرف مع رصيد متراكم.</p></div>
+  <div class="card"><h4>أرصدة العملاء / الموردين</h4><p>لقطة لجميع الأطراف.</p></div>
+  <div class="card"><h4>أعمار الديون</h4><p>تصنيف المستحقات إلى ٠–٣٠ / ٣١–٦٠ / ٦١–٩٠ / ٩١–١٢٠ / أكثر من ١٢٠ يومًا.</p></div>
+  <div class="card"><h4>المخزون الحالي</h4><p>الكميات والقيمة لكل مستودع.</p></div>
+  <div class="card"><h4>دفتر حركة المخزون</h4><p>سجل تدقيق لكل تغيير في الكميات.</p></div>
+  <div class="card"><h4>الإقرار الضريبي</h4><p>ضريبة المخرجات ناقص ضريبة المدخلات مع تعديلات الإشعارات.</p></div>
+</div>
+
+<div class="figure">
+  <img src="img/reports-ar.png" alt="مركز التقارير" />
+  <div class="caption">الشكل ٨ — مركز التقارير. مجمّع كل التقارير في خمسة أقسام واضحة.</div>
+</div>
+
+<div class="figure">
+  <img src="img/report-tb-ar.png" alt="ميزان المراجعة" />
+  <div class="caption">الشكل ٩ — تقرير ميزان المراجعة. مرشحات التاريخ تمر عبر <code>ReportFilters</code>؛ شكل الأعمدة والإجماليات موحّد عبر التقارير.</div>
+</div>
+
+<h2>8 · الإعدادات وإدارة الهوية</h2>
+
+<p>تتكوّن الإعدادات من ثماني صفحات مدعومة بنماذج حقيقية (لم يتبقَّ أي صفحة وهمية).</p>
+
+<table class="matrix">
+  <thead><tr><th>الصفحة</th><th>ما الذي تتحكم فيه</th></tr></thead>
+  <tbody>
+    <tr><td><strong>ملف الشركة</strong></td><td>الأسماء (AR/EN)، الرقم الضريبي، السجل التجاري، العنوان، الدولة، النسبة الضريبية الافتراضية، بادئات الفواتير، رفع الشعار.</td></tr>
+    <tr><td><strong>إعدادات الضريبة</strong></td><td>النسبة الافتراضية، الرقم الضريبي، تفعيل ZATCA، معرّف ZATCA، ظهور رمز QR.</td></tr>
+    <tr><td><strong>إعدادات الفواتير</strong></td><td>بادئات المبيعات والمشتريات، تذييل الفاتورة AR/EN، خيار QR.</td></tr>
+    <tr><td><strong>إعدادات العملة</strong></td><td>رمز ISO الأساسي (افتراضي <code>SAR</code>) ورمز العرض.</td></tr>
+    <tr><td><strong>إعدادات الترقيم</strong></td><td>قائمة <code>NumberingPolicy</code> — صف لكل نوع مستند مع البادئة، نمط الترقيم، التسلسل الحالي، إعادة سنوية.</td></tr>
+    <tr><td><strong>الفروع</strong></td><td>إدارة الفروع (الكود، الاسم AR/EN، المدينة، العنوان، الهاتف، المسؤول، نشط).</td></tr>
+    <tr><td><strong>المستخدمون والصلاحيات</strong></td><td>إدارة كاملة عبر Identity: إنشاء وتعديل وحذف مع تخصيص الأدوار وإعادة كلمة المرور.</td></tr>
+    <tr><td><strong>التكاملات المستقبلية</strong></td><td>شبكة بطاقات: بوابات الدفع، التسوية البنكية، WhatsApp Business، ZATCA Phase 2، شركات التوصيل، البريد التشغيلي.</td></tr>
+  </tbody>
+</table>
+
+<div class="figure">
+  <img src="img/settings-ar.png" alt="مركز الإعدادات" />
+  <div class="caption">الشكل ١٠ — صفحة الإعدادات الرئيسية. كل بطاقة تفتح نموذجًا حقيقيًا.</div>
+</div>
+
+<div class="figure">
+  <img src="img/users-ar.png" alt="المستخدمون والصلاحيات" />
+  <div class="caption">الشكل ١١ — إدارة المستخدمين والأدوار، حالة الإيقاف، أزرار الإنشاء والتعديل والحذف، كلها موصولة بـ ASP.NET Core Identity.</div>
+</div>
+
+<div class="figure">
+  <img src="img/branches-ar.png" alt="الفروع" />
+  <div class="caption">الشكل ١٢ — صفحة الفروع، تظهر تلقائيًا عبر <code>CrudController&lt;Branch&gt;</code> دون أي شفرة وحدة تحكم خاصة.</div>
+</div>
+
+<h2>9 · نموذج البيانات وشجرة الحسابات</h2>
+
+<h3>قائمة الكيانات (مستوى عالٍ)</h3>
+<div class="grid-3">
+  <div class="card"><h4>البيانات الرئيسية</h4><p>عميل · مورد · منتج · تصنيف · مستودع · موظف · وسم أصل · فرع.</p></div>
+  <div class="card"><h4>مستندات المبيعات</h4><p>عرض سعر · فاتورة · إيصال قبض · استرداد · إشعار دائن · سند تسليم · سياسة تسعير.</p></div>
+  <div class="card"><h4>مستندات المشتريات</h4><p>أمر شراء · فاتورة · دفعة مورد · استرداد · إشعار مدين · سند استلام · سياسة تسعير.</p></div>
+  <div class="card"><h4>عمليات المخزون</h4><p>جرد · نقل بين مستودعات · سجل حركة (تدقيق).</p></div>
+  <div class="card"><h4>المحاسبة</h4><p>حساب · قيد + سطور · إيصال عام · رصيد افتتاحي · بُعد تقاريري.</p></div>
+  <div class="card"><h4>الموارد البشرية</h4><p>موظف · مستند · راتب · خصم · مكافأة · قرض · إيصال · طلب.</p></div>
+  <div class="card"><h4>الأصول</h4><p>أصل ثابت · تأجير · وسم.</p></div>
+  <div class="card"><h4>النقد والبنوك</h4><p>صندوق · حساب بنكي · مصروف.</p></div>
+  <div class="card"><h4>الإعدادات</h4><p>‎CompanySettings · Branch · NumberingPolicy.</p></div>
+</div>
+
+<h3>شجرة الحسابات الجاهزة</h3>
+<table class="matrix">
+  <thead><tr><th>الرمز</th><th>الحساب</th><th>النوع</th><th>يستخدمه</th></tr></thead>
+  <tbody>
+    <tr><td>1000</td><td>الصندوق</td><td>أصل</td><td>كل التسويات النقدية</td></tr>
+    <tr><td>1010</td><td>البنك</td><td>أصل</td><td>كل التسويات البنكية</td></tr>
+    <tr><td>1100</td><td>الذمم المدينة</td><td>أصل</td><td>فواتير المبيعات والإيصالات والإشعارات الدائنة</td></tr>
+    <tr><td>1110</td><td>ذمم موظفين</td><td>أصل</td><td>قروض الموظفين</td></tr>
+    <tr><td>1200</td><td>المخزون</td><td>أصل</td><td>كل التدفقات التي تحرّك الكميات</td></tr>
+    <tr><td>1500</td><td>أصول ثابتة</td><td>أصل</td><td>اقتناء الأصول</td></tr>
+    <tr><td>1510</td><td>الإهلاك المتراكم</td><td>أصل عكسي</td><td>محجوز — مهمة الإهلاك مرحلة 9</td></tr>
+    <tr><td>2000</td><td>الذمم الدائنة</td><td>التزام</td><td>فواتير المشتريات والدفعات والإشعارات المدينة</td></tr>
+    <tr><td>2100</td><td>ضريبة المخرجات</td><td>التزام</td><td>ضريبة المبيعات</td></tr>
+    <tr><td>2110</td><td>ضريبة المدخلات</td><td>أصل</td><td>ضريبة المشتريات</td></tr>
+    <tr><td>2200</td><td>رواتب مستحقة</td><td>التزام</td><td>الرواتب المعتمدة غير المدفوعة</td></tr>
+    <tr><td>2230</td><td>‏GR/IR — بضاعة مستلمة لم تُفوتر</td><td>التزام</td><td>محجوز للتسوية مع أوامر الشراء</td></tr>
+    <tr><td>3000</td><td>حقوق الملكية</td><td>حقوق</td><td>—</td></tr>
+    <tr><td>3100</td><td>الأرباح المحتجزة</td><td>حقوق</td><td>تدوير الميزانية</td></tr>
+    <tr><td>3200</td><td>حقوق ملكية افتتاحية</td><td>حقوق</td><td>قيد الأرصدة الافتتاحية</td></tr>
+    <tr><td>4000</td><td>إيرادات المبيعات</td><td>إيراد</td><td>الفواتير</td></tr>
+    <tr><td>4200</td><td>إيرادات تأجير الأصول</td><td>إيراد</td><td>عقود التأجير</td></tr>
+    <tr><td>4900</td><td>مرتجع المبيعات</td><td>إيراد عكسي</td><td>إشعارات دائنة واستردادات</td></tr>
+    <tr><td>5000</td><td>تكلفة البضاعة المباعة</td><td>مصروف</td><td>الفواتير</td></tr>
+    <tr><td>5200</td><td>الرواتب</td><td>مصروف</td><td>الرواتب</td></tr>
+    <tr><td>5210</td><td>المكافآت</td><td>مصروف</td><td>المكافآت</td></tr>
+    <tr><td>5800</td><td>فروقات المخزون</td><td>مصروف</td><td>تسويات الجرد</td></tr>
+    <tr><td>5900</td><td>مرتجع المشتريات</td><td>مصروف عكسي</td><td>استردادات وإشعارات مدينة</td></tr>
+  </tbody>
+</table>
+
+<h2>10 · الحالة الحالية والمتبقي من المهام</h2>
+
+<p>أُنجزت ٩ مراحل من خطة الإنتاج العشرية. المراحل ٠ إلى ٨ مكتملة ومُتحققة باختبار تشغيل (smoke test). المرحلتان ٩ و ١٠ في قائمة الانتظار.</p>
+
+<div class="phase done"><h4>المرحلة ٠ · الأساس <span class="pill green">مكتمل</span></h4><p>سجل حركة المخزون · مرجع شجرة الحسابات · خدمة أرصدة الأطراف · مساعد الترحيل المشترك · بذرة ٢٨ رمزًا للحسابات.</p></div>
+
+<div class="phase done"><h4>المرحلة ١ · توصيل المبيعات بالأستاذ <span class="pill green">مكتمل</span></h4><p>إيصالات القبض · الاسترداد · الإشعارات الدائنة · سندات التسليم — كلها ترحّل قيدًا متوازنًا وتعيد احتساب رصيد العميل.</p></div>
+
+<div class="phase done"><h4>المرحلة ٢ · توصيل المشتريات بالأستاذ <span class="pill green">مكتمل</span></h4><p>دفعات الموردين · الاسترداد · الإشعارات المدينة · سندات الاستلام — متماثلة مع جانب المبيعات.</p></div>
+
+<div class="phase done"><h4>المرحلة ٣ · عمليات المخزون <span class="pill green">مكتمل</span></h4><p>نقل المخزون (حركتان متزاوجتان) · جرد المخزون (قيد فروقات) · الأرصدة الافتتاحية (تأسيس الدفاتر).</p></div>
+
+<div class="phase done"><h4>المرحلة ٤ · المحاسبة المتقدمة <span class="pill green">مكتمل</span></h4><p>استخراج <code>JournalEntryService</code> من وحدة التحكم · <code>GeneralReceiptService</code> مع تعديل أرصدة الصناديق · مرشّح قفل الفترة جاهز.</p></div>
+
+<div class="phase done"><h4>المرحلة ٥ · الموارد البشرية <span class="pill green">مكتمل</span></h4><p>الرواتب · المكافآت · الخصومات · القروض · الإيصالات — كلها ترحّل قيدًا حسب حالة المستند.</p></div>
+
+<div class="phase done"><h4>المرحلة ٦ · الأصول الثابتة <span class="pill green">مكتمل</span></h4><p>اقتناء الأصل يرحَّل تلقائيًا · تأجيرات الأصول تولد رقمًا. الإيرادات الشهرية والإهلاك مؤجلان للمرحلة ٩.</p></div>
+
+<div class="phase done"><h4>المرحلة ٧ · مركز التقارير <span class="pill green">مكتمل</span></h4><p>نمط الموزِّع · ١٣ تقريرًا حيًا · قالب Razor واحد · مرشحات التاريخ · حالة بديلة لتقارير الذيل الطويل.</p></div>
+
+<div class="phase done"><h4>المرحلة ٨ · الإعدادات <span class="pill green">مكتمل</span></h4><p>نماذج حقيقية للضريبة والفواتير والعملة والترقيم والفروع · إدارة المستخدمين عبر Identity · <code>DocumentNumberingService</code> · ٨ سياسات ترقيم وفروع افتراضية مزروعة · رفع الشعار.</p></div>
+
+<div class="phase pending">
+  <h4>المرحلة ٩ · التحصين <span class="pill amber">منتظر</span></h4>
+  <ul>
+    <li>تشديد قواعد كلمات المرور في <code>Program.cs</code> (مع إعادة تعيين كلمة سر المسؤول الافتراضي للحفاظ على الدخول التطويري).</li>
+    <li>إضافة <code>[Authorize(Roles = "...")]</code> على كل وحدة تحكم وفق مصفوفة الأدوار.</li>
+    <li>إضافة <code>[Timestamp] byte[] RowVersion</code> على الكيانات المالية للتحكم في التزامن.</li>
+    <li>إعادة قيم <code>ServiceResult&lt;T&gt;</code> مع قائمة أخطاء التحقق إلى وحدات التحكم.</li>
+    <li>سجل تدقيق <code>CreatedBy</code>/<code>UpdatedBy</code> عبر <code>SaveChangesInterceptor</code>.</li>
+    <li>قفل الفترة المالية — منع القيود قبل <code>CompanySettings.LockedThrough</code>.</li>
+    <li>‏<code>MonthEndService</code> كمهمة مستضافة تعالج الإهلاك ولقطات الأعمار.</li>
+  </ul>
+</div>
+
+<div class="phase pending">
+  <h4>المرحلة ١٠ · الاختبارات والإطلاق <span class="pill amber">منتظر</span></h4>
+  <ul>
+    <li>مشروع <code>tests/Bestgen.Tests/</code> بـ xUnit و EF Core In-Memory.</li>
+    <li>تغطية شاملة: فاتورة مبيعات تنشئ قيدًا متوازنًا وتخصم المخزون، فاتورة شراء + دفعة، نقل مخزون يعطي حركتين تجمعهما صفر، قفل الفترة يمنع القيود السابقة، رفض القيود غير المتوازنة، كل تقرير يطابق بيانات البذرة.</li>
+    <li>قائمة <code>tests/SMOKE.md</code> ٣٠ دقيقة قبل كل إصدار.</li>
+  </ul>
+</div>
+
+<h3>خارج النطاق (متعمَّد)</h3>
+<ul>
+  <li><strong>EF Migrations</strong> — نعتمد حاليًا على <code>EnsureCreatedAsync</code>؛ يجب الانتقال إلى ترحيلات حقيقية قبل الإنتاج.</li>
+  <li><strong>تعدد العملات</strong> — العملة الأساسية أحادية حاليًا.</li>
+  <li><strong>‎ZATCA Phase 2 clearance</strong> — البنية جاهزة (الرقم وQR) لكن التكامل الفعلي مع فاتورة على خارطة الطريق.</li>
+  <li><strong>تعدد المستأجرين</strong> — التطبيق وحيد المستأجر بالتصميم.</li>
+</ul>
+
+<h2>11 · تشغيل التطبيق</h2>
+
+<h3>الإقلاع لأول مرة</h3>
+<ol>
+  <li>استنساخ المستودع ثم <code>dotnet restore</code>.</li>
+  <li>تشغيل <code>dotnet run</code> — يُنشئ ملف SQLite ويزرع الأدوار والحسابات والمستخدمين الافتراضيين والفروع وسياسات الترقيم وبيانات تجريبية.</li>
+  <li>زيارة <code>http://localhost:5000</code> وتسجيل الدخول بـ <code>max@bestgen.com / 123</code>.</li>
+  <li>فتح <em>الإعدادات → ملف الشركة</em> واستبدال البيانات المزروعة بالبيانات الحقيقية ورفع الشعار.</li>
+  <li>فتح <em>الإعدادات → المستخدمون والصلاحيات</em> وإضافة المستخدمين بالأدوار المناسبة.</li>
+</ol>
+
+<h3>التدفقات اليومية</h3>
+<ul>
+  <li><strong>بيع</strong> — العملاء ← فواتير المبيعات ← جديد. السطور والضريبة والإجمالي والقيد والمخزون كلها تُحفظ معًا.</li>
+  <li><strong>تحصيل</strong> — إيصالات القبض ← جديد. اختر العميل والصندوق/البنك.</li>
+  <li><strong>شراء</strong> — الموردون ← فواتير المشتريات ← جديد.</li>
+  <li><strong>دفع لمورد</strong> — دفعات الموردين ← جديد.</li>
+  <li><strong>تسوية جرد</strong> — جرد المخزون ← جديد، ثم <em>معتمد</em> لينشأ قيد الفروقات.</li>
+  <li><strong>إصدار التقارير</strong> — التقارير ← ميزان المراجعة / قائمة الدخل / الميزانية — كلها بيانات حية.</li>
+</ul>
+
+<h3>المخاطر الشائعة وكيف يحتجزها بيستجن</h3>
+<table class="matrix">
+  <thead><tr><th>الخطر</th><th>الحارس المدمج</th></tr></thead>
+  <tbody>
+    <tr><td>قيد غير متوازن</td><td><code>BuildAndAddEntryAsync</code> يطلق استثناءً إذا اختلف المدين عن الدائن.</td></tr>
+    <tr><td>رمز حساب مفقود</td><td><code>ChartOfAccounts.ResolveAsync</code> يطلق <code>MissingAccountException</code>.</td></tr>
+    <tr><td>تعديل المخزون خارج المسار المعتمد</td><td>لا يكتب أحد إلى <code>Product.CurrentStock</code> سوى <code>StockMovementService</code>.</td></tr>
+    <tr><td>رصيد طرف قديم</td><td><code>PartyBalanceService</code> يعيد الاحتساب من المستندات الأساسية بعد كل عملية.</td></tr>
+    <tr><td>رقم مستند مكرر</td><td>فهارس فريدة على كل أرقام المستندات في <code>OnModelCreating</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>12 · خلاصة المشروع</h2>
+
+<p style="font-size:12pt;line-height:2;">باختصار شديد: <strong>بيستجن</strong> منتج محاسبة ومخزون متكامل، مكتوب بالعربية والإنجليزية، ومُصمَّم لاحتياجات الشركات السعودية الصغيرة والمتوسطة. يحلّ في وقت واحد ثلاث مشاكل تواجه أصحاب الأعمال يوميًا: تشتُّت الدفاتر بين أوراق Excel، صعوبة معرفة الكميات الفعلية في المستودع، والوقت الضائع في تجهيز التقارير الضريبية والمالية.</p>
+
+<div class="grid-3" style="margin-top:14pt;">
+  <div class="card"><h4>ماذا يفعل بيستجن؟</h4><p>يتولى دورة الأعمال كاملة: يصدر عرض السعر، ثم الفاتورة، ثم يستلم الدفعة، ثم يخصم البضاعة من المستودع، ثم يسجّل القيد في دفتر الأستاذ — كل ذلك في خطوة حفظ واحدة.</p></div>
+  <div class="card"><h4>لماذا يختلف؟</h4><p>الواجهة عربية أصيلة وليست ترجمة. القيود مزدوجة بشكل صحيح. التقارير حقيقية من قاعدة البيانات وليست أرقامًا وهمية. الأمان مبني على نظام الأدوار من اليوم الأول.</p></div>
+  <div class="card"><h4>مَن المستخدم المستهدف؟</h4><p>المحاسب اليومي، أمين المخزن، مسؤول المبيعات، مسؤول المشتريات، ومسؤول الموارد البشرية في شركة صغيرة أو متوسطة الحجم — كل منهم يجد قسمه جاهزًا في الشريط الجانبي.</p></div>
+  <div class="card"><h4>أين النضج اليوم؟</h4><p>تسعة أقسام كاملة في الشريط الجانبي. تسعة أدوار. ٢٨ حسابًا في شجرة الحسابات. ‏١٣ تقريرًا حيًا. ٧٠ كيانًا في قاعدة البيانات. ٨ مراحل من الخطة العشرية مكتملة.</p></div>
+  <div class="card"><h4>ما المتبقي قبل الإنتاج؟</h4><p>ثلاث مهام أساسية: تشديد كلمات المرور وأدوار الوصول، إضافة قفل الفترة المالية، ومجموعة من الاختبارات الآلية. ثم استبدال <code>EnsureCreatedAsync</code> بترحيلات EF رسمية قبل أول عميل حقيقي.</p></div>
+  <div class="card"><h4>لمَن يصلح الآن؟</h4><p>للشركات التي تريد تشغيله داخليًا أو على خادم خاص. عند الانتهاء من المرحلتين ٩ و ١٠ سيكون جاهزًا للنشر التجاري على عملاء حقيقيين.</p></div>
+</div>
+
+<div class="callout success" style="margin-top:18pt;"><strong>الخلاصة بأبسط صورة:</strong> بيستجن وصل إلى مرحلة منتج عامل بكل وحداته الأساسية. كل عملية تحفظها في النظام تنعكس فورًا على القيود وعلى المخزون وعلى رصيد الطرف، ويمكن استخراج تقارير محاسبية ومخزنية حقيقية في أي وقت. ما تبقى هو طبقة التحصين النهائية قبل التسليم الإنتاجي — وليس بناء المنتج من جديد.</div>
+
+<hr/>
+<p class="keyline">© بيستجن — وثيقة المشروع، أُصدرت من الشيفرة الحية بتاريخ ٢٠٢٦-٠٥-٠٩.</p>
+
+</body>
+</html>

@@ -1,14 +1,19 @@
+@using System.Globalization
 @model JournalEntry
 @{
-    ViewData["Title"] = "حذف قيد يومية";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Delete Journal Entry", "حذف قيد يومية");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("حذف قيد يومية", "تأكيد حذف القيد المحدد."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Delete Journal Entry", "حذف قيد يومية"),
+    T("Confirm removal of the selected entry.", "تأكيد حذف القيد المحدد.")))" />
 
 <section class="details-panel">
-    <div class="alert alert-danger">هل تريد حذف القيد @Model.EntryNumber؟</div>
+    <div class="alert alert-danger">@T($"Delete entry {Model.EntryNumber}?", $"هل تريد حذف القيد {Model.EntryNumber}؟")</div>
     <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
-        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> حذف</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> @T("Delete", "حذف")</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
     </form>
 </section>

@@ -1,78 +1,86 @@
+@using System.Globalization
 @model CompanySettings
 @{
-    ViewData["Title"] = "الإعدادات";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Settings", "الإعدادات");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("الإعدادات", "اضبط بيانات شركتك وقواعد الفوترة والترقيم والعملات وصلاحيات المستخدمين.", "Edit", "Settings", "تعديل ملف الشركة"))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Settings", "الإعدادات"),
+    T("Configure your company profile, invoicing rules, numbering, currencies, and user permissions.",
+      "اضبط بيانات شركتك وقواعد الفوترة والترقيم والعملات وصلاحيات المستخدمين."),
+    "Edit", "Settings", T("Edit company profile", "تعديل ملف الشركة")))" />
 
 <section class="details-panel mb-4">
     <div class="panel-title">
-        <h2>ملف الشركة</h2>
-        <span class="badge bg-emerald-soft text-emerald">معتمد</span>
+        <h2>@T("Company profile", "ملف الشركة")</h2>
+        <span class="badge bg-emerald-soft text-emerald">@T("Approved", "معتمد")</span>
     </div>
     <div class="summary-grid">
-        <div class="summary-card"><span>اسم الشركة</span><strong>@(string.IsNullOrWhiteSpace(Model.CompanyNameAr) ? "-" : Model.CompanyNameAr)</strong></div>
-        <div class="summary-card"><span>الرقم الضريبي</span><strong>@(Model.VatNumber ?? "-")</strong></div>
-        <div class="summary-card"><span>المدينة</span><strong>@(Model.City ?? "-")</strong></div>
-        <div class="summary-card"><span>نسبة الضريبة الافتراضية</span><strong>@Model.DefaultVatRate.ToString("N2")%</strong></div>
+        <div class="summary-card"><span>@T("Company name", "اسم الشركة")</span><strong>@(string.IsNullOrWhiteSpace(Model.CompanyNameAr) && string.IsNullOrWhiteSpace(Model.CompanyNameEn) ? "-" : pickName(Model.CompanyNameAr, Model.CompanyNameEn))</strong></div>
+        <div class="summary-card"><span>@T("VAT number", "الرقم الضريبي")</span><strong>@(Model.VatNumber ?? "-")</strong></div>
+        <div class="summary-card"><span>@T("City", "المدينة")</span><strong>@(Model.City ?? "-")</strong></div>
+        <div class="summary-card"><span>@T("Default VAT rate", "نسبة الضريبة الافتراضية")</span><strong>@Model.DefaultVatRate.ToString("N2")%</strong></div>
     </div>
 
     <div class="table-responsive">
         <table class="table">
             <tbody>
-                <tr><th style="width:240px">الاسم عربي</th><td>@(Model.CompanyNameAr ?? "-")</td></tr>
-                <tr><th>الاسم إنجليزي</th><td>@(Model.CompanyNameEn ?? "-")</td></tr>
-                <tr><th>السجل التجاري</th><td>@(Model.CommercialRegistrationNumber ?? "-")</td></tr>
-                <tr><th>العنوان</th><td>@(Model.Address ?? "-")</td></tr>
-                <tr><th>الدولة</th><td>@Model.Country</td></tr>
-                <tr><th>بادئة فواتير البيع</th><td>@Model.InvoicePrefix</td></tr>
-                <tr><th>بادئة فواتير الشراء</th><td>@Model.PurchaseInvoicePrefix</td></tr>
-                <tr><th>مسار الشعار</th><td>@(Model.LogoPath ?? "-")</td></tr>
+                <tr><th style="width:240px">@T("Arabic name", "الاسم عربي")</th><td>@(Model.CompanyNameAr ?? "-")</td></tr>
+                <tr><th>@T("English name", "الاسم إنجليزي")</th><td>@(Model.CompanyNameEn ?? "-")</td></tr>
+                <tr><th>@T("Commercial registration", "السجل التجاري")</th><td>@(Model.CommercialRegistrationNumber ?? "-")</td></tr>
+                <tr><th>@T("Address", "العنوان")</th><td>@(Model.Address ?? "-")</td></tr>
+                <tr><th>@T("Country", "الدولة")</th><td>@Model.Country</td></tr>
+                <tr><th>@T("Sales invoice prefix", "بادئة فواتير البيع")</th><td>@Model.InvoicePrefix</td></tr>
+                <tr><th>@T("Purchase invoice prefix", "بادئة فواتير الشراء")</th><td>@Model.PurchaseInvoicePrefix</td></tr>
+                <tr><th>@T("Logo path", "مسار الشعار")</th><td>@(Model.LogoPath ?? "-")</td></tr>
             </tbody>
         </table>
     </div>
 </section>
 
-<div class="panel-title"><h2>أقسام الإعدادات</h2><span class="badge bg-blue-soft text-blue">8 أقسام</span></div>
+<div class="panel-title"><h2>@T("Settings sections", "أقسام الإعدادات")</h2><span class="badge bg-blue-soft text-blue">@T("8 sections", "8 أقسام")</span></div>
 <section class="settings-grid mb-4">
     <a class="settings-card" asp-controller="Settings" asp-action="Edit">
         <div class="icon"><i class="bi bi-buildings"></i></div>
-        <h3>ملف الشركة</h3>
-        <p>اسم الشركة، الرقم الضريبي، السجل التجاري، الشعار.</p>
+        <h3>@T("Company profile", "ملف الشركة")</h3>
+        <p>@T("Company name, VAT number, commercial registration, logo.", "اسم الشركة، الرقم الضريبي، السجل التجاري، الشعار.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="TaxSettings">
         <div class="icon"><i class="bi bi-percent"></i></div>
-        <h3>إعدادات الضريبة</h3>
-        <p>نسبة الضريبة الافتراضية وجاهزية الفوترة الإلكترونية ZATCA.</p>
+        <h3>@T("Tax settings", "إعدادات الضريبة")</h3>
+        <p>@T("Default VAT rate and ZATCA e-invoicing readiness.", "نسبة الضريبة الافتراضية وجاهزية الفوترة الإلكترونية ZATCA.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="InvoiceSettings">
         <div class="icon"><i class="bi bi-receipt"></i></div>
-        <h3>إعدادات الفواتير</h3>
-        <p>بادئات الترقيم، تذييل الفاتورة، وقوالب الطباعة.</p>
+        <h3>@T("Invoice settings", "إعدادات الفواتير")</h3>
+        <p>@T("Numbering prefixes, invoice footer, and print templates.", "بادئات الترقيم، تذييل الفاتورة، وقوالب الطباعة.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="UsersRoles">
         <div class="icon"><i class="bi bi-shield-lock"></i></div>
-        <h3>المستخدمون والصلاحيات</h3>
-        <p>إدارة الأدوار والمستخدمين وحدود الصلاحيات.</p>
+        <h3>@T("Users & permissions", "المستخدمون والصلاحيات")</h3>
+        <p>@T("Manage roles, users, and permission boundaries.", "إدارة الأدوار والمستخدمين وحدود الصلاحيات.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="Branches">
         <div class="icon"><i class="bi bi-geo-alt"></i></div>
-        <h3>الفروع</h3>
-        <p>إدارة فروع المنشأة وربطها بالمستودعات.</p>
+        <h3>@T("Branches", "الفروع")</h3>
+        <p>@T("Manage organization branches and link them to warehouses.", "إدارة فروع المنشأة وربطها بالمستودعات.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="NumberingSettings">
         <div class="icon"><i class="bi bi-hash"></i></div>
-        <h3>إعدادات الترقيم</h3>
-        <p>أنماط ترقيم تلقائية للفواتير والإيصالات والقيود.</p>
+        <h3>@T("Numbering settings", "إعدادات الترقيم")</h3>
+        <p>@T("Auto-numbering patterns for invoices, receipts, and journals.", "أنماط ترقيم تلقائية للفواتير والإيصالات والقيود.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="CurrencySettings">
         <div class="icon"><i class="bi bi-currency-exchange"></i></div>
-        <h3>إعدادات العملات</h3>
-        <p>العملة الأساسية وعملات إضافية وأسعار الصرف.</p>
+        <h3>@T("Currency settings", "إعدادات العملات")</h3>
+        <p>@T("Base currency, additional currencies, and exchange rates.", "العملة الأساسية وعملات إضافية وأسعار الصرف.")</p>
     </a>
     <a class="settings-card" asp-controller="Settings" asp-action="FutureIntegrations">
         <div class="icon"><i class="bi bi-plug"></i></div>
-        <h3>التكاملات المستقبلية</h3>
-        <p>الدفع، البنوك، WhatsApp، ZATCA، أنظمة التوصيل.</p>
+        <h3>@T("Future integrations", "التكاملات المستقبلية")</h3>
+        <p>@T("Payments, banks, WhatsApp, ZATCA, delivery systems.", "الدفع، البنوك، WhatsApp، ZATCA، أنظمة التوصيل.")</p>
     </a>
 </section>

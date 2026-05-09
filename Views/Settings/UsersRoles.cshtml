@@ -1,25 +1,83 @@
+@using System.Globalization
+@model IReadOnlyList<UserRowViewModel>
 @{
-    ViewData["Title"] = "المستخدمون والصلاحيات";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Users & permissions", "المستخدمون والصلاحيات");
+    var roles = ViewBag.AllRoles as IList<string> ?? new List<string>();
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("المستخدمون والصلاحيات", "إدارة مستخدمي النظام والأدوار الأساسية."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Users & permissions", "المستخدمون والصلاحيات"),
+    T("Manage system users, assign roles, and reset passwords.", "إدارة المستخدمين، إسناد الأدوار، وإعادة تعيين كلمات المرور."),
+    "CreateUser", "Settings", T("Add user", "إضافة مستخدم")))" />
+
+@if (TempData["SettingsMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
 
 <section class="details-panel">
     <div class="summary-grid">
-        <div class="summary-card"><span>المستخدم الافتراضي</span><strong>admin@ledgerflow.local</strong></div>
-        <div class="summary-card"><span>الأدوار</span><strong>8</strong></div>
-        <div class="summary-card"><span>السياسات</span><strong>Placeholder</strong></div>
-        <div class="summary-card"><span>الصلاحيات التفصيلية</span><strong>MVP لاحقا</strong></div>
+        <div class="summary-card"><span>@T("Users", "المستخدمون")</span><strong>@Model.Count</strong></div>
+        <div class="summary-card"><span>@T("Roles", "الأدوار")</span><strong>@roles.Count</strong></div>
+        <div class="summary-card"><span>@T("Owners", "المالكون")</span><strong>@Model.Count(u => u.Roles.Contains("Owner"))</strong></div>
+        <div class="summary-card"><span>@T("Locked", "موقوفون")</span><strong>@Model.Count(u => u.IsLocked)</strong></div>
     </div>
+
+    <div class="panel-title"><h2>@T("Users", "المستخدمون")</h2></div>
     <div class="table-responsive">
         <table class="table">
-            <thead><tr><th>الدور</th><th>الاستخدام</th><th>الحالة</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>@T("Email", "البريد")</th>
+                    <th>@T("Name", "الاسم")</th>
+                    <th>@T("Roles", "الأدوار")</th>
+                    <th>@T("Status", "الحالة")</th>
+                    <th></th>
+                </tr>
+            </thead>
             <tbody>
-                @foreach (var role in new[] { "Owner", "Admin", "Accountant", "Sales", "Purchases", "Warehouse", "Cashier", "Viewer" })
+                @foreach (var u in Model)
                 {
-                    <tr><td>@role</td><td>صلاحيات أساسية قابلة للتوسعة</td><td><span class="badge bg-emerald-soft text-emerald">نشط</span></td></tr>
+                    <tr>
+                        <td>@u.Email</td>
+                        <td>@(u.FullName ?? "-")</td>
+                        <td>
+                            @foreach (var r in u.Roles)
+                            {
+                                <span class="badge bg-blue-soft text-blue me-1">@r</span>
+                            }
+                        </td>
+                        <td>
+                            @if (u.IsLocked)
+                            {
+                                <span class="badge bg-danger-subtle text-danger">@T("Locked", "موقوف")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-emerald-soft text-emerald">@T("Active", "نشط")</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="EditUser" asp-route-id="@u.Id"><i class="bi bi-pencil"></i></a>
+                            <form asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('@T("Delete this user?", "حذف هذا المستخدم؟")');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
+    </div>
+
+    <div class="panel-title mt-4"><h2>@T("Available roles", "الأدوار المتاحة")</h2></div>
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var role in roles)
+        {
+            <span class="badge bg-blue-soft text-blue px-3 py-2">@role</span>
+        }
     </div>
 </section>

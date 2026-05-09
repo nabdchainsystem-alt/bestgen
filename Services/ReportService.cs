@@ -1,10 +1,52 @@
+using bestgen.Data;
+using bestgen.Services.Reports;
 using bestgen.ViewModels;
 
 namespace bestgen.Services;
 
+/// <summary>
+/// Lists the report cards shown in the Reports Center and dispatches a key
+/// to the corresponding query class under <see cref="Reports"/>. The dispatch
+/// table is the source of truth for which reports are wired to live data;
+/// any key not listed will render the "in progress" placeholder so the view
+/// can still navigate to it without crashing.
+/// </summary>
 public class ReportService
 {
+    private readonly LedgerReports _ledger;
+    private readonly PartyReports _party;
+    private readonly InventoryReports _inventory;
+    private readonly TaxReports _tax;
+
+    public ReportService(LedgerReports ledger, PartyReports party, InventoryReports inventory, TaxReports tax)
+    {
+        _ledger = ledger;
+        _party = party;
+        _inventory = inventory;
+        _tax = tax;
+    }
+
     public IReadOnlyList<ReportCardViewModel> GetReportCards() => Cards;
+
+    public Task<ReportResult> RunAsync(string key, ReportFilters filters) => key switch
+    {
+        "general-ledger" => _ledger.GeneralLedgerAsync(filters),
+        "trial-balance" => _ledger.TrialBalanceAsync(filters),
+        "income-statement" => _ledger.IncomeStatementAsync(filters),
+        "balance-sheet" => _ledger.BalanceSheetAsync(filters),
+        "account-statement" => _ledger.AccountStatementAsync(filters),
+        "customer-statement" => _party.CustomerStatementAsync(filters),
+        "supplier-statement" => _party.SupplierStatementAsync(filters),
+        "customer-balances-summary" => _party.CustomerBalancesAsync(filters),
+        "supplier-balances-summary" => _party.SupplierBalancesAsync(filters),
+        "receivables-aging" => _party.AgingReceivablesAsync(filters),
+        "payables-aging" => _party.AgingPayablesAsync(filters),
+        "vat-return" => _tax.VatReturnAsync(filters),
+        "general-receipts-summary" => _ledger.GeneralReceiptsSummaryAsync(filters),
+        "current-stock" => _inventory.CurrentStockAsync(filters),
+        "inventory-ledger" => _inventory.StockMovementLedgerAsync(filters),
+        _ => Task.FromResult(ReportResult.NotImplemented(key, filters))
+    };
 
     private static readonly IReadOnlyList<ReportCardViewModel> Cards = new List<ReportCardViewModel>
     {

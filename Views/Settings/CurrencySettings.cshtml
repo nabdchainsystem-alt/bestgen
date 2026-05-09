@@ -1,0 +1,37 @@
+@using System.Globalization
+@model CompanySettings
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Currency settings", "إعدادات العملات");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Currency settings", "إعدادات العملات"),
+    T("Base currency and display symbol used across documents.", "العملة الأساسية ورمز العرض المستخدم في المستندات.")))" />
+
+@if (TempData["SettingsMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<section class="form-panel">
+    <form asp-action="CurrencySettings" method="post">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-grid">
+            <div>
+                <label asp-for="BaseCurrency" class="form-label">@T("Base currency code", "رمز العملة الأساسية")</label>
+                <input asp-for="BaseCurrency" class="form-control" maxlength="8" />
+                <small class="text-muted">@T("ISO code, e.g. SAR, USD, AED.", "كود ISO مثل SAR أو USD أو AED.")</small>
+            </div>
+            <div>
+                <label asp-for="CurrencySymbol" class="form-label">@T("Display symbol", "الرمز")</label>
+                <input asp-for="CurrencySymbol" class="form-control" maxlength="16" />
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> @T("Save", "حفظ")</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@T("Back", "رجوع")</a>
+        </div>
+    </form>
+</section>

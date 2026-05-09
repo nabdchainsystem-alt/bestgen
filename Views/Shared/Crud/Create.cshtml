@@ -1,19 +1,23 @@
+@using System.Globalization
 @model object
 @{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
     var controllerName = (string)ViewBag.ControllerName;
     var title = (string)ViewBag.EntityTitle;
     var description = (string)ViewBag.EntityDescription;
-    ViewData["Title"] = $"إضافة {title}";
+    ViewData["Title"] = T($"Add {title}", $"إضافة {title}");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel($"إضافة {title}", description))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(T($"Add {title}", $"إضافة {title}"), description))" />
 
 <section class="form-panel">
     <form asp-action="Create" method="post">
         <partial name="_CrudFormFields" model="@Model" />
         <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> حفظ</button>
-            <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save", "حفظ")</button>
+            <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
         </div>
     </form>
 </section>

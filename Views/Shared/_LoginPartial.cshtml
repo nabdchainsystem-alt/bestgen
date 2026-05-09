@@ -1,6 +1,11 @@
+@using System.Globalization
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+}
 
 @if (SignInManager.IsSignedIn(User))
 {
@@ -13,11 +18,11 @@
             <i class="bi bi-chevron-down"></i>
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">حسابي</a></li>
+            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">@T("My account", "حسابي")</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Dashboard", new { area = "" })">
-                    <button type="submit" class="dropdown-item">تسجيل الخروج</button>
+                    <button type="submit" class="dropdown-item">@T("Sign out", "تسجيل الخروج")</button>
                 </form>
             </li>
         </ul>
@@ -25,5 +30,5 @@
 }
 else
 {
-    <a class="btn btn-primary btn-sm" asp-area="Identity" asp-page="/Account/Login">تسجيل الدخول</a>
+    <a class="btn btn-primary btn-sm" asp-area="Identity" asp-page="/Account/Login">@T("Sign in", "تسجيل الدخول")</a>
 }

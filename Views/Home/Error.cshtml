@@ -1,9 +1,12 @@
+@using System.Globalization
 @{
-    ViewData["Title"] = "حدث خطأ";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("An error occurred", "حدث خطأ");
 }
 
 <section class="details-panel">
-    <h1 class="h4 mb-3">حدث خطأ غير متوقع</h1>
-    <p class="text-muted">راجع سجلات التطبيق أو إعدادات الاتصال بقاعدة البيانات.</p>
+    <h1 class="h4 mb-3">@T("An unexpected error occurred", "حدث خطأ غير متوقع")</h1>
+    <p class="text-muted">@T("Check the application logs or your database connection settings.", "راجع سجلات التطبيق أو إعدادات الاتصال بقاعدة البيانات.")</p>
     <p class="small text-muted">Request ID: @ViewBag.RequestId</p>
 </section>

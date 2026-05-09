@@ -174,7 +174,11 @@ public class SalesInvoicesController : Controller
     {
         if (itemCount == 0)
         {
-            ModelState.AddModelError("Items", "أضف صنفا واحدا على الأقل للفاتورة.");
+            var isArabic = System.Globalization.CultureInfo.CurrentUICulture.Name
+                .StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+            ModelState.AddModelError("Items", isArabic
+                ? "أضف صنفا واحدا على الأقل للفاتورة."
+                : "Add at least one item to the invoice.");
         }
     }
 }

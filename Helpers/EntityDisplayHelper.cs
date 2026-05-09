@@ -61,7 +61,11 @@ public static class EntityDisplayHelper
         ["EmployeeBonuses"] = ("Bonuses", "Bonuses and incentives."),
         ["EmployeeLoans"] = ("Loans", "Employee loans and monthly installments."),
         ["EmployeeReceipts"] = ("Receipts", "Receipts and payments related to employees."),
-        ["EmployeeRequests"] = ("Requests", "Leave, advance, and document requests.")
+        ["EmployeeRequests"] = ("Requests", "Leave, advance, and document requests."),
+
+        ["Branches"] = ("Branches", "Manage organization branches, contact info, and ownership."),
+        ["NumberingPolicies"] = ("Numbering Policies", "Per-document-type numbering format and current sequence."),
+        ["TaxRates"] = ("Tax Rates", "VAT rates and tax codes (15% standard, zero-rated, exempt).")
     };
 
     private static readonly Dictionary<string, (string Ar, string Description)> ModuleNames = new()
@@ -111,7 +115,11 @@ public static class EntityDisplayHelper
         ["EmployeeBonuses"] = ("المكافآت", "تسجيل المكافآت والحوافز للموظفين."),
         ["EmployeeLoans"] = ("القروض", "متابعة قروض الموظفين والأقساط الشهرية."),
         ["EmployeeReceipts"] = ("الإيصالات", "إيصالات استلام أو دفع متعلقة بالموظفين."),
-        ["EmployeeRequests"] = ("إدارة الطلبات", "طلبات الإجازات والسلف والمستندات.")
+        ["EmployeeRequests"] = ("إدارة الطلبات", "طلبات الإجازات والسلف والمستندات."),
+
+        ["Branches"] = ("الفروع", "إدارة فروع المنشأة وبياناتها."),
+        ["NumberingPolicies"] = ("إعدادات الترقيم", "ضبط بادئات وتنسيقات أرقام كل نوع مستند."),
+        ["TaxRates"] = ("نسب الضريبة", "إدارة نسب ضريبة القيمة المضافة ورموز الإعفاء.")
     };
 
     private static readonly Dictionary<string, string> LabelsEn = new()
@@ -154,6 +162,8 @@ public static class EntityDisplayHelper
         ["CurrentBalance"] = "Current Balance",
         ["PaymentTerms"] = "Payment Terms",
         ["IsActive"] = "Active",
+        ["IsDefault"] = "Default",
+        ["Rate"] = "Rate %",
         ["CreatedAt"] = "Created At",
         ["UpdatedAt"] = "Last Updated",
         ["SKU"] = "SKU",
@@ -280,7 +290,16 @@ public static class EntityDisplayHelper
         ["PurchaseInvoicePrefix"] = "Purchase Invoice Prefix",
         ["LogoPath"] = "Logo Path",
         ["Country"] = "Country",
-        ["ProductCategory"] = "Product Category"
+        ["ProductCategory"] = "Product Category",
+        ["BranchCode"] = "Branch Code",
+        ["Manager"] = "Manager",
+        ["DisplayNameAr"] = "Arabic Name",
+        ["DisplayNameEn"] = "English Name",
+        ["Prefix"] = "Prefix",
+        ["Format"] = "Format Pattern",
+        ["CurrentSequence"] = "Current Sequence",
+        ["ResetAnnually"] = "Reset Annually",
+        ["LastResetYear"] = "Last Reset Year"
     };
 
     private static readonly Dictionary<string, string> Labels = new()
@@ -323,6 +342,8 @@ public static class EntityDisplayHelper
         ["CurrentBalance"] = "الرصيد الحالي",
         ["PaymentTerms"] = "شروط الدفع",
         ["IsActive"] = "نشط",
+        ["IsDefault"] = "افتراضي",
+        ["Rate"] = "النسبة %",
         ["CreatedAt"] = "تاريخ الإنشاء",
         ["UpdatedAt"] = "آخر تحديث",
         ["SKU"] = "SKU",
@@ -449,7 +470,16 @@ public static class EntityDisplayHelper
         ["PurchaseInvoicePrefix"] = "بادئة فاتورة الشراء",
         ["LogoPath"] = "مسار الشعار",
         ["Country"] = "الدولة",
-        ["ProductCategory"] = "تصنيف المنتج"
+        ["ProductCategory"] = "تصنيف المنتج",
+        ["BranchCode"] = "كود الفرع",
+        ["Manager"] = "المسؤول",
+        ["DisplayNameAr"] = "الاسم عربي",
+        ["DisplayNameEn"] = "الاسم إنجليزي",
+        ["Prefix"] = "البادئة",
+        ["Format"] = "نمط الترقيم",
+        ["CurrentSequence"] = "التسلسل الحالي",
+        ["ResetAnnually"] = "إعادة سنوية",
+        ["LastResetYear"] = "آخر سنة إعادة"
     };
 
     private static readonly Dictionary<Type, string[]> ListProperties = new()
@@ -497,7 +527,11 @@ public static class EntityDisplayHelper
         [typeof(EmployeeBonus)] = new[] { "EmployeeId", "Date", "Amount", "Reason", "Status" },
         [typeof(EmployeeLoan)] = new[] { "EmployeeId", "LoanDate", "LoanAmount", "RemainingAmount", "Status" },
         [typeof(EmployeeReceipt)] = new[] { "ReceiptNumber", "EmployeeId", "Date", "Amount", "Status" },
-        [typeof(EmployeeRequest)] = new[] { "EmployeeId", "RequestType", "RequestDate", "Status" }
+        [typeof(EmployeeRequest)] = new[] { "EmployeeId", "RequestType", "RequestDate", "Status" },
+
+        [typeof(Branch)] = new[] { "BranchCode", "NameAr", "City", "Manager", "Phone", "IsActive" },
+        [typeof(NumberingPolicy)] = new[] { "DocumentType", "DisplayNameAr", "Prefix", "Format", "CurrentSequence", "ResetAnnually" },
+        [typeof(TaxRate)] = new[] { "Code", "NameAr", "Rate", "IsDefault", "IsActive" }
     };
 
     private static readonly string[] HiddenFormFields =

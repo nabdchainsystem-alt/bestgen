@@ -1,247 +1,303 @@
 @{
     Layout = null;
-    ViewData["Title"] = "وازن | برنامج محاسبي سحابي";
+    ViewData["Title"] = "Bestgen ERP — The all-in-one cloud ERP platform";
 
-    var trustItems = new[]
+    var pillars = new[]
     {
-        "فوترة ومبيعات",
-        "مشتريات وموردين",
-        "مخزون ومستودعات",
-        "تقارير مالية"
+        (Icon: "bi-graph-up-arrow", Title: "Full Accounting",
+         Body: "Chart of accounts, manual entries, P&L, balance sheet, and opening balances — every transaction wired automatically to the correct journal entry.",
+         Tone: "indigo"),
+        (Icon: "bi-boxes", Title: "Connected Inventory",
+         Body: "Products and warehouses, counts and transfers, with movement tied live to invoices, returns, and adjustments. No double entry, ever.",
+         Tone: "emerald"),
+        (Icon: "bi-bar-chart-steps", Title: "Smart Reporting",
+         Body: "General ledger, trial balance, aging reports, VAT returns, and bilingual customer/supplier statements at a single click.",
+         Tone: "amber")
     };
 
-    var problemCards = new[]
+    var modules = new[]
     {
-        (Title: "فواتير منفصلة عن المخزون", Description: "عند غياب الربط بين البيع والمخزون تظهر أخطاء في الكميات والتكلفة والربح."),
-        (Title: "أرصدة العملاء والموردين غير واضحة", Description: "المتابعة اليدوية تجعل التحصيلات والمدفوعات أصعب وتزيد احتمالية التأخير."),
-        (Title: "تقارير كثيرة لكن القرار غير واضح", Description: "الأرقام وحدها لا تكفي، تحتاج رؤية مختصرة توضّح أين تقف شركتك.")
+        (Icon: "bi-grid-1x2-fill",       Tone: "navy",    Title: "Dashboard",        Sub: "Real-time pulse of your finances and operations", Items: new[] { "Live KPIs", "Overdue invoices", "Stock alerts", "Latest activity" }),
+        (Icon: "bi-cart-check-fill",     Tone: "emerald", Title: "Sales",            Sub: "From customer to collection in one connected flow", Items: new[] { "Customers", "Quotations", "Sales invoices", "Receipts", "Credit notes", "Delivery notes" }),
+        (Icon: "bi-truck",               Tone: "blue",    Title: "Purchases",        Sub: "Orders, payments, and supplier balances unified", Items: new[] { "Suppliers", "Purchase orders", "Purchase invoices", "Supplier payments", "Debit notes", "Goods receipts" }),
+        (Icon: "bi-box-seam-fill",       Tone: "amber",   Title: "Inventory",        Sub: "Real-time tracking of quantities, costs, and movement", Items: new[] { "Categories", "Products", "Warehouses", "Stock counts", "Transfers" }),
+        (Icon: "bi-building-fill-gear",  Tone: "navy",    Title: "Fixed Assets",     Sub: "Asset register, depreciation, and rental contracts", Items: new[] { "Asset register", "Asset tags", "Rental contracts", "Operating status" }),
+        (Icon: "bi-journal-text",        Tone: "blue",    Title: "Accounting",       Sub: "Balanced entries with flexible reporting dimensions", Items: new[] { "Chart of accounts", "Manual entries", "General receipts", "Opening balances", "Cost centers" }),
+        (Icon: "bi-people-fill",         Tone: "emerald", Title: "Human Resources",  Sub: "Employees, payroll, and benefits in one module", Items: new[] { "Employees", "Documents", "Payroll", "Deductions", "Bonuses", "Loans" }),
+        (Icon: "bi-bar-chart-line-fill", Tone: "amber",   Title: "Reports Center",   Sub: "Professional financial and operational insights", Items: new[] { "General ledger", "Trial balance", "Income statement", "Balance sheet", "Aging", "VAT return" }),
+        (Icon: "bi-sliders2",            Tone: "navy",    Title: "Settings",         Sub: "Permissions, branches, and document numbering", Items: new[] { "Company profile", "Branches", "Numbering policies", "Users & roles" })
     };
 
-    var solutionCards = new[]
+    var reports = new[]
     {
-        (Title: "فواتير المبيعات", Description: "إصدار فواتير منظمة وربطها بالعملاء والمخزون والتحصيلات من نفس المسار."),
-        (Title: "فواتير المشتريات", Description: "تسجيل مشتريات الموردين ومتابعة المستحقات وتأثيرها على تكلفة المخزون."),
-        (Title: "العملاء والموردون", Description: "أرصدة واضحة، بيانات مرتبة، وحركة مالية يمكن الرجوع إليها بسرعة."),
-        (Title: "المنتجات والمخزون", Description: "تعريف المنتجات والمستودعات وحدود إعادة الطلب مع متابعة الحركة اليومية."),
-        (Title: "الخزينة والبنوك", Description: "متابعة النقد والحسابات البنكية والمدفوعات والتحصيلات بصورة مترابطة."),
-        (Title: "التقارير المحاسبية", Description: "مؤشرات وتقارير تساعدك على قراءة المبيعات، المصروفات، الأرباح، والالتزامات.")
+        (Icon: "bi-journal-bookmark-fill", Title: "General Ledger"),
+        (Icon: "bi-list-check",            Title: "Trial Balance"),
+        (Icon: "bi-graph-up",               Title: "Income Statement"),
+        (Icon: "bi-columns-gap",            Title: "Balance Sheet"),
+        (Icon: "bi-receipt-cutoff",         Title: "Customer Statement"),
+        (Icon: "bi-receipt",                Title: "Supplier Statement"),
+        (Icon: "bi-hourglass-split",        Title: "Receivables Aging"),
+        (Icon: "bi-percent",                Title: "VAT Return"),
+        (Icon: "bi-boxes",                  Title: "Current Stock"),
+        (Icon: "bi-arrow-left-right",       Title: "Inventory Movement"),
+        (Icon: "bi-cash-coin",              Title: "General Receipts"),
+        (Icon: "bi-grid-3x3-gap-fill",      Title: "Reporting Dimensions")
     };
 
-    var featureItems = new[]
+    var integrations = new[]
     {
-        "العملاء",
-        "الموردين",
-        "عروض الأسعار",
-        "فواتير المبيعات",
-        "إيصالات المبيعات",
-        "طلبات الشراء",
-        "فواتير المشتريات",
-        "إيصالات المشتريات",
-        "المنتجات",
-        "المخازن",
-        "الجرد",
-        "نقل المخزون",
-        "شجرة الحسابات",
-        "القيود اليومية",
-        "الإقرار الضريبي",
-        "مراكز التكلفة"
+        (Icon: "bi-translate",       Title: "Bilingual UI",       Body: "Arabic RTL and English LTR — every screen, every report."),
+        (Icon: "bi-shield-check",    Title: "Granular Permissions", Body: "9 roles ready out of the box, fully customizable."),
+        (Icon: "bi-cloud-arrow-up",  Title: "Cloud-Native",        Body: "Run locally, self-host, or deploy to any cloud."),
+        (Icon: "bi-percent",         Title: "VAT Compliance",      Body: "Saudi 15% VAT baked in with a ready-to-file return."),
+        (Icon: "bi-diagram-3-fill",  Title: "Extensible",          Body: "Generic CRUD framework — new modules in minutes."),
+        (Icon: "bi-moon-stars-fill", Title: "Dark Mode",           Body: "Built-in dark theme for teams that work long hours."),
+        (Icon: "bi-file-earmark-spreadsheet", Title: "Excel I/O",  Body: "Bulk import customers, products, opening balances."),
+        (Icon: "bi-clock-history",   Title: "Audit Trail",         Body: "Every change tracked with user, timestamp, and diff.")
     };
 
-    var complianceCards = new[]
+    var pillars2 = new[]
     {
-        (Title: "ضريبة القيمة المضافة", Description: "تنظيم البيانات الضريبية ومراجعة أثر الضريبة على الفواتير والتقارير."),
-        (Title: "فواتير إلكترونية جاهزة للتطوير", Description: "هيكلة قابلة للتوسع حسب احتياج المنشأة ومراحل التطوير القادمة."),
-        (Title: "بيانات المنشأة والسجل التجاري", Description: "حفظ بيانات النشاط الأساسية لاستخدامها في المستندات والتقارير."),
-        (Title: "تقارير تساعد المحاسب وصاحب العمل", Description: "ملخصات مالية قابلة للقراءة تساعد في المتابعة والمراجعة اليومية.")
+        (Icon: "bi-translate",       Title: "Truly bilingual",   Body: "Full Arabic RTL + English LTR with native-quality support across every screen, document, and report."),
+        (Icon: "bi-shield-check",    Title: "Role-based access", Body: "Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer — ready and customizable."),
+        (Icon: "bi-cloud-arrow-up",  Title: "Cloud-ready stack", Body: "ASP.NET Core 8 + Entity Framework Core. Run locally, self-host, or deploy to your favorite cloud."),
+        (Icon: "bi-percent",         Title: "VAT compliance",    Body: "Saudi 15% VAT calculation across invoices, with a ready-to-file VAT return report."),
+        (Icon: "bi-diagram-3-fill",  Title: "Extensible by design", Body: "A generic CRUD framework lets you add new modules in minutes — not days, not weeks."),
+        (Icon: "bi-moon-stars-fill", Title: "Dark mode included", Body: "Built-in dark theme for teams that spend long hours staring at screens.")
     };
 
-    var dashboardMetrics = new[]
+    var pricing = new[]
     {
-        (Label: "إجمالي المبيعات", Value: "128,450 ر.س"),
-        (Label: "إجمالي المشتريات", Value: "72,180 ر.س"),
-        (Label: "صافي الربح", Value: "31,940 ر.س"),
-        (Label: "رصيد الخزينة", Value: "18,600 ر.س"),
-        (Label: "العملاء المدينون", Value: "24,300 ر.س"),
-        (Label: "الموردون الدائنون", Value: "15,720 ر.س"),
-        (Label: "المنتجات منخفضة المخزون", Value: "3"),
-        (Label: "الفواتير المتأخرة", Value: "4")
-    };
-
-    var moduleGroups = new[]
-    {
-        (Title: "المبيعات", Items: new[] { "قائمة العملاء", "عروض الأسعار", "فواتير المبيعات", "إيصالات المبيعات" }),
-        (Title: "المشتريات", Items: new[] { "قائمة الموردين", "طلبات الشراء", "فواتير المشتريات", "إيصالات المشتريات" }),
-        (Title: "المنتجات والمخزون", Items: new[] { "أصناف المنتجات", "قائمة المنتجات", "المخازن", "عمليات الجرد", "نقل المخزون" }),
-        (Title: "الأصول الثابتة", Items: new[] { "أصول", "وسوم الأصول", "تأجيرات الأصول" }),
-        (Title: "المحاسبة المتقدمة", Items: new[] { "شجرة الحسابات", "القيود اليدوية", "الإيصالات العامة", "الرصيد الافتتاحي", "أبعاد التقارير" }),
-        (Title: "الموارد البشرية", Items: new[] { "الموظفين", "قيود الرواتب", "الخصومات", "المكافآت", "القروض" }),
-        (Title: "التقارير", Items: new[] { "دفتر الأستاذ", "الميزانية العمومية", "قائمة الدخل", "ميزان المراجعة", "الإقرار الضريبي" })
-    };
-
-    var reasons = new[]
-    {
-        "واجهة عربية واضحة",
-        "مناسب لصاحب العمل والمحاسب",
-        "يربط الفواتير بالمخزون والحسابات",
-        "قابل للتوسع مع نمو الشركة",
-        "تقارير تساعدك على اتخاذ القرار"
-    };
-
-    var pricingPlans = new[]
-    {
-        (Name: "البداية", Price: "49 ريال / شهر", ForText: "للمنشآت الصغيرة التي تريد تنظيم الفواتير والعملاء", Features: new[] { "فواتير المبيعات", "العملاء", "الموردين", "تقارير أساسية", "مستخدم واحد" }, Highlight: false),
-        (Name: "النمو", Price: "99 ريال / شهر", ForText: "للأنشطة التي تحتاج مشتريات ومخزون وتقارير أوضح", Features: new[] { "كل مميزات البداية", "المنتجات والمخزون", "فواتير المشتريات", "الخزينة والبنوك", "3 مستخدمين" }, Highlight: true),
-        (Name: "الأعمال", Price: "199 ريال / شهر", ForText: "للشركات التي تحتاج محاسبة أعمق وصلاحيات وتقارير متقدمة", Features: new[] { "كل مميزات النمو", "المحاسبة المتقدمة", "مراكز تكلفة", "صلاحيات مستخدمين", "تقارير متقدمة", "5 مستخدمين" }, Highlight: false)
-    };
-
-    var testimonials = new[]
-    {
-        (Role: "صاحب مؤسسة تجارية", Text: "أحتاج أن أرى المبيعات والمخزون والتحصيلات في شاشة واحدة قبل اتخاذ أي قرار شراء جديد."),
-        (Role: "محاسب منشأة صغيرة", Text: "الأهم بالنسبة لي أن تكون الفواتير والقيود والتقارير مترابطة بدون نقل يدوي متكرر."),
-        (Role: "مدير عمليات", Text: "وجود تنبيهات للمخزون والفواتير المتأخرة يساعد الفريق على التحرك قبل أن تتراكم المشكلات.")
+        (Name: "Starter",  PriceMonth: "19",  PriceYear: "180", For: "Small businesses getting organized for the first time", Features: new[] { "Sales & purchase invoices", "Customers & suppliers", "Basic reports", "1 user", "Email support" }, Highlight: false),
+        (Name: "Growth",   PriceMonth: "49",  PriceYear: "470", For: "Mid-size companies that need real inventory clarity",   Features: new[] { "Everything in Starter", "Products & warehouses", "Stock counts & transfers", "Cash & bank", "Up to 3 users", "Advanced reports" }, Highlight: true),
+        (Name: "Business", PriceMonth: "99",  PriceYear: "950", For: "Established companies with deeper accounting needs",    Features: new[] { "Everything in Growth", "Full advanced accounting", "Fixed assets", "Human resources", "Reporting dimensions", "Granular permissions", "Up to 10 users" }, Highlight: false)
     };
 
     var faqs = new[]
     {
-        (Question: "هل وازن مناسب للمؤسسات الصغيرة؟", Answer: "نعم، صمم وازن للمنشآت الصغيرة والمتوسطة التي تحتاج نظاما منظما للفواتير والمخزون والحسابات دون تعقيد زائد."),
-        (Question: "هل يدعم اللغة العربية؟", Answer: "نعم، الواجهة عربية واتجاهها من اليمين إلى اليسار لتناسب فرق العمل في السعودية والمنطقة."),
-        (Question: "هل يمكن إدارة المخزون؟", Answer: "نعم، يمكنك متابعة المنتجات والمخازن والجرد ونقل المخزون وربط الحركة بفواتير البيع والشراء."),
-        (Question: "هل يدعم ضريبة القيمة المضافة؟", Answer: "يدعم تنظيم بيانات ضريبة القيمة المضافة على الفواتير والتقارير بما يساعد المحاسب على المراجعة."),
-        (Question: "هل يمكن إضافة أكثر من مستخدم؟", Answer: "نعم، تختلف حدود المستخدمين حسب الباقة، ويمكن تطوير الصلاحيات حسب احتياج المنشأة."),
-        (Question: "هل يمكن تطويره لاحقًا للفوترة الإلكترونية؟", Answer: "نعم، وازن جاهز للتطوير نحو متطلبات الفوترة الإلكترونية والربط المستقبلي دون ادعاء اعتماد رسمي قبل تنفيذه.")
+        (Q: "Is Bestgen a good fit for my business?", A: "Bestgen is built for small and mid-size businesses across trading, services, and retail. It starts simple and scales with you — no need to migrate to another system as you grow."),
+        (Q: "Does it support Arabic and VAT?", A: "Yes. The UI is fully bilingual (Arabic RTL + English LTR), and Saudi 15% VAT is built into invoices, line items, and the dedicated VAT return report."),
+        (Q: "Can I manage multiple branches and warehouses?", A: "Yes. Run multiple branches and separate warehouses, with stock transfers between them and per-warehouse balance tracking."),
+        (Q: "How do user roles work?", A: "Bestgen ships with 9 roles (Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer) and supports custom role creation when you need finer control."),
+        (Q: "Can I import existing data?", A: "Yes. You can bulk-import customers, suppliers, products, and opening balances from Excel files — and we offer onboarding help for the initial migration."),
+        (Q: "What platforms are supported?", A: "Bestgen runs on any modern browser (Windows, Mac, iPad, mobile) and is built on a cloud-ready architecture for fast, secure access from anywhere.")
     };
 }
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="وازن برنامج محاسبي سحابي عربي للمنشآت الصغيرة والمتوسطة لإدارة الفواتير والمخزون والعملاء والموردين والتقارير والضريبة من مكان واحد." />
+    <meta name="description" content="Bestgen ERP — The all-in-one cloud ERP platform. Sales, purchasing, inventory, accounting, and HR unified in one bilingual experience built on .NET 8." />
+    <meta name="theme-color" content="#0b1020" />
     <title>@ViewData["Title"]</title>
+
+    <link rel="icon" type="image/png" href="/img/logo.png">
+    <link rel="apple-touch-icon" href="/img/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="site-header" id="top">
-        <div class="announcement">
-            <div class="landing-container announcement-inner">
-                <span>نسخة تجريبية مبكرة — برنامج محاسبي سحابي للمنشآت الصغيرة والمتوسطة</span>
-                <a href="#features">اكتشف المميزات</a>
+    <!-- Topbar -->
+    <header class="topbar" id="topbar">
+        <div class="topbar-inner container-x">
+            <a class="brand" href="#top" aria-label="Bestgen ERP">
+                <img src="/img/logo.png" alt="Bestgen ERP" class="brand-logo">
+            </a>
+
+            <nav class="topnav" aria-label="Main navigation">
+                <a href="#features">Features</a>
+                <a href="#preview">Live Preview</a>
+                <a href="#modules">Modules</a>
+                <a href="#reports">Reports</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+
+            <div class="topactions">
+                <a class="btn btn-ghost" href="/Identity/Account/Login">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Sign in</span>
+                </a>
+                <a class="btn btn-primary" href="/Identity/Account/Register">
+                    <span>Get started</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <button class="mobile-toggle" type="button" aria-label="Menu" onclick="document.documentElement.classList.toggle('nav-open')">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        <div class="mobile-drawer">
+            <a href="#features" onclick="document.documentElement.classList.remove('nav-open')">Features</a>
+            <a href="#preview" onclick="document.documentElement.classList.remove('nav-open')">Live Preview</a>
+            <a href="#modules" onclick="document.documentElement.classList.remove('nav-open')">Modules</a>
+            <a href="#reports" onclick="document.documentElement.classList.remove('nav-open')">Reports</a>
+            <a href="#pricing" onclick="document.documentElement.classList.remove('nav-open')">Pricing</a>
+            <a href="#faq" onclick="document.documentElement.classList.remove('nav-open')">FAQ</a>
+            <div class="mobile-actions">
+                <a class="btn btn-ghost" href="/Identity/Account/Login">Sign in</a>
+                <a class="btn btn-primary" href="/Identity/Account/Register">Get started</a>
             </div>
         </div>
-
-        <nav class="navbar" aria-label="التنقل الرئيسي">
-            <div class="landing-container nav-inner">
-                <a class="brand" href="#top" aria-label="وازن">
-                    <span class="brand-symbol">و</span>
-                    <span class="brand-copy">
-                        <strong>وازن</strong>
-                        <small>Wazen Accounting Cloud</small>
-                    </span>
-                </a>
-
-                <div class="nav-links" aria-label="روابط الصفحة">
-                    <a href="#features">المميزات</a>
-                    <a href="#solutions">الحلول</a>
-                    <a href="#reports">التقارير</a>
-                    <a href="#pricing">الأسعار</a>
-                    <a href="#faq">الأسئلة الشائعة</a>
-                </div>
-
-                <div class="nav-actions">
-                    <a class="btn btn-secondary" href="/Identity/Account/Login">تسجيل الدخول</a>
-                    <a class="btn btn-primary" href="/Identity/Account/Register">ابدأ التجربة</a>
-                </div>
-
-                <details class="mobile-menu">
-                    <summary>القائمة</summary>
-                    <div class="mobile-panel">
-                        <a href="#features">المميزات</a>
-                        <a href="#solutions">الحلول</a>
-                        <a href="#reports">التقارير</a>
-                        <a href="#pricing">الأسعار</a>
-                        <a href="#faq">الأسئلة الشائعة</a>
-                        <span class="mobile-actions">
-                            <a class="btn btn-secondary" href="/Identity/Account/Login">تسجيل الدخول</a>
-                            <a class="btn btn-primary" href="/Identity/Account/Register">ابدأ التجربة</a>
-                        </span>
-                    </div>
-                </details>
-            </div>
-        </nav>
     </header>
 
-    <main>
-        <section class="hero-section">
-            <div class="landing-container hero-grid">
+    <main id="top">
+        <!-- ============================================================ -->
+        <!-- Hero                                                          -->
+        <!-- ============================================================ -->
+        <section class="hero">
+            <div class="hero-bg" aria-hidden="true">
+                <span class="blob blob-a"></span>
+                <span class="blob blob-b"></span>
+                <span class="blob blob-c"></span>
+                <div class="hero-grid">
+                    <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                        <defs>
+                            <pattern id="hero-dots" x="0" y="0" width="36" height="36" patternUnits="userSpaceOnUse">
+                                <circle cx="1.4" cy="1.4" r="1.4" fill="rgba(255,255,255,0.07)"></circle>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#hero-dots)"></rect>
+                    </svg>
+                </div>
+                <div class="aurora"></div>
+            </div>
+
+            <div class="container-x hero-grid-layout">
                 <div class="hero-copy">
-                    <span class="eyebrow">محاسبة سحابية هادئة وواضحة</span>
-                    <h1>برنامج محاسبي سحابي يوازن مبيعاتك، مخزونك، وحساباتك في مكان واحد</h1>
-                    <p>
-                        وازن يساعدك على إصدار الفواتير، متابعة العملاء والموردين، إدارة المخزون،
-                        مراقبة الخزينة والبنوك، وفهم وضعك المالي من لوحة تحكم واضحة وسهلة.
+                    <span class="eyebrow">
+                        <span class="eyebrow-dot"></span>
+                        All-in-one ERP · 2026 release
+                    </span>
+                    <h1 class="hero-title">
+                        <span class="line">Run your entire</span>
+                        <span class="line"><span class="grad-text">business</span> on one</span>
+                        <span class="line">elegant platform.</span>
+                    </h1>
+                    <p class="hero-lead">
+                        Bestgen ERP unifies sales, purchasing, inventory, accounting, and HR into a single
+                        delightful experience — built on .NET 8 for the performance your business deserves,
+                        and bilingual from day one.
                     </p>
-                    <div class="hero-actions">
-                        <a class="btn btn-primary btn-large" href="/Identity/Account/Register">ابدأ الآن</a>
-                        <a class="btn btn-secondary btn-large" href="/Dashboard">شاهد لوحة التحكم</a>
+                    <div class="hero-cta">
+                        <a class="btn btn-primary btn-lg btn-shimmer" href="/Identity/Account/Register">
+                            <span>Start free</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a class="btn btn-outline-light btn-lg" href="#preview">
+                            <i class="bi bi-play-circle"></i>
+                            <span>Watch dashboard</span>
+                        </a>
                     </div>
-                    <ul class="trust-notes" aria-label="ملاحظات الثقة">
-                        <li>بدون تعقيد</li>
-                        <li>مناسب للمنشآت السعودية</li>
-                        <li>جاهز للتوسع</li>
+                    <ul class="hero-trust">
+                        <li><i class="bi bi-check2-circle"></i><span>No credit card</span></li>
+                        <li><i class="bi bi-check2-circle"></i><span>14-day trial</span></li>
+                        <li><i class="bi bi-check2-circle"></i><span>Arabic + English</span></li>
                     </ul>
                 </div>
 
-                <div class="hero-visual" aria-label="تصور للوحة تحكم وازن">
-                    <div class="mock-dashboard">
-                        <aside class="mock-sidebar">
-                            <div class="mock-logo">وازن</div>
-                            <span class="mock-nav active"></span>
-                            <span class="mock-nav"></span>
-                            <span class="mock-nav"></span>
-                            <span class="mock-nav short"></span>
-                        </aside>
-                        <div class="mock-main">
-                            <div class="mock-topline">
-                                <div>
-                                    <strong>لوحة الشركة</strong>
-                                    <span>ملخص اليوم</span>
-                                </div>
-                                <span class="mock-chip">نشط</span>
+                <!-- 3D scene -->
+                <div class="hero-visual" aria-label="Bestgen ERP dashboard preview">
+                    <div class="scene" id="hero-scene">
+                        <div class="device">
+                            <div class="device-bar">
+                                <span></span><span></span><span></span>
+                                <em class="device-url">app.bestgen.com / dashboard</em>
                             </div>
-                            <div class="mock-kpis">
-                                <div class="mock-kpi">
-                                    <span>المبيعات</span>
-                                    <strong>48,250</strong>
+                            <div class="device-body">
+                                <div class="device-side">
+                                    <span class="device-logo">B</span>
+                                    <div class="device-nav active"><i class="bi bi-grid-1x2-fill"></i><span></span></div>
+                                    <div class="device-nav"><i class="bi bi-cart"></i><span></span></div>
+                                    <div class="device-nav"><i class="bi bi-truck"></i><span></span></div>
+                                    <div class="device-nav"><i class="bi bi-boxes"></i><span></span></div>
+                                    <div class="device-nav"><i class="bi bi-journal-text"></i><span></span></div>
+                                    <div class="device-nav"><i class="bi bi-people-fill"></i><span></span></div>
                                 </div>
-                                <div class="mock-kpi">
-                                    <span>المخزون</span>
-                                    <strong>1,284</strong>
-                                </div>
-                                <div class="mock-kpi">
-                                    <span>التحصيل</span>
-                                    <strong>92%</strong>
-                                </div>
-                            </div>
-                            <div class="mock-body">
-                                <div class="mock-chart">
-                                    <div class="chart-bars">
-                                        <span style="height: 38%"></span>
-                                        <span style="height: 58%"></span>
-                                        <span style="height: 46%"></span>
-                                        <span style="height: 72%"></span>
-                                        <span style="height: 64%"></span>
-                                        <span style="height: 86%"></span>
+                                <div class="device-stage">
+                                    <div class="device-row">
+                                        <div class="kpi kpi-emerald">
+                                            <span>Total Sales</span>
+                                            <strong>$128,450</strong>
+                                            <em><i class="bi bi-arrow-up"></i> 12.4%</em>
+                                        </div>
+                                        <div class="kpi kpi-blue">
+                                            <span>Net Profit</span>
+                                            <strong>$31,940</strong>
+                                            <em><i class="bi bi-arrow-up"></i> 5.1%</em>
+                                        </div>
+                                        <div class="kpi kpi-amber">
+                                            <span>Overdue</span>
+                                            <strong>4</strong>
+                                            <em><i class="bi bi-arrow-down"></i> 2</em>
+                                        </div>
+                                    </div>
+                                    <div class="device-chart">
+                                        <canvas id="hero-chart" height="160"></canvas>
+                                    </div>
+                                    <div class="device-rows">
+                                        <div class="device-row-item">
+                                            <span class="dot dot-emerald"></span>
+                                            <span class="lbl">INV-1042 · Acme Co.</span>
+                                            <em class="status status-paid">Paid</em>
+                                            <strong>$4,820</strong>
+                                        </div>
+                                        <div class="device-row-item">
+                                            <span class="dot dot-blue"></span>
+                                            <span class="lbl">INV-1041 · Beta LLC</span>
+                                            <em class="status status-issued">Issued</em>
+                                            <strong>$2,310</strong>
+                                        </div>
+                                        <div class="device-row-item">
+                                            <span class="dot dot-amber"></span>
+                                            <span class="lbl">INV-1040 · Gamma Co.</span>
+                                            <em class="status status-due">Due</em>
+                                            <strong>$6,470</strong>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mock-alert">
-                                    <strong>تنبيه</strong>
-                                    <p>فاتورتان متأخرتان ومنتج واحد وصل حد إعادة الطلب.</p>
-                                </div>
                             </div>
-                            <div class="mock-table">
-                                <div><span>INV-1042</span><strong>مدفوعة</strong></div>
-                                <div><span>INV-1041</span><strong>جزئية</strong></div>
-                                <div><span>INV-1040</span><strong>مستحقة</strong></div>
+                        </div>
+
+                        <!-- Floating cards -->
+                        <div class="float-card float-card-1">
+                            <div class="float-card-head">
+                                <i class="bi bi-percent"></i>
+                                <span>VAT Return</span>
+                            </div>
+                            <strong>15%</strong>
+                            <em>auto-calculated</em>
+                            <div class="float-spark">
+                                <svg viewBox="0 0 60 20" preserveAspectRatio="none">
+                                    <polyline points="0,16 10,12 20,14 30,8 40,10 50,4 60,6" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="float-card float-card-2">
+                            <div class="float-card-head">
+                                <i class="bi bi-bell-fill"></i>
+                                <span>Stock Alert</span>
+                            </div>
+                            <strong>3 items</strong>
+                            <em>at reorder threshold</em>
+                            <div class="float-bars">
+                                <span style="height: 30%"></span>
+                                <span style="height: 55%"></span>
+                                <span style="height: 78%"></span>
+                                <span style="height: 42%"></span>
+                                <span style="height: 65%"></span>
+                            </div>
+                        </div>
+                        <div class="float-donut" aria-hidden="true">
+                            <canvas id="hero-donut" width="160" height="160"></canvas>
+                            <div class="float-donut-label">
+                                <small>Mix</small>
+                                <strong>Revenue</strong>
                             </div>
                         </div>
                     </div>
@@ -249,154 +305,182 @@
             </div>
         </section>
 
-        <section class="value-strip" aria-label="مجالات القيمة">
-            <div class="landing-container value-grid">
-                @foreach (var item in trustItems)
-                {
-                    <div class="value-item">
-                        <span class="value-icon" aria-hidden="true"></span>
-                        <strong>@item</strong>
-                    </div>
-                }
+        <!-- ============================================================ -->
+        <!-- Logo strip                                                    -->
+        <!-- ============================================================ -->
+        <section class="logo-strip">
+            <div class="container-x logo-strip-inner">
+                <span class="logo-strip-label">Crafted for modern teams across the region</span>
+                <div class="logo-strip-marks">
+                    <span class="logo-mark"><i class="bi bi-shop"></i> Trading Co.</span>
+                    <span class="logo-mark"><i class="bi bi-buildings"></i> AlBina Group</span>
+                    <span class="logo-mark"><i class="bi bi-graph-up"></i> Nova Capital</span>
+                    <span class="logo-mark"><i class="bi bi-cup-hot"></i> Brewline</span>
+                    <span class="logo-mark"><i class="bi bi-gem"></i> Atelier MX</span>
+                    <span class="logo-mark"><i class="bi bi-tools"></i> Helm Works</span>
+                </div>
             </div>
         </section>
 
-        <section class="landing-section" id="problems">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">المشكلة</span>
-                    <h2>المحاسبة لا يجب أن تكون مشتتة</h2>
+        <!-- ============================================================ -->
+        <!-- Stats                                                         -->
+        <!-- ============================================================ -->
+        <section class="stats-strip">
+            <div class="container-x stats-grid">
+                <div class="stat">
+                    <strong data-count="9" data-suffix="">0</strong>
+                    <span>Core modules</span>
                 </div>
-                <div class="three-grid">
-                    @foreach (var card in problemCards)
+                <div class="stat">
+                    <strong data-count="60" data-suffix="+">0</strong>
+                    <span>Pre-built screens</span>
+                </div>
+                <div class="stat">
+                    <strong data-count="15" data-suffix="+">0</strong>
+                    <span>Financial reports</span>
+                </div>
+                <div class="stat">
+                    <strong data-count="100" data-suffix="%">0</strong>
+                    <span>Bilingual coverage</span>
+                </div>
+                <div class="stat">
+                    <strong>.NET 8</strong>
+                    <span>Modern stack</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3 Pillars                                                     -->
+        <!-- ============================================================ -->
+        <section class="pillars" id="features">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-diamond-half"></i> Why Bestgen</span>
+                    <h2>One system that replaces five</h2>
+                    <p>Sales, purchasing, inventory, accounting, and reports — all linked in a single workflow you'll actually enjoy using.</p>
+                </div>
+                <div class="pillars-grid">
+                    @foreach (var p in pillars)
                     {
-                        <article class="landing-card">
-                            <span class="card-index"></span>
-                            <h3>@card.Title</h3>
-                            <p>@card.Description</p>
+                        <article class="pillar-card pillar-@p.Tone glow-card">
+                            <div class="pillar-icon">
+                                <i class="bi @p.Icon"></i>
+                            </div>
+                            <h3>@p.Title</h3>
+                            <p>@p.Body</p>
+                            <a href="#modules" class="pillar-link">Learn more <i class="bi bi-arrow-right"></i></a>
                         </article>
                     }
                 </div>
             </div>
         </section>
 
-        <section class="landing-section section-muted" id="solutions">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">الحل</span>
-                    <h2>وازن يجمع التشغيل المالي في نظام واحد</h2>
+        <!-- ============================================================ -->
+        <!-- Live Preview                                                  -->
+        <!-- ============================================================ -->
+        <section class="preview" id="preview">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-broadcast"></i> Live Preview</span>
+                    <h2>Your real numbers, rendered beautifully</h2>
+                    <p>Everything you need to read your company's pulse in a single glance — KPIs, charts, alerts, and the latest activity.</p>
                 </div>
-                <div class="feature-grid feature-grid-six">
-                    @foreach (var card in solutionCards)
-                    {
-                        <article class="landing-card feature-card">
-                            <span class="feature-icon" aria-hidden="true"></span>
-                            <h3>@card.Title</h3>
-                            <p>@card.Description</p>
-                        </article>
-                    }
-                </div>
-            </div>
-        </section>
 
-        <section class="landing-section" id="features">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">المميزات</span>
-                    <h2>كل ما تحتاجه لإدارة حساباتك اليومية</h2>
-                </div>
-                <div class="compact-grid">
-                    @foreach (var feature in featureItems)
-                    {
-                        <div class="compact-card">
-                            <span aria-hidden="true"></span>
-                            <strong>@feature</strong>
-                        </div>
-                    }
-                </div>
-            </div>
-        </section>
-
-        <section class="landing-section section-muted">
-            <div class="landing-container compliance-layout">
-                <div class="section-heading align-start">
-                    <span class="eyebrow">السعودية</span>
-                    <h2>مصمم لبيئة الأعمال في السعودية</h2>
-                    <p class="section-lead">جاهز للتطوير نحو متطلبات الفوترة الإلكترونية والربط المستقبلي</p>
-                </div>
-                <div class="two-grid">
-                    @foreach (var card in complianceCards)
-                    {
-                        <article class="landing-card">
-                            <h3>@card.Title</h3>
-                            <p>@card.Description</p>
-                        </article>
-                    }
-                </div>
-            </div>
-        </section>
-
-        <section class="landing-section" id="reports">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">لوحة التحكم</span>
-                    <h2>لوحة تحكم تعطيك صورة واضحة عن شركتك</h2>
-                </div>
-                <div class="dashboard-preview-layout">
-                    <div class="dashboard-preview">
-                        <div class="preview-head">
+                <div class="preview-grid">
+                    <div class="preview-main glass-card">
+                        <header class="preview-head">
                             <div>
-                                <strong>مؤشرات الأداء</strong>
-                                <span>آخر 30 يوم</span>
+                                <h3>Sales vs. Purchases</h3>
+                                <small>Trailing 12 months · USD</small>
                             </div>
-                            <span>تحديث تلقائي</span>
+                            <div class="legend">
+                                <span><i class="dot dot-emerald"></i>Sales</span>
+                                <span><i class="dot dot-indigo"></i>Purchases</span>
+                            </div>
+                        </header>
+                        <div class="preview-chart-wrap">
+                            <canvas id="trend-chart" height="280"></canvas>
                         </div>
-                        <div class="preview-metrics">
-                            @foreach (var metric in dashboardMetrics)
-                            {
-                                <div class="preview-metric">
-                                    <span>@metric.Label</span>
-                                    <strong>@metric.Value</strong>
+                        <footer class="preview-foot">
+                            <div class="foot-stat">
+                                <small>Avg. monthly sales</small>
+                                <strong>$96.4K</strong>
+                            </div>
+                            <div class="foot-stat">
+                                <small>Margin trend</small>
+                                <strong class="positive"><i class="bi bi-arrow-up-right"></i> 8.2%</strong>
+                            </div>
+                            <div class="foot-stat">
+                                <small>Top month</small>
+                                <strong>December · $138K</strong>
+                            </div>
+                        </footer>
+                    </div>
+
+                    <div class="preview-side">
+                        <div class="glass-card preview-donut glow-card">
+                            <header class="preview-head">
+                                <div>
+                                    <h4>Revenue Mix</h4>
+                                    <small>By product category</small>
                                 </div>
-                            }
+                            </header>
+                            <div class="donut-stack">
+                                <canvas id="donut-chart" width="220" height="220"></canvas>
+                                <div class="donut-center">
+                                    <small>Total</small>
+                                    <strong>$128.4K</strong>
+                                </div>
+                            </div>
+                            <ul class="donut-legend">
+                                <li><i class="dot dot-emerald"></i><span>Electronics</span><strong>42%</strong></li>
+                                <li><i class="dot dot-indigo"></i><span>Tools</span><strong>28%</strong></li>
+                                <li><i class="dot dot-amber"></i><span>Stationery</span><strong>18%</strong></li>
+                                <li><i class="dot dot-navy"></i><span>Other</span><strong>12%</strong></li>
+                            </ul>
                         </div>
-                        <div class="preview-chart-row">
-                            <div class="wide-chart">
-                                <span class="line one"></span>
-                                <span class="line two"></span>
-                                <span class="line three"></span>
-                            </div>
-                            <div class="preview-list">
-                                <div><span>تحصيلات اليوم</span><strong>6,800 ر.س</strong></div>
-                                <div><span>مدفوعات الموردين</span><strong>4,250 ر.س</strong></div>
-                                <div><span>طلبات شراء مفتوحة</span><strong>7</strong></div>
-                            </div>
+
+                        <div class="glass-card preview-bars glow-card">
+                            <header class="preview-head">
+                                <div>
+                                    <h4>Receivables Aging</h4>
+                                    <small>Outstanding balances</small>
+                                </div>
+                            </header>
+                            <canvas id="aging-chart" height="180"></canvas>
                         </div>
                     </div>
-                    <aside class="insight-card">
-                        <span class="insight-label">تنبيه ذكي</span>
-                        <h3>يوجد 4 فواتير متأخرة و3 منتجات وصلت إلى حد إعادة الطلب.</h3>
-                        <p>تساعدك التنبيهات المختصرة على متابعة التحصيل والمخزون قبل أن تتحول التفاصيل اليومية إلى ضغط تشغيلي.</p>
-                    </aside>
                 </div>
             </div>
         </section>
 
-        <section class="landing-section section-muted">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">الوحدات</span>
-                    <h2>نظام متكامل قابل للتوسع</h2>
+        <!-- ============================================================ -->
+        <!-- Modules                                                       -->
+        <!-- ============================================================ -->
+        <section class="modules" id="modules">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-grid-3x3-gap-fill"></i> Nine modules · One experience</span>
+                    <h2>Everything your business needs</h2>
+                    <p>From the moment you make a sale to the moment you close the books, Bestgen walks beside you.</p>
                 </div>
                 <div class="modules-grid">
-                    @foreach (var module in moduleGroups)
+                    @foreach (var m in modules)
                     {
-                        <article class="module-card">
-                            <h3>@module.Title</h3>
-                            <ul>
-                                @foreach (var item in module.Items)
+                        <article class="module-card module-@m.Tone glow-card">
+                            <div class="module-top">
+                                <div class="module-icon">
+                                    <i class="bi @m.Icon"></i>
+                                </div>
+                                <span class="module-badge"><i class="bi bi-arrow-up-right"></i></span>
+                            </div>
+                            <h3>@m.Title</h3>
+                            <p>@m.Sub</p>
+                            <ul class="module-list">
+                                @foreach (var item in m.Items)
                                 {
-                                    <li>@item</li>
+                                    <li><i class="bi bi-check2"></i><span>@item</span></li>
                                 }
                             </ul>
                         </article>
@@ -405,133 +489,293 @@
             </div>
         </section>
 
-        <section class="landing-section">
-            <div class="landing-container why-layout">
-                <div class="section-heading align-start">
-                    <span class="eyebrow">الاختيار</span>
-                    <h2>لماذا وازن؟</h2>
+        <!-- ============================================================ -->
+        <!-- Integrations / Feature mosaic                                 -->
+        <!-- ============================================================ -->
+        <section class="integrations">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-plug-fill"></i> Built right in</span>
+                    <h2>Everything you'd expect, plus a little more</h2>
+                    <p>You don't need plugins, marketplaces, or upsells. The features that matter ship with the product.</p>
                 </div>
-                <div class="why-list">
-                    @foreach (var reason in reasons)
+                <div class="integrations-grid">
+                    @foreach (var i in integrations)
                     {
-                        <div class="why-item">
-                            <span aria-hidden="true"></span>
-                            <strong>@reason</strong>
-                        </div>
+                        <article class="integration-card">
+                            <i class="bi @i.Icon"></i>
+                            <strong>@i.Title</strong>
+                            <p>@i.Body</p>
+                        </article>
                     }
                 </div>
             </div>
         </section>
 
-        <section class="landing-section section-muted" id="pricing">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">الأسعار</span>
-                    <h2>باقات بسيطة تبدأ معك وتتوسع مع نشاطك</h2>
+        <!-- ============================================================ -->
+        <!-- Reports gallery                                               -->
+        <!-- ============================================================ -->
+        <section class="reports" id="reports">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-bar-chart-line"></i> Reports Center</span>
+                    <h2>Professional financial reports</h2>
+                    <p>Reports that satisfy both the business owner and the accountant — ready at a single click.</p>
+                </div>
+                <div class="reports-grid">
+                    @foreach (var r in reports)
+                    {
+                        <a class="report-card" href="#preview">
+                            <i class="bi @r.Icon"></i>
+                            <span>@r.Title</span>
+                            <em><i class="bi bi-arrow-up-right"></i></em>
+                        </a>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Why Bestgen                                                   -->
+        <!-- ============================================================ -->
+        <section class="why">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-stars"></i> Why teams pick Bestgen</span>
+                    <h2>Built for modern businesses, with global standards</h2>
+                </div>
+                <div class="why-grid">
+                    @foreach (var p in pillars2)
+                    {
+                        <article class="why-card glow-card">
+                            <div class="why-icon"><i class="bi @p.Icon"></i></div>
+                            <h3>@p.Title</h3>
+                            <p>@p.Body</p>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- Pricing                                                       -->
+        <!-- ============================================================ -->
+        <section class="pricing" id="pricing">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-tag-fill"></i> Pricing</span>
+                    <h2>Transparent plans that grow with you</h2>
+                    <p>Start small, move up whenever you need to — without painful data migrations.</p>
+                    <div class="billing-toggle" role="tablist" aria-label="Billing period">
+                        <button class="bt-option active" data-billing="month">Monthly</button>
+                        <button class="bt-option" data-billing="year">
+                            Yearly
+                            <span class="bt-save">save 20%</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="pricing-grid">
-                    @foreach (var plan in pricingPlans)
+                    @foreach (var plan in pricing)
                     {
-                        <article class="pricing-card @(plan.Highlight ? "featured" : "")">
-                            <div class="pricing-head">
-                                <h3>@plan.Name</h3>
-                                @if (plan.Highlight)
-                                {
-                                    <span>الأكثر توازنا</span>
-                                }
+                        <article class="plan @(plan.Highlight ? "plan-featured" : "")">
+                            @if (plan.Highlight)
+                            {
+                                <div class="plan-ribbon"><i class="bi bi-stars"></i> Most popular</div>
+                            }
+                            <h3>@plan.Name</h3>
+                            <p class="plan-for">@plan.For</p>
+                            <div class="plan-price">
+                                <span class="currency">$</span>
+                                <strong class="price-num"
+                                        data-price-month="@plan.PriceMonth"
+                                        data-price-year="@plan.PriceYear">@plan.PriceMonth</strong>
+                                <span class="period">/month</span>
                             </div>
-                            <strong class="price">@plan.Price</strong>
-                            <p>@plan.ForText</p>
-                            <ul>
-                                @foreach (var feature in plan.Features)
+                            <p class="plan-billed">Billed <span class="bill-period">monthly</span> · cancel anytime</p>
+                            <ul class="plan-features">
+                                @foreach (var f in plan.Features)
                                 {
-                                    <li>@feature</li>
+                                    <li><i class="bi bi-check2-circle"></i><span>@f</span></li>
                                 }
                             </ul>
-                            <a class="btn @(plan.Highlight ? "btn-primary" : "btn-secondary")" href="/Identity/Account/Register">ابدأ التجربة</a>
+                            <a class="btn @(plan.Highlight ? "btn-primary" : "btn-outline") btn-block" href="/Identity/Account/Register">
+                                <span>Choose @plan.Name</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
                         </article>
                     }
                 </div>
-                <p class="pricing-note">الأسعار تجريبية ويمكن تعديلها حسب مرحلة الإطلاق.</p>
+                <p class="pricing-note">
+                    <i class="bi bi-shield-check"></i>
+                    All plans include automatic updates, daily backups, and bilingual support.
+                </p>
             </div>
         </section>
 
-        <section class="landing-section">
-            <div class="landing-container">
-                <div class="section-heading">
-                    <span class="eyebrow">طريقة العمل</span>
-                    <h2>مصمم ليكون قريبًا من طريقة عملك اليومية</h2>
+        <!-- ============================================================ -->
+        <!-- Testimonials                                                  -->
+        <!-- ============================================================ -->
+        <section class="testimonials">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-chat-quote-fill"></i> Customer voices</span>
+                    <h2>What teams say about Bestgen</h2>
                 </div>
-                <div class="three-grid">
-                    @foreach (var testimonial in testimonials)
-                    {
-                        <article class="testimonial-card">
-                            <p>“@testimonial.Text”</p>
-                            <strong>@testimonial.Role</strong>
-                        </article>
-                    }
+                <div class="testimonials-grid">
+                    <article class="testimonial">
+                        <div class="t-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p>"I need to see sales, inventory, and collections on one screen before any purchase decision. Bestgen does exactly that — and the dashboard is genuinely beautiful to look at."</p>
+                        <footer>
+                            <div class="avatar avatar-emerald">A</div>
+                            <div>
+                                <strong>Ahmed A.</strong>
+                                <small>Owner · Trading Co.</small>
+                            </div>
+                        </footer>
+                    </article>
+                    <article class="testimonial featured">
+                        <div class="t-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p>"What matters most to me is invoices, journal entries, and reports being connected — without manual re-entry. Bestgen saved me hours every week, and our month-end is finally smooth."</p>
+                        <footer>
+                            <div class="avatar avatar-indigo">N</div>
+                            <div>
+                                <strong>Nouf Q.</strong>
+                                <small>Senior Accountant · Mid-size company</small>
+                            </div>
+                        </footer>
+                    </article>
+                    <article class="testimonial">
+                        <div class="t-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p>"Stock alerts and overdue-invoice nudges push the team to act before issues compound. Practical, no-nonsense, and clearly designed by people who've actually run a business."</p>
+                        <footer>
+                            <div class="avatar avatar-amber">M</div>
+                            <div>
+                                <strong>Mohammed Z.</strong>
+                                <small>Operations Manager</small>
+                            </div>
+                        </footer>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <section class="landing-section section-muted" id="faq">
-            <div class="landing-container faq-layout">
-                <div class="section-heading align-start">
-                    <span class="eyebrow">الأسئلة الشائعة</span>
-                    <h2>إجابات مختصرة قبل أن تبدأ</h2>
+        <!-- ============================================================ -->
+        <!-- FAQ                                                           -->
+        <!-- ============================================================ -->
+        <section class="faq" id="faq">
+            <div class="container-x">
+                <div class="section-head">
+                    <span class="section-eyebrow"><i class="bi bi-patch-question-fill"></i> Frequently asked</span>
+                    <h2>Answers to what's on your mind</h2>
                 </div>
                 <div class="faq-list">
-                    @foreach (var faq in faqs)
+                    @foreach (var f in faqs)
                     {
                         <details class="faq-item">
-                            <summary>@faq.Question</summary>
-                            <p>@faq.Answer</p>
+                            <summary>
+                                <span>@f.Q</span>
+                                <i class="bi bi-plus-lg"></i>
+                            </summary>
+                            <div class="faq-body">@f.A</div>
                         </details>
                     }
                 </div>
             </div>
         </section>
 
-        <section class="final-cta">
-            <div class="landing-container final-cta-inner">
-                <h2>ابدأ بتنظيم حساباتك اليوم</h2>
-                <p>جرّب وازن كنسخة مبكرة، وابدأ ببناء نظام مالي أوضح لشركتك.</p>
-                <div class="hero-actions center-actions">
-                    <a class="btn btn-primary btn-large" href="/Identity/Account/Register">ابدأ التجربة</a>
-                    <a class="btn btn-secondary btn-large" href="#contact">تواصل معنا</a>
+        <!-- ============================================================ -->
+        <!-- Final CTA                                                     -->
+        <!-- ============================================================ -->
+        <section class="cta">
+            <div class="container-x cta-inner">
+                <div class="cta-glow" aria-hidden="true"></div>
+                <div class="cta-grid">
+                    <span class="cta-grid-svg" aria-hidden="true">
+                        <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                            <defs>
+                                <pattern id="cta-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+                                    <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.06)"></circle>
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#cta-dots)"></rect>
+                        </svg>
+                    </span>
+                </div>
+                <h2>Ready to upgrade your accounting?</h2>
+                <p>Start your trial today — no credit card required, no commitment, no migration headaches.</p>
+                <div class="cta-actions">
+                    <a class="btn btn-primary btn-lg btn-shimmer" href="/Identity/Account/Register">
+                        <span>Create free account</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a class="btn btn-ghost-light btn-lg" href="/Identity/Account/Login">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>I have an account</span>
+                    </a>
                 </div>
             </div>
         </section>
+
+        <!-- ============================================================ -->
+        <!-- Footer                                                        -->
+        <!-- ============================================================ -->
+        <footer class="site-footer">
+            <div class="container-x footer-grid">
+                <div class="footer-brand">
+                    <a class="brand" href="#top">
+                        <img src="/img/logo.png" alt="Bestgen ERP" class="brand-logo">
+                    </a>
+                    <p>The all-in-one cloud ERP platform for modern businesses — accounting, inventory, and operations in one place.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="bi bi-github"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h5>Product</h5>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#modules">Modules</a></li>
+                        <li><a href="#reports">Reports</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="/Identity/Account/Register">Get started</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Company</h5>
+                    <ul>
+                        <li><a href="#">About Bestgen</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Customers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Legal</h5>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Service Agreement</a></li>
+                        <li><a href="#">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="container-x footer-bottom">
+                <span>© @DateTime.Now.Year Bestgen ERP. All rights reserved.</span>
+                <span class="footer-mini">Made with attention to detail · Built on .NET 8</span>
+            </div>
+        </footer>
     </main>
 
-    <footer class="site-footer" id="contact">
-        <div class="landing-container footer-grid">
-            <div>
-                <h2>وازن</h2>
-                <p>برنامج محاسبي سحابي للمنشآت الصغيرة والمتوسطة</p>
-            </div>
-            <div>
-                <h3>المنتج</h3>
-                <a href="#features">المميزات</a>
-                <a href="#reports">التقارير</a>
-                <a href="#pricing">الأسعار</a>
-                <a href="/Identity/Account/Login">تسجيل الدخول</a>
-            </div>
-            <div>
-                <h3>الموارد</h3>
-                <a href="#faq">الأسئلة الشائعة</a>
-                <span>الدعم</span>
-                <span>التوثيق لاحقًا</span>
-            </div>
-            <div>
-                <h3>تواصل</h3>
-                <span>البريد الإلكتروني placeholder</span>
-                <span>واتساب placeholder</span>
-            </div>
-        </div>
-        <div class="landing-container footer-bottom">
-            <span>© 2026 وازن. جميع الحقوق محفوظة.</span>
-        </div>
-    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="~/js/landing.js" asp-append-version="true"></script>
 </body>
 </html>

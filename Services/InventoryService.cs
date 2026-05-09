@@ -4,45 +4,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace bestgen.Services;
 
+/// <summary>
+/// High-level inventory operations used by the orchestration services. The actual
+/// stock-level mutation + audit-trail writing lives in <see cref="StockMovementService"/>;
+/// this layer just exposes invoice-shaped helpers and inventory queries.
+/// </summary>
 public class InventoryService
 {
     private readonly ApplicationDbContext _context;
+    private readonly StockMovementService _movements;
 
-    public InventoryService(ApplicationDbContext context)
+    public InventoryService(ApplicationDbContext context, StockMovementService movements)
     {
         _context = context;
+        _movements = movements;
     }
 
-    public async Task ReduceStockAsync(IEnumerable<SalesInvoiceItem> items)
-    {
-        foreach (var item in items)
-        {
-            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
-            if (product is null || !product.TrackInventory)
-            {
-                continue;
-            }
+    public Task ReduceStockAsync(SalesInvoice invoice) =>
+        _movements.RecordSalesIssueAsync(invoice);
 
-            product.CurrentStock -= item.Quantity;
-            product.UpdatedAt = DateTime.UtcNow;
-        }
-    }
-
-    public async Task IncreaseStockAsync(IEnumerable<PurchaseInvoiceItem> items)
-    {
-        foreach (var item in items)
-        {
-            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
-            if (product is null || !product.TrackInventory)
-            {
-                continue;
-            }
-
-            product.CurrentStock += item.Quantity;
-            product.PurchasePrice = item.UnitCost;
-            product.UpdatedAt = DateTime.UtcNow;
-        }
-    }
+    public Task IncreaseStockAsync(PurchaseInvoice invoice) =>
+        _movements.RecordPurchaseReceiptAsync(invoice);
 
     public async Task<List<Product>> GetLowStockProductsAsync(int take = 10)
     {

@@ -1,16 +1,23 @@
+@using System.Globalization
 @model IReadOnlyList<PurchaseInvoice>
 @{
-    ViewData["Title"] = "فواتير الشراء";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Purchase Invoices", "فواتير الشراء");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("فواتير الشراء", "تسجيل مشتريات الموردين وتحديث المخزون والذمم.", "Create", "PurchaseInvoices", "فاتورة شراء جديدة"))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Purchase Invoices", "فواتير الشراء"),
+    T("Record supplier purchases and update inventory and payables.", "تسجيل مشتريات الموردين وتحديث المخزون والذمم."),
+    "Create", "PurchaseInvoices", T("New purchase invoice", "فاتورة شراء جديدة")))" />
 
 <section class="data-panel">
     <partial name="_SearchBar" />
 
     @if (!Model.Any())
     {
-        <partial name="_EmptyState" model="@("لا توجد فواتير شراء مطابقة للفلاتر الحالية.")" />
+        <partial name="_EmptyState" model="@(T("No purchase invoices match the current filters.", "لا توجد فواتير شراء مطابقة للفلاتر الحالية."))" />
     }
     else
     {
@@ -18,14 +25,14 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>رقم الفاتورة</th>
-                        <th>مرجع المورد</th>
-                        <th>التاريخ</th>
-                        <th>المورد</th>
-                        <th>الإجمالي</th>
-                        <th>المتبقي</th>
-                        <th>الحالة</th>
-                        <th>الإجراءات</th>
+                        <th>@T("Invoice No.", "رقم الفاتورة")</th>
+                        <th>@T("Supplier ref.", "مرجع المورد")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th>@T("Supplier", "المورد")</th>
+                        <th>@T("Total", "الإجمالي")</th>
+                        <th>@T("Outstanding", "المتبقي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th>@T("Actions", "الإجراءات")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,7 +42,7 @@
                             <td>@invoice.PurchaseInvoiceNumber</td>
                             <td>@(invoice.SupplierInvoiceReference ?? "-")</td>
                             <td>@invoice.InvoiceDate.ToString("yyyy/MM/dd")</td>
-                            <td>@invoice.Supplier?.NameAr</td>
+                            <td>@(invoice.Supplier == null ? "-" : pickName(invoice.Supplier.NameAr, invoice.Supplier.NameEn))</td>
                             <td>@EntityDisplayHelper.FormatValue(invoice.GrandTotal, nameof(invoice.GrandTotal))</td>
                             <td>@EntityDisplayHelper.FormatValue(invoice.RemainingAmount, nameof(invoice.RemainingAmount))</td>
                             <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(invoice.Status))" /></td>
@@ -45,6 +52,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="text-muted small">ترقيم الصفحات placeholder للنسخة القادمة.</div>
+        <div class="text-muted small">@T($"Total invoices: {Model.Count}", $"إجمالي الفواتير: {Model.Count}")</div>
     }
 </section>

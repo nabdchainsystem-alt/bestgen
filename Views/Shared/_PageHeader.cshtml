@@ -1,4 +1,9 @@
+@using System.Globalization
 @model PageHeaderViewModel
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+}
 
 <div class="page-header">
     <div>
@@ -9,7 +14,7 @@
     {
         <a class="btn btn-primary" asp-controller="@Model.CreateController" asp-action="@Model.CreateAction">
             <i class="bi bi-plus-lg"></i>
-            <span>@(Model.CreateText ?? "إضافة جديد")</span>
+            <span>@(Model.CreateText ?? T("Add new", "إضافة جديد"))</span>
         </a>
     }
 </div>

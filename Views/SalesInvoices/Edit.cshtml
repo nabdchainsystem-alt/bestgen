@@ -1,16 +1,21 @@
+@using System.Globalization
 @model SalesInvoiceFormViewModel
 @{
-    ViewData["Title"] = "تعديل فاتورة بيع";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Edit Sales Invoice", "تعديل فاتورة بيع");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("تعديل فاتورة بيع", "راجع البيانات والأصناف ثم احفظ التغييرات."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Edit Sales Invoice", "تعديل فاتورة بيع"),
+    T("Review the data and items, then save your changes.", "راجع البيانات والأصناف ثم احفظ التغييرات.")))" />
 
 <section class="form-panel">
     <form asp-action="Edit" asp-route-id="@Model.Id" method="post" data-invoice-form data-mode="sales">
         <partial name="_Form" model="@Model" />
         <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> حفظ التغييرات</button>
-            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">إلغاء</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save changes", "حفظ التغييرات")</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
         </div>
     </form>
 </section>

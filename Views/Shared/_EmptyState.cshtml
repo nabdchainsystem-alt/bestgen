@@ -1,6 +1,11 @@
+@using System.Globalization
 @model string
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+}
 <div class="empty-state">
     <i class="bi bi-inbox"></i>
-    <h3>لا توجد بيانات</h3>
+    <h3>@T("No data yet", "لا توجد بيانات")</h3>
     <p>@Model</p>
 </div>

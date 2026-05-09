@@ -23,25 +23,85 @@
 
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var nextCulture = isArabic ? "en-US" : "ar-SA";
-    var nextCultureLabel = isArabic ? "English" : "العربية";
+    var nextCultureLabel = isArabic ? "EN" : "AR";
 
-    string SectionLabel()
+    (string Section, string Page) Crumbs()
     {
         var c = currentController.ToLowerInvariant();
-        if (c == "dashboard" || string.IsNullOrEmpty(c)) return T("Dashboard", "لوحة التحكم");
-        if (new[] { "customers", "salesquotations", "salesinvoices", "salesreceipts", "salesrefundreceipts", "creditnotes", "deliverynotes", "salespricepolicies" }.Contains(c)) return T("Sales", "المبيعات");
-        if (new[] { "suppliers", "purchaseorders", "purchaseinvoices", "supplierpayments", "purchaserefundreceipts", "debitnotes", "goodsreceipts", "purchasepricepolicies" }.Contains(c)) return T("Purchases", "المشتريات");
-        if (new[] { "productcategories", "products", "warehouses", "inventorycounts", "stocktransfers" }.Contains(c)) return T("Inventory", "المنتجات والمخزون");
-        if (new[] { "fixedassets", "assettags", "assetrentals" }.Contains(c)) return T("Fixed Assets", "الأصول الثابتة");
-        if (new[] { "accounts", "journalentries", "generalreceipts", "openingbalances", "reportingdimensions", "cashboxes", "bankaccounts", "expenses" }.Contains(c)) return T("Accounting", "المحاسبة");
-        if (new[] { "employees", "employeedocuments", "payrollentries", "employeedeductions", "employeebonuses", "employeeloans", "employeereceipts", "employeerequests" }.Contains(c)) return T("HR", "الموارد البشرية");
-        if (c == "reports") return T("Reports", "التقارير");
-        if (c == "settings") return T("Settings", "الإعدادات");
-        return T("Workspace", "العمل");
+        if (c == "dashboard" || string.IsNullOrEmpty(c))
+            return (T("Workspace", "مساحة العمل"), T("Dashboard", "لوحة التحكم"));
+
+        var sales = new[] { "customers", "salesquotations", "salesinvoices", "salesreceipts", "salesrefundreceipts", "creditnotes", "deliverynotes", "salespricepolicies" };
+        var purchases = new[] { "suppliers", "purchaseorders", "purchaseinvoices", "supplierpayments", "purchaserefundreceipts", "debitnotes", "goodsreceipts", "purchasepricepolicies" };
+        var inventory = new[] { "productcategories", "products", "warehouses", "inventorycounts", "stocktransfers" };
+        var assets = new[] { "fixedassets", "assettags", "assetrentals" };
+        var accounting = new[] { "accounts", "journalentries", "generalreceipts", "openingbalances", "reportingdimensions", "cashboxes", "bankaccounts", "expenses" };
+        var hr = new[] { "employees", "employeedocuments", "payrollentries", "employeedeductions", "employeebonuses", "employeeloans", "employeereceipts", "employeerequests" };
+
+        string section;
+        if (sales.Contains(c)) section = T("Sales", "المبيعات");
+        else if (purchases.Contains(c)) section = T("Purchases", "المشتريات");
+        else if (inventory.Contains(c)) section = T("Inventory", "المنتجات والمخزون");
+        else if (assets.Contains(c)) section = T("Fixed Assets", "الأصول الثابتة");
+        else if (accounting.Contains(c)) section = T("Accounting", "المحاسبة");
+        else if (hr.Contains(c)) section = T("Human Resources", "الموارد البشرية");
+        else if (c == "reports") section = T("Reports", "التقارير");
+        else if (c == "settings") section = T("Settings", "الإعدادات");
+        else if (c == "home") section = T("Home", "الرئيسية");
+        else section = T("Workspace", "مساحة العمل");
+
+        var page = c switch
+        {
+            "customers" => T("Customers", "قائمة العملاء"),
+            "salesquotations" => T("Quotations", "عروض الأسعار"),
+            "salesinvoices" => T("Sales Invoices", "فواتير المبيعات"),
+            "salesreceipts" => T("Sales Receipts", "إيصالات المبيعات"),
+            "salesrefundreceipts" => T("Refund Receipts", "إيصالات الاسترداد"),
+            "creditnotes" => T("Credit Notes", "الإشعارات الدائنة"),
+            "deliverynotes" => T("Delivery Notes", "سندات تسليم المبيعات"),
+            "salespricepolicies" => T("Sales Pricing", "سياسات تسعير المبيعات"),
+            "suppliers" => T("Suppliers", "قائمة الموردين"),
+            "purchaseorders" => T("Purchase Orders", "طلبات الشراء"),
+            "purchaseinvoices" => T("Purchase Invoices", "فواتير المشتريات"),
+            "supplierpayments" => T("Supplier Payments", "إيصالات المشتريات"),
+            "purchaserefundreceipts" => T("Purchase Refunds", "إيصالات الاسترداد"),
+            "debitnotes" => T("Debit Notes", "الإشعارات المدينة"),
+            "goodsreceipts" => T("Goods Receipts", "سندات استلام المنتجات"),
+            "purchasepricepolicies" => T("Purchase Pricing", "سياسة تسعير الشراء"),
+            "productcategories" => T("Product Categories", "أصناف المنتجات"),
+            "products" => T("Products", "قائمة المنتجات"),
+            "warehouses" => T("Warehouses", "المخازن"),
+            "inventorycounts" => T("Inventory Counts", "عمليات الجرد"),
+            "stocktransfers" => T("Stock Transfers", "نقل المخزون"),
+            "fixedassets" => T("Assets", "أصول"),
+            "assettags" => T("Asset Tags", "وسوم الأصول"),
+            "assetrentals" => T("Asset Rentals", "تأجيرات الأصول"),
+            "accounts" => T("Chart of Accounts", "شجرة الحسابات"),
+            "journalentries" => T("Journal Entries", "القيود اليدوية"),
+            "generalreceipts" => T("General Receipts", "الإيصالات العامة"),
+            "openingbalances" => T("Opening Balances", "الرصيد الافتتاحي"),
+            "reportingdimensions" => T("Reporting Dimensions", "أبعاد التقارير"),
+            "cashboxes" => T("Cash Boxes", "الصناديق النقدية"),
+            "bankaccounts" => T("Bank Accounts", "الحسابات البنكية"),
+            "expenses" => T("Expenses", "المصروفات"),
+            "employees" => T("Employees", "الموظفين"),
+            "employeedocuments" => T("Employee Documents", "المستندات المرتبطة بالموظفين"),
+            "payrollentries" => T("Payroll", "قيود الرواتب"),
+            "employeedeductions" => T("Deductions", "الخصومات"),
+            "employeebonuses" => T("Bonuses", "المكافآت"),
+            "employeeloans" => T("Loans", "القروض"),
+            "employeereceipts" => T("Receipts", "الإيصالات"),
+            "employeerequests" => T("Requests", "إدارة الطلبات"),
+            "reports" => T("Reports Center", "مركز التقارير"),
+            "settings" => T("Settings", "الإعدادات"),
+            _ => section
+        };
+
+        return (section, page);
     }
 
-    var pageTitle = ViewData["Title"]?.ToString() ?? T("Dashboard", "لوحة التحكم");
-    var sectionLabel = SectionLabel();
+    var (sectionLabel, pageLabel) = Crumbs();
+    var pageTitle = pageLabel;
 
     var loginName = User?.Identity?.Name ?? "";
     var initials = string.IsNullOrWhiteSpace(loginName)
@@ -50,6 +110,58 @@
     var profileRole = User != null && SignInManager.IsSignedIn(User)
         ? T("Account Owner", "مالك الحساب")
         : T("Guest session", "جلسة زائر");
+
+    // Server-side pre-paint of the sidebar state to eliminate flicker on navigation.
+    var sidebarCookie = Context.Request.Cookies["bestgen_sidebar"];
+    var sidebarCollapsed = string.Equals(sidebarCookie, "1", StringComparison.Ordinal);
+    var shellClass = sidebarCollapsed ? "app-shell sidebar-collapsed" : "app-shell";
+
+    // Bootstrap icon for each child controller, rendered inside sub-links so they have
+    // a glyph to show in rail mode.
+    string SubIcon(string c) => c.ToLowerInvariant() switch
+    {
+        "customers" => "bi-person",
+        "salesquotations" => "bi-file-text",
+        "salesinvoices" => "bi-receipt",
+        "salesreceipts" => "bi-cash-coin",
+        "salesrefundreceipts" => "bi-arrow-counterclockwise",
+        "creditnotes" => "bi-journal-arrow-up",
+        "deliverynotes" => "bi-truck",
+        "salespricepolicies" => "bi-tag",
+        "suppliers" => "bi-building",
+        "purchaseorders" => "bi-clipboard-check",
+        "purchaseinvoices" => "bi-receipt-cutoff",
+        "supplierpayments" => "bi-credit-card",
+        "purchaserefundreceipts" => "bi-arrow-clockwise",
+        "debitnotes" => "bi-journal-arrow-down",
+        "goodsreceipts" => "bi-box-arrow-in-down",
+        "purchasepricepolicies" => "bi-tags",
+        "productcategories" => "bi-bookmark",
+        "products" => "bi-box",
+        "warehouses" => "bi-house-gear",
+        "inventorycounts" => "bi-clipboard-data",
+        "stocktransfers" => "bi-arrow-left-right",
+        "fixedassets" => "bi-building",
+        "assettags" => "bi-bookmark-star",
+        "assetrentals" => "bi-clock-history",
+        "accounts" => "bi-list-columns",
+        "journalentries" => "bi-journal-text",
+        "generalreceipts" => "bi-receipt",
+        "openingbalances" => "bi-bank",
+        "reportingdimensions" => "bi-bezier",
+        "cashboxes" => "bi-cash-stack",
+        "bankaccounts" => "bi-bank2",
+        "expenses" => "bi-arrow-down-right-circle",
+        "employees" => "bi-person-badge",
+        "employeedocuments" => "bi-file-earmark",
+        "payrollentries" => "bi-cash",
+        "employeedeductions" => "bi-dash-circle",
+        "employeebonuses" => "bi-plus-circle",
+        "employeeloans" => "bi-piggy-bank",
+        "employeereceipts" => "bi-receipt",
+        "employeerequests" => "bi-envelope",
+        _ => "bi-dot"
+    };
 }
 <!DOCTYPE html>
 <html lang="@lang" dir="@dir" data-culture="@culture">
@@ -64,112 +176,115 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="@bootstrapHref" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="~/img/logo.png" />
+    <link rel="apple-touch-icon" href="~/img/logo.png" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="app-shell">
+    <div class="@shellClass">
         <aside class="app-sidebar" id="appSidebar">
             <div class="brand">
-                <div class="brand-card">
-                    <div class="brand-mark">B</div>
+                <a asp-controller="Dashboard" asp-action="Index" class="brand-card" title="Bestgen ERP">
+                    <div class="brand-mark"><img src="~/img/logo-transparent.png" alt="Bestgen" /></div>
                     <div class="brand-meta">
                         <div class="brand-label">@T("Workspace", "مساحة العمل")</div>
-                        <div class="brand-title">Bestgen</div>
+                        <div class="brand-title">Bestgen ERP</div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <nav class="sidebar-nav">
-                <a asp-controller="Dashboard" asp-action="Index" class="nav-link nav-item @(IsActive("Dashboard") ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Index" class="nav-link nav-item @(IsActive("Dashboard") ? "active" : "")" title="@T("Dashboard", "لوحة التحكم")">
                     <i class="bi bi-grid-1x2"></i><span>@T("Dashboard", "لوحة التحكم")</span>
                 </a>
 
                 @{ var salesActive = new[] { "Customers", "SalesQuotations", "SalesInvoices", "SalesReceipts", "SalesRefundReceipts", "CreditNotes", "DeliveryNotes", "SalesPricePolicies" }; }
                 <details class="@GroupClass(salesActive)" @(IsActive(salesActive) ? "open" : "")>
-                    <summary><i class="bi bi-cart-check"></i><span>@T("Sales", "المبيعات")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Sales", "المبيعات")"><i class="bi bi-cart-check"></i><span>@T("Sales", "المبيعات")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(salesActive)">
-                        <a asp-controller="Customers" asp-action="Index" class="nav-sublink @(IsActive("Customers") ? "active" : "")">@T("Customers", "قائمة العملاء")</a>
-                        <a asp-controller="SalesQuotations" asp-action="Index" class="nav-sublink @(IsActive("SalesQuotations") ? "active" : "")">@T("Quotations", "عروض الأسعار")</a>
-                        <a asp-controller="SalesInvoices" asp-action="Index" class="nav-sublink @(IsActive("SalesInvoices") ? "active" : "")">@T("Sales Invoices", "فواتير المبيعات")</a>
-                        <a asp-controller="SalesReceipts" asp-action="Index" class="nav-sublink @(IsActive("SalesReceipts") ? "active" : "")">@T("Sales Receipts", "إيصالات المبيعات")</a>
-                        <a asp-controller="SalesRefundReceipts" asp-action="Index" class="nav-sublink @(IsActive("SalesRefundReceipts") ? "active" : "")">@T("Refund Receipts", "إيصالات الاسترداد")</a>
-                        <a asp-controller="CreditNotes" asp-action="Index" class="nav-sublink @(IsActive("CreditNotes") ? "active" : "")">@T("Credit Notes", "الإشعارات الدائنة")</a>
-                        <a asp-controller="DeliveryNotes" asp-action="Index" class="nav-sublink @(IsActive("DeliveryNotes") ? "active" : "")">@T("Delivery Notes", "سندات تسليم المبيعات")</a>
-                        <a asp-controller="SalesPricePolicies" asp-action="Index" class="nav-sublink @(IsActive("SalesPricePolicies") ? "active" : "")">@T("Sales Pricing", "سياسات تسعير المبيعات")</a>
+                        <a asp-controller="Customers" asp-action="Index" class="nav-sublink @(IsActive("Customers") ? "active" : "")" title="@T("Customers", "قائمة العملاء")"><i class="bi @SubIcon("Customers")"></i><span>@T("Customers", "قائمة العملاء")</span></a>
+                        <a asp-controller="SalesQuotations" asp-action="Index" class="nav-sublink @(IsActive("SalesQuotations") ? "active" : "")" title="@T("Quotations", "عروض الأسعار")"><i class="bi @SubIcon("SalesQuotations")"></i><span>@T("Quotations", "عروض الأسعار")</span></a>
+                        <a asp-controller="SalesInvoices" asp-action="Index" class="nav-sublink @(IsActive("SalesInvoices") ? "active" : "")" title="@T("Sales Invoices", "فواتير المبيعات")"><i class="bi @SubIcon("SalesInvoices")"></i><span>@T("Sales Invoices", "فواتير المبيعات")</span></a>
+                        <a asp-controller="SalesReceipts" asp-action="Index" class="nav-sublink @(IsActive("SalesReceipts") ? "active" : "")" title="@T("Sales Receipts", "إيصالات المبيعات")"><i class="bi @SubIcon("SalesReceipts")"></i><span>@T("Sales Receipts", "إيصالات المبيعات")</span></a>
+                        <a asp-controller="SalesRefundReceipts" asp-action="Index" class="nav-sublink @(IsActive("SalesRefundReceipts") ? "active" : "")" title="@T("Refund Receipts", "إيصالات الاسترداد")"><i class="bi @SubIcon("SalesRefundReceipts")"></i><span>@T("Refund Receipts", "إيصالات الاسترداد")</span></a>
+                        <a asp-controller="CreditNotes" asp-action="Index" class="nav-sublink @(IsActive("CreditNotes") ? "active" : "")" title="@T("Credit Notes", "الإشعارات الدائنة")"><i class="bi @SubIcon("CreditNotes")"></i><span>@T("Credit Notes", "الإشعارات الدائنة")</span></a>
+                        <a asp-controller="DeliveryNotes" asp-action="Index" class="nav-sublink @(IsActive("DeliveryNotes") ? "active" : "")" title="@T("Delivery Notes", "سندات تسليم المبيعات")"><i class="bi @SubIcon("DeliveryNotes")"></i><span>@T("Delivery Notes", "سندات تسليم المبيعات")</span></a>
+                        <a asp-controller="SalesPricePolicies" asp-action="Index" class="nav-sublink @(IsActive("SalesPricePolicies") ? "active" : "")" title="@T("Sales Pricing", "سياسات تسعير المبيعات")"><i class="bi @SubIcon("SalesPricePolicies")"></i><span>@T("Sales Pricing", "سياسات تسعير المبيعات")</span></a>
                     </div>
                 </details>
 
                 @{ var purchaseActive = new[] { "Suppliers", "PurchaseOrders", "PurchaseInvoices", "SupplierPayments", "PurchaseRefundReceipts", "DebitNotes", "GoodsReceipts", "PurchasePricePolicies" }; }
                 <details class="@GroupClass(purchaseActive)" @(IsActive(purchaseActive) ? "open" : "")>
-                    <summary><i class="bi bi-bag-check"></i><span>@T("Purchases", "المشتريات")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Purchases", "المشتريات")"><i class="bi bi-bag-check"></i><span>@T("Purchases", "المشتريات")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(purchaseActive)">
-                        <a asp-controller="Suppliers" asp-action="Index" class="nav-sublink @(IsActive("Suppliers") ? "active" : "")">@T("Suppliers", "قائمة الموردين")</a>
-                        <a asp-controller="PurchaseOrders" asp-action="Index" class="nav-sublink @(IsActive("PurchaseOrders") ? "active" : "")">@T("Purchase Orders", "طلبات الشراء")</a>
-                        <a asp-controller="PurchaseInvoices" asp-action="Index" class="nav-sublink @(IsActive("PurchaseInvoices") ? "active" : "")">@T("Purchase Invoices", "فواتير المشتريات")</a>
-                        <a asp-controller="SupplierPayments" asp-action="Index" class="nav-sublink @(IsActive("SupplierPayments") ? "active" : "")">@T("Supplier Payments", "إيصالات المشتريات")</a>
-                        <a asp-controller="PurchaseRefundReceipts" asp-action="Index" class="nav-sublink @(IsActive("PurchaseRefundReceipts") ? "active" : "")">@T("Purchase Refunds", "إيصالات الاسترداد")</a>
-                        <a asp-controller="DebitNotes" asp-action="Index" class="nav-sublink @(IsActive("DebitNotes") ? "active" : "")">@T("Debit Notes", "الإشعارات المدينة")</a>
-                        <a asp-controller="GoodsReceipts" asp-action="Index" class="nav-sublink @(IsActive("GoodsReceipts") ? "active" : "")">@T("Goods Receipts", "سندات استلام المنتجات")</a>
-                        <a asp-controller="PurchasePricePolicies" asp-action="Index" class="nav-sublink @(IsActive("PurchasePricePolicies") ? "active" : "")">@T("Purchase Pricing", "سياسة تسعير الشراء")</a>
+                        <a asp-controller="Suppliers" asp-action="Index" class="nav-sublink @(IsActive("Suppliers") ? "active" : "")" title="@T("Suppliers", "قائمة الموردين")"><i class="bi @SubIcon("Suppliers")"></i><span>@T("Suppliers", "قائمة الموردين")</span></a>
+                        <a asp-controller="PurchaseOrders" asp-action="Index" class="nav-sublink @(IsActive("PurchaseOrders") ? "active" : "")" title="@T("Purchase Orders", "طلبات الشراء")"><i class="bi @SubIcon("PurchaseOrders")"></i><span>@T("Purchase Orders", "طلبات الشراء")</span></a>
+                        <a asp-controller="PurchaseInvoices" asp-action="Index" class="nav-sublink @(IsActive("PurchaseInvoices") ? "active" : "")" title="@T("Purchase Invoices", "فواتير المشتريات")"><i class="bi @SubIcon("PurchaseInvoices")"></i><span>@T("Purchase Invoices", "فواتير المشتريات")</span></a>
+                        <a asp-controller="SupplierPayments" asp-action="Index" class="nav-sublink @(IsActive("SupplierPayments") ? "active" : "")" title="@T("Supplier Payments", "إيصالات المشتريات")"><i class="bi @SubIcon("SupplierPayments")"></i><span>@T("Supplier Payments", "إيصالات المشتريات")</span></a>
+                        <a asp-controller="PurchaseRefundReceipts" asp-action="Index" class="nav-sublink @(IsActive("PurchaseRefundReceipts") ? "active" : "")" title="@T("Purchase Refunds", "إيصالات الاسترداد")"><i class="bi @SubIcon("PurchaseRefundReceipts")"></i><span>@T("Purchase Refunds", "إيصالات الاسترداد")</span></a>
+                        <a asp-controller="DebitNotes" asp-action="Index" class="nav-sublink @(IsActive("DebitNotes") ? "active" : "")" title="@T("Debit Notes", "الإشعارات المدينة")"><i class="bi @SubIcon("DebitNotes")"></i><span>@T("Debit Notes", "الإشعارات المدينة")</span></a>
+                        <a asp-controller="GoodsReceipts" asp-action="Index" class="nav-sublink @(IsActive("GoodsReceipts") ? "active" : "")" title="@T("Goods Receipts", "سندات استلام المنتجات")"><i class="bi @SubIcon("GoodsReceipts")"></i><span>@T("Goods Receipts", "سندات استلام المنتجات")</span></a>
+                        <a asp-controller="PurchasePricePolicies" asp-action="Index" class="nav-sublink @(IsActive("PurchasePricePolicies") ? "active" : "")" title="@T("Purchase Pricing", "سياسة تسعير الشراء")"><i class="bi @SubIcon("PurchasePricePolicies")"></i><span>@T("Purchase Pricing", "سياسة تسعير الشراء")</span></a>
                     </div>
                 </details>
 
                 @{ var inventoryActive = new[] { "ProductCategories", "Products", "Warehouses", "InventoryCounts", "StockTransfers" }; }
                 <details class="@GroupClass(inventoryActive)" @(IsActive(inventoryActive) ? "open" : "")>
-                    <summary><i class="bi bi-box-seam"></i><span>@T("Products & Inventory", "المنتجات والمخزون")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Products & Inventory", "المنتجات والمخزون")"><i class="bi bi-box-seam"></i><span>@T("Products & Inventory", "المنتجات والمخزون")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(inventoryActive)">
-                        <a asp-controller="ProductCategories" asp-action="Index" class="nav-sublink @(IsActive("ProductCategories") ? "active" : "")">@T("Product Categories", "أصناف المنتجات")</a>
-                        <a asp-controller="Products" asp-action="Index" class="nav-sublink @(IsActive("Products") ? "active" : "")">@T("Products", "قائمة المنتجات")</a>
-                        <a asp-controller="Warehouses" asp-action="Index" class="nav-sublink @(IsActive("Warehouses") ? "active" : "")">@T("Warehouses", "المخازن")</a>
-                        <a asp-controller="InventoryCounts" asp-action="Index" class="nav-sublink @(IsActive("InventoryCounts") ? "active" : "")">@T("Inventory Counts", "عمليات الجرد")</a>
-                        <a asp-controller="StockTransfers" asp-action="Index" class="nav-sublink @(IsActive("StockTransfers") ? "active" : "")">@T("Stock Transfers", "نقل المخزون")</a>
+                        <a asp-controller="ProductCategories" asp-action="Index" class="nav-sublink @(IsActive("ProductCategories") ? "active" : "")" title="@T("Product Categories", "أصناف المنتجات")"><i class="bi @SubIcon("ProductCategories")"></i><span>@T("Product Categories", "أصناف المنتجات")</span></a>
+                        <a asp-controller="Products" asp-action="Index" class="nav-sublink @(IsActive("Products") ? "active" : "")" title="@T("Products", "قائمة المنتجات")"><i class="bi @SubIcon("Products")"></i><span>@T("Products", "قائمة المنتجات")</span></a>
+                        <a asp-controller="Warehouses" asp-action="Index" class="nav-sublink @(IsActive("Warehouses") ? "active" : "")" title="@T("Warehouses", "المخازن")"><i class="bi @SubIcon("Warehouses")"></i><span>@T("Warehouses", "المخازن")</span></a>
+                        <a asp-controller="InventoryCounts" asp-action="Index" class="nav-sublink @(IsActive("InventoryCounts") ? "active" : "")" title="@T("Inventory Counts", "عمليات الجرد")"><i class="bi @SubIcon("InventoryCounts")"></i><span>@T("Inventory Counts", "عمليات الجرد")</span></a>
+                        <a asp-controller="StockTransfers" asp-action="Index" class="nav-sublink @(IsActive("StockTransfers") ? "active" : "")" title="@T("Stock Transfers", "نقل المخزون")"><i class="bi @SubIcon("StockTransfers")"></i><span>@T("Stock Transfers", "نقل المخزون")</span></a>
                     </div>
                 </details>
 
                 @{ var assetsActive = new[] { "FixedAssets", "AssetTags", "AssetRentals" }; }
                 <details class="@GroupClass(assetsActive)" @(IsActive(assetsActive) ? "open" : "")>
-                    <summary><i class="bi bi-buildings"></i><span>@T("Fixed Assets", "الأصول الثابتة")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Fixed Assets", "الأصول الثابتة")"><i class="bi bi-buildings"></i><span>@T("Fixed Assets", "الأصول الثابتة")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(assetsActive)">
-                        <a asp-controller="FixedAssets" asp-action="Index" class="nav-sublink @(IsActive("FixedAssets") ? "active" : "")">@T("Assets", "أصول")</a>
-                        <a asp-controller="AssetTags" asp-action="Index" class="nav-sublink @(IsActive("AssetTags") ? "active" : "")">@T("Asset Tags", "وسوم الأصول")</a>
-                        <a asp-controller="AssetRentals" asp-action="Index" class="nav-sublink @(IsActive("AssetRentals") ? "active" : "")">@T("Asset Rentals", "تأجيرات الأصول")</a>
+                        <a asp-controller="FixedAssets" asp-action="Index" class="nav-sublink @(IsActive("FixedAssets") ? "active" : "")" title="@T("Assets", "أصول")"><i class="bi @SubIcon("FixedAssets")"></i><span>@T("Assets", "أصول")</span></a>
+                        <a asp-controller="AssetTags" asp-action="Index" class="nav-sublink @(IsActive("AssetTags") ? "active" : "")" title="@T("Asset Tags", "وسوم الأصول")"><i class="bi @SubIcon("AssetTags")"></i><span>@T("Asset Tags", "وسوم الأصول")</span></a>
+                        <a asp-controller="AssetRentals" asp-action="Index" class="nav-sublink @(IsActive("AssetRentals") ? "active" : "")" title="@T("Asset Rentals", "تأجيرات الأصول")"><i class="bi @SubIcon("AssetRentals")"></i><span>@T("Asset Rentals", "تأجيرات الأصول")</span></a>
                     </div>
                 </details>
 
-                @{ var accountingActive = new[] { "Accounts", "JournalEntries", "GeneralReceipts", "OpeningBalances", "ReportingDimensions", "CashBoxes", "BankAccounts", "Expenses" }; }
+                @{ var accountingActive = new[] { "Accounts", "JournalEntries", "GeneralReceipts", "OpeningBalances", "ReportingDimensions", "CashBoxes", "BankAccounts", "Expenses", "TaxRates" }; }
                 <details class="@GroupClass(accountingActive)" @(IsActive(accountingActive) ? "open" : "")>
-                    <summary><i class="bi bi-diagram-3"></i><span>@T("Advanced Accounting", "المحاسبة المتقدمة")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Advanced Accounting", "المحاسبة المتقدمة")"><i class="bi bi-diagram-3"></i><span>@T("Advanced Accounting", "المحاسبة المتقدمة")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(accountingActive)">
-                        <a asp-controller="Accounts" asp-action="Index" class="nav-sublink @(IsActive("Accounts") ? "active" : "")">@T("Chart of Accounts", "شجرة الحسابات")</a>
-                        <a asp-controller="JournalEntries" asp-action="Index" class="nav-sublink @(IsActive("JournalEntries") ? "active" : "")">@T("Journal Entries", "القيود اليدوية")</a>
-                        <a asp-controller="GeneralReceipts" asp-action="Index" class="nav-sublink @(IsActive("GeneralReceipts") ? "active" : "")">@T("General Receipts", "الإيصالات العامة")</a>
-                        <a asp-controller="OpeningBalances" asp-action="Index" class="nav-sublink @(IsActive("OpeningBalances") ? "active" : "")">@T("Opening Balances", "الرصيد الافتتاحي")</a>
-                        <a asp-controller="ReportingDimensions" asp-action="Index" class="nav-sublink @(IsActive("ReportingDimensions") ? "active" : "")">@T("Reporting Dimensions", "أبعاد التقارير")</a>
-                        <a asp-controller="CashBoxes" asp-action="Index" class="nav-sublink @(IsActive("CashBoxes") ? "active" : "")">@T("Cash Boxes", "الصناديق النقدية")</a>
-                        <a asp-controller="BankAccounts" asp-action="Index" class="nav-sublink @(IsActive("BankAccounts") ? "active" : "")">@T("Bank Accounts", "الحسابات البنكية")</a>
-                        <a asp-controller="Expenses" asp-action="Index" class="nav-sublink @(IsActive("Expenses") ? "active" : "")">@T("Expenses", "المصروفات")</a>
+                        <a asp-controller="Accounts" asp-action="Index" class="nav-sublink @(IsActive("Accounts") ? "active" : "")" title="@T("Chart of Accounts", "شجرة الحسابات")"><i class="bi @SubIcon("Accounts")"></i><span>@T("Chart of Accounts", "شجرة الحسابات")</span></a>
+                        <a asp-controller="JournalEntries" asp-action="Index" class="nav-sublink @(IsActive("JournalEntries") ? "active" : "")" title="@T("Journal Entries", "القيود اليدوية")"><i class="bi @SubIcon("JournalEntries")"></i><span>@T("Journal Entries", "القيود اليدوية")</span></a>
+                        <a asp-controller="GeneralReceipts" asp-action="Index" class="nav-sublink @(IsActive("GeneralReceipts") ? "active" : "")" title="@T("General Receipts", "الإيصالات العامة")"><i class="bi @SubIcon("GeneralReceipts")"></i><span>@T("General Receipts", "الإيصالات العامة")</span></a>
+                        <a asp-controller="OpeningBalances" asp-action="Index" class="nav-sublink @(IsActive("OpeningBalances") ? "active" : "")" title="@T("Opening Balances", "الرصيد الافتتاحي")"><i class="bi @SubIcon("OpeningBalances")"></i><span>@T("Opening Balances", "الرصيد الافتتاحي")</span></a>
+                        <a asp-controller="ReportingDimensions" asp-action="Index" class="nav-sublink @(IsActive("ReportingDimensions") ? "active" : "")" title="@T("Reporting Dimensions", "أبعاد التقارير")"><i class="bi @SubIcon("ReportingDimensions")"></i><span>@T("Reporting Dimensions", "أبعاد التقارير")</span></a>
+                        <a asp-controller="CashBoxes" asp-action="Index" class="nav-sublink @(IsActive("CashBoxes") ? "active" : "")" title="@T("Cash Boxes", "الصناديق النقدية")"><i class="bi @SubIcon("CashBoxes")"></i><span>@T("Cash Boxes", "الصناديق النقدية")</span></a>
+                        <a asp-controller="BankAccounts" asp-action="Index" class="nav-sublink @(IsActive("BankAccounts") ? "active" : "")" title="@T("Bank Accounts", "الحسابات البنكية")"><i class="bi @SubIcon("BankAccounts")"></i><span>@T("Bank Accounts", "الحسابات البنكية")</span></a>
+                        <a asp-controller="Expenses" asp-action="Index" class="nav-sublink @(IsActive("Expenses") ? "active" : "")" title="@T("Expenses", "المصروفات")"><i class="bi @SubIcon("Expenses")"></i><span>@T("Expenses", "المصروفات")</span></a>
+                        <a asp-controller="TaxRates" asp-action="Index" class="nav-sublink @(IsActive("TaxRates") ? "active" : "")" title="@T("Tax Rates", "نسب الضريبة")"><i class="bi bi-percent"></i><span>@T("Tax Rates", "نسب الضريبة")</span></a>
                     </div>
                 </details>
 
                 @{ var hrActive = new[] { "Employees", "EmployeeDocuments", "PayrollEntries", "EmployeeDeductions", "EmployeeBonuses", "EmployeeLoans", "EmployeeReceipts", "EmployeeRequests" }; }
                 <details class="@GroupClass(hrActive)" @(IsActive(hrActive) ? "open" : "")>
-                    <summary><i class="bi bi-people"></i><span>@T("Human Resources", "الموارد البشرية")</span><i class="bi bi-chevron-down chev"></i></summary>
+                    <summary title="@T("Human Resources", "الموارد البشرية")"><i class="bi bi-people"></i><span>@T("Human Resources", "الموارد البشرية")</span><i class="bi bi-chevron-down chev"></i></summary>
                     <div class="@CollapseClass(hrActive)">
-                        <a asp-controller="Employees" asp-action="Index" class="nav-sublink @(IsActive("Employees") ? "active" : "")">@T("Employees", "الموظفين")</a>
-                        <a asp-controller="EmployeeDocuments" asp-action="Index" class="nav-sublink @(IsActive("EmployeeDocuments") ? "active" : "")">@T("Employee Documents", "المستندات المرتبطة بالموظفين")</a>
-                        <a asp-controller="PayrollEntries" asp-action="Index" class="nav-sublink @(IsActive("PayrollEntries") ? "active" : "")">@T("Payroll", "قيود الرواتب")</a>
-                        <a asp-controller="EmployeeDeductions" asp-action="Index" class="nav-sublink @(IsActive("EmployeeDeductions") ? "active" : "")">@T("Deductions", "الخصومات")</a>
-                        <a asp-controller="EmployeeBonuses" asp-action="Index" class="nav-sublink @(IsActive("EmployeeBonuses") ? "active" : "")">@T("Bonuses", "المكافآت")</a>
-                        <a asp-controller="EmployeeLoans" asp-action="Index" class="nav-sublink @(IsActive("EmployeeLoans") ? "active" : "")">@T("Loans", "القروض")</a>
-                        <a asp-controller="EmployeeReceipts" asp-action="Index" class="nav-sublink @(IsActive("EmployeeReceipts") ? "active" : "")">@T("Receipts", "الإيصالات")</a>
-                        <a asp-controller="EmployeeRequests" asp-action="Index" class="nav-sublink @(IsActive("EmployeeRequests") ? "active" : "")">@T("Requests", "إدارة الطلبات")</a>
+                        <a asp-controller="Employees" asp-action="Index" class="nav-sublink @(IsActive("Employees") ? "active" : "")" title="@T("Employees", "الموظفين")"><i class="bi @SubIcon("Employees")"></i><span>@T("Employees", "الموظفين")</span></a>
+                        <a asp-controller="EmployeeDocuments" asp-action="Index" class="nav-sublink @(IsActive("EmployeeDocuments") ? "active" : "")" title="@T("Employee Documents", "المستندات المرتبطة بالموظفين")"><i class="bi @SubIcon("EmployeeDocuments")"></i><span>@T("Employee Documents", "المستندات المرتبطة بالموظفين")</span></a>
+                        <a asp-controller="PayrollEntries" asp-action="Index" class="nav-sublink @(IsActive("PayrollEntries") ? "active" : "")" title="@T("Payroll", "قيود الرواتب")"><i class="bi @SubIcon("PayrollEntries")"></i><span>@T("Payroll", "قيود الرواتب")</span></a>
+                        <a asp-controller="EmployeeDeductions" asp-action="Index" class="nav-sublink @(IsActive("EmployeeDeductions") ? "active" : "")" title="@T("Deductions", "الخصومات")"><i class="bi @SubIcon("EmployeeDeductions")"></i><span>@T("Deductions", "الخصومات")</span></a>
+                        <a asp-controller="EmployeeBonuses" asp-action="Index" class="nav-sublink @(IsActive("EmployeeBonuses") ? "active" : "")" title="@T("Bonuses", "المكافآت")"><i class="bi @SubIcon("EmployeeBonuses")"></i><span>@T("Bonuses", "المكافآت")</span></a>
+                        <a asp-controller="EmployeeLoans" asp-action="Index" class="nav-sublink @(IsActive("EmployeeLoans") ? "active" : "")" title="@T("Loans", "القروض")"><i class="bi @SubIcon("EmployeeLoans")"></i><span>@T("Loans", "القروض")</span></a>
+                        <a asp-controller="EmployeeReceipts" asp-action="Index" class="nav-sublink @(IsActive("EmployeeReceipts") ? "active" : "")" title="@T("Receipts", "الإيصالات")"><i class="bi @SubIcon("EmployeeReceipts")"></i><span>@T("Receipts", "الإيصالات")</span></a>
+                        <a asp-controller="EmployeeRequests" asp-action="Index" class="nav-sublink @(IsActive("EmployeeRequests") ? "active" : "")" title="@T("Requests", "إدارة الطلبات")"><i class="bi @SubIcon("EmployeeRequests")"></i><span>@T("Requests", "إدارة الطلبات")</span></a>
                     </div>
                 </details>
 
-                <a asp-controller="Reports" asp-action="Index" class="nav-link nav-item @(IsActive("Reports") ? "active" : "")">
+                <a asp-controller="Reports" asp-action="Index" class="nav-link nav-item @(IsActive("Reports") ? "active" : "")" title="@T("Reports", "التقارير")">
                     <i class="bi bi-bar-chart-line"></i><span>@T("Reports", "التقارير")</span>
                 </a>
-                <a asp-controller="Settings" asp-action="Index" class="nav-link nav-item @(IsActive("Settings") ? "active" : "")">
+                <a asp-controller="Settings" asp-action="Index" class="nav-link nav-item @(IsActive("Settings") ? "active" : "")" title="@T("Settings", "الإعدادات")">
                     <i class="bi bi-sliders2"></i><span>@T("Settings", "الإعدادات")</span>
                 </a>
             </nav>
@@ -190,25 +305,25 @@
                 <button class="icon-button" type="button" id="sidebarToggle" aria-label="@T("Toggle sidebar", "طي القائمة")">
                     <i class="bi bi-list"></i>
                 </button>
+                <a asp-controller="Dashboard" asp-action="Index" class="topbar-brand" title="Bestgen ERP">
+                    <img src="~/img/logo-transparent.png" alt="Bestgen" />
+                </a>
                 <div class="breadcrumb-trail">
                     <span class="breadcrumb-item-text">@sectionLabel</span>
                     <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-item-text current">@pageTitle</span>
+                    <span class="breadcrumb-item-text current">@pageLabel</span>
                 </div>
-                <div class="topbar-search">
+                <form class="topbar-search" method="get" action="@Url.Action("Index", string.IsNullOrEmpty(currentController) ? "Dashboard" : currentController)" role="search">
                     <i class="bi bi-search"></i>
-                    <input type="search" placeholder="@T("Quick search...", "بحث سريع في النظام...")" />
-                </div>
+                    <input type="search" name="q" value="@(Context.Request.Query["q"])" placeholder="@T("Search this page...", "بحث في هذه الصفحة...")" />
+                </form>
                 <div class="topbar-actions">
                     <a asp-controller="Language" asp-action="Set"
                        asp-route-culture="@nextCulture"
                        asp-route-returnUrl="@returnUrl"
-                       class="chip-button" title="@T("Switch language", "تبديل اللغة")">
+                       class="chip-button lang-chip" title="@T("Switch language", "تبديل اللغة")">
                         <i class="bi bi-translate"></i><span>@nextCultureLabel</span>
                     </a>
-                    <button class="chip-button" type="button" id="themeToggle">
-                        <i class="bi bi-moon-stars"></i><span>@T("Dark mode", "الوضع الداكن")</span>
-                    </button>
                     <partial name="_LoginPartial" />
                 </div>
             </header>

@@ -1,17 +1,26 @@
+@using System.Globalization
 @model object
 @{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
     var controllerName = (string)ViewBag.ControllerName;
     var title = (string)ViewBag.EntityTitle;
     var entityType = Model.GetType();
     var id = (int)(entityType.GetProperty("Id")?.GetValue(Model) ?? 0);
     var properties = EntityDisplayHelper.GetListProperties(entityType).ToList();
-    ViewData["Title"] = $"حذف {title}";
+    ViewData["Title"] = T($"Delete {title}", $"حذف {title}");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel($"حذف {title}", "تأكيد حذف السجل المحدد من النظام."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T($"Delete {title}", $"حذف {title}"),
+    T("Confirm removal of the selected record.", "تأكيد حذف السجل المحدد من النظام.")))" />
 
 <section class="details-panel">
-    <div class="alert alert-danger mb-4">هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع من داخل واجهة MVP.</div>
+    <div class="alert alert-danger mb-4">
+        @T("Are you sure you want to delete this record? This action cannot be undone from the MVP UI.",
+           "هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع من داخل واجهة MVP.")
+    </div>
     <dl class="row">
         @foreach (var property in properties)
         {
@@ -20,7 +29,7 @@
         }
     </dl>
     <form asp-action="Delete" asp-route-id="@id" method="post" class="d-flex gap-2">
-        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> حذف</button>
-        <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> @T("Delete", "حذف")</button>
+        <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
     </form>
 </section>

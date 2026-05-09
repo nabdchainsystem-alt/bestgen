@@ -1,42 +1,47 @@
+@using System.Globalization
 @model SalesInvoice
 @{
-    ViewData["Title"] = $"فاتورة {Model.InvoiceNumber}";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T($"Invoice {Model.InvoiceNumber}", $"فاتورة {Model.InvoiceNumber}");
 }
 
 <div class="page-header">
     <div>
         <h1>@Model.InvoiceNumber</h1>
-        <p>@Model.Customer?.NameAr - @Model.InvoiceDate.ToString("yyyy/MM/dd")</p>
+        <p>@(Model.Customer == null ? "-" : pickName(Model.Customer.NameAr, Model.Customer.NameEn)) - @Model.InvoiceDate.ToString("yyyy/MM/dd")</p>
     </div>
     <div class="d-flex gap-2 align-items-center">
         <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(Model.Status))" />
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="bi bi-pencil"></i> تعديل</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="bi bi-pencil"></i> @T("Edit", "تعديل")</a>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back to list", "العودة إلى القائمة")</a>
     </div>
 </div>
 
 <section class="details-panel">
     <div class="summary-grid">
-        <div class="summary-card"><span>الإجمالي قبل الضريبة</span><strong>@EntityDisplayHelper.FormatValue(Model.Subtotal, nameof(Model.Subtotal))</strong></div>
-        <div class="summary-card"><span>الضريبة</span><strong>@EntityDisplayHelper.FormatValue(Model.VatTotal, nameof(Model.VatTotal))</strong></div>
-        <div class="summary-card"><span>إجمالي الفاتورة</span><strong>@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</strong></div>
-        <div class="summary-card"><span>المتبقي</span><strong>@EntityDisplayHelper.FormatValue(Model.RemainingAmount, nameof(Model.RemainingAmount))</strong></div>
+        <div class="summary-card"><span>@T("Subtotal (before VAT)", "الإجمالي قبل الضريبة")</span><strong>@EntityDisplayHelper.FormatValue(Model.Subtotal, nameof(Model.Subtotal))</strong></div>
+        <div class="summary-card"><span>@T("VAT", "الضريبة")</span><strong>@EntityDisplayHelper.FormatValue(Model.VatTotal, nameof(Model.VatTotal))</strong></div>
+        <div class="summary-card"><span>@T("Grand total", "إجمالي الفاتورة")</span><strong>@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</strong></div>
+        <div class="summary-card"><span>@T("Outstanding", "المتبقي")</span><strong>@EntityDisplayHelper.FormatValue(Model.RemainingAmount, nameof(Model.RemainingAmount))</strong></div>
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4"><strong>العميل:</strong> @Model.Customer?.NameAr</div>
-        <div class="col-md-4"><strong>المستودع:</strong> @Model.Warehouse?.Name</div>
-        <div class="col-md-4"><strong>طريقة الدفع:</strong> @EntityDisplayHelper.TranslateEnum(Model.PaymentMethod)</div>
-        <div class="col-12"><strong>ملاحظات:</strong> @(Model.Notes ?? "-")</div>
+        <div class="col-md-4"><strong>@T("Customer:", "العميل:")</strong> @(Model.Customer == null ? "-" : pickName(Model.Customer.NameAr, Model.Customer.NameEn))</div>
+        <div class="col-md-4"><strong>@T("Warehouse:", "المستودع:")</strong> @Model.Warehouse?.Name</div>
+        <div class="col-md-4"><strong>@T("Payment method:", "طريقة الدفع:")</strong> @EntityDisplayHelper.TranslateEnum(Model.PaymentMethod)</div>
+        <div class="col-12"><strong>@T("Notes:", "ملاحظات:")</strong> @(Model.Notes ?? "-")</div>
     </div>
 
     <div class="table-responsive">
         <table class="table">
-            <thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الخصم</th><th>الضريبة</th><th>الإجمالي</th></tr></thead>
+            <thead><tr><th>@T("Item", "الصنف")</th><th>@T("Qty", "الكمية")</th><th>@T("Price", "السعر")</th><th>@T("Discount", "الخصم")</th><th>@T("VAT", "الضريبة")</th><th>@T("Total", "الإجمالي")</th></tr></thead>
             <tbody>
                 @foreach (var item in Model.Items)
                 {
                     <tr>
-                        <td>@item.Product?.NameAr</td>
+                        <td>@(item.Product == null ? "-" : pickName(item.Product.NameAr, item.Product.NameEn))</td>
                         <td>@item.Quantity.ToString("N2")</td>
                         <td>@EntityDisplayHelper.FormatValue(item.UnitPrice, nameof(item.UnitPrice))</td>
                         <td>@EntityDisplayHelper.FormatValue(item.Discount, nameof(item.Discount))</td>
@@ -49,11 +54,11 @@
     </div>
 
     <ul class="nav nav-tabs mt-4">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#invoice-related" type="button">القيود والمدفوعات</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoice-files" type="button">المرفقات</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#invoice-related" type="button">@T("Journals & payments", "القيود والمدفوعات")</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoice-files" type="button">@T("Attachments", "المرفقات")</button></li>
     </ul>
     <div class="tab-content pt-3">
-        <div id="invoice-related" class="tab-pane fade show active">سيتم عرض القيود وسندات القبض المرتبطة هنا في مرحلة لاحقة.</div>
-        <div id="invoice-files" class="tab-pane fade">مرفقات الفاتورة placeholder.</div>
+        <div id="invoice-related" class="tab-pane fade show active">@T("Linked journals and receipts will appear here in a later phase.", "سيتم عرض القيود وسندات القبض المرتبطة هنا في مرحلة لاحقة.")</div>
+        <div id="invoice-files" class="tab-pane fade">@T("Invoice attachments placeholder.", "مرفقات الفاتورة placeholder.")</div>
     </div>
 </section>

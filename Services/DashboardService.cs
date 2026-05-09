@@ -10,6 +10,16 @@ public class DashboardService
 {
     private static readonly CultureInfo ArabicCulture = new("ar-SA");
 
+    private static bool IsArabic =>
+        CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    private static string T(string en, string ar) => IsArabic ? ar : en;
+    private static string PickName(string nameAr, string? nameEn) =>
+        IsArabic ? nameAr : (string.IsNullOrWhiteSpace(nameEn) ? nameAr : nameEn!);
+    private static string FormatMoney(decimal value) =>
+        IsArabic
+            ? $"{value.ToString("N2", ArabicCulture)} ر.س"
+            : $"SAR {value.ToString("N2", CultureInfo.InvariantCulture)}";
+
     private readonly ApplicationDbContext _context;
     private readonly InventoryService _inventoryService;
 
@@ -177,7 +187,7 @@ public class DashboardService
             .AsNoTracking()
             .Select(product => new
             {
-                Category = product.Category ?? "غير مصنف",
+                Category = product.Category ?? (IsArabic ? "غير مصنف" : "Uncategorized"),
                 Value = product.CurrentStock * product.PurchasePrice
             })
             .ToListAsync();
@@ -197,12 +207,15 @@ public class DashboardService
         if (lowStockProducts.Count > 0)
         {
             var sample = lowStockProducts.First();
+            var sampleName = PickName(sample.NameAr, sample.NameEn);
             model.Alerts.Add(new SmartAlert
             {
                 Tone = "warning",
                 Icon = "bi-exclamation-triangle",
-                Title = "تنبيه مخزون منخفض",
-                Message = $"{lowStockProducts.Count} منتج وصل إلى حد الطلب — مثال: {sample.NameAr}."
+                Title = T("Low stock alert", "تنبيه مخزون منخفض"),
+                Message = T(
+                    $"{lowStockProducts.Count} product(s) reached the reorder point — e.g. {sampleName}.",
+                    $"{lowStockProducts.Count} منتج وصل إلى حد الطلب — مثال: {sampleName}.")
             });
         }
 
@@ -212,8 +225,10 @@ public class DashboardService
             {
                 Tone = "danger",
                 Icon = "bi-clock-history",
-                Title = "فواتير عملاء متأخرة",
-                Message = $"{overdueInvoices.Count} فاتورة عميل متأخرة عن السداد لأكثر من 30 يوما."
+                Title = T("Overdue customer invoices", "فواتير عملاء متأخرة"),
+                Message = T(
+                    $"{overdueInvoices.Count} customer invoice(s) overdue by more than 30 days.",
+                    $"{overdueInvoices.Count} فاتورة عميل متأخرة عن السداد لأكثر من 30 يوما.")
             });
         }
 
@@ -223,8 +238,10 @@ public class DashboardService
             {
                 Tone = "info",
                 Icon = "bi-calendar2-event",
-                Title = "دفعات موردين مستحقة",
-                Message = $"إجمالي مستحقات الموردين الحالية {model.Payables.ToString("N2", ArabicCulture)} ر.س."
+                Title = T("Supplier payments due", "دفعات موردين مستحقة"),
+                Message = T(
+                    $"Outstanding supplier balance is {FormatMoney(model.Payables)}.",
+                    $"إجمالي مستحقات الموردين الحالية {FormatMoney(model.Payables)}.")
             });
         }
 
@@ -234,8 +251,10 @@ public class DashboardService
             {
                 Tone = "warning",
                 Icon = "bi-cash",
-                Title = "انخفاض رصيد الخزينة",
-                Message = "رصيد الصناديق الإجمالي قارب على الحد الأدنى — يفضل المراجعة."
+                Title = T("Low cash balance", "انخفاض رصيد الخزينة"),
+                Message = T(
+                    "Total cash balance is approaching the minimum — review recommended.",
+                    "رصيد الصناديق الإجمالي قارب على الحد الأدنى — يفضل المراجعة.")
             });
         }
 
@@ -250,12 +269,15 @@ public class DashboardService
 
         if (stagnant.Count > 0)
         {
+            var stagnantName = PickName(stagnant[0].NameAr, stagnant[0].NameEn);
             model.Alerts.Add(new SmartAlert
             {
                 Tone = "info",
                 Icon = "bi-archive",
-                Title = "منتج راكد",
-                Message = $"{stagnant[0].NameAr} لديه مخزون يفوق ضعفي حد الطلب بشكل ملحوظ."
+                Title = T("Stagnant product", "منتج راكد"),
+                Message = T(
+                    $"{stagnantName} is carrying stock well above twice its reorder point.",
+                    $"{stagnantName} لديه مخزون يفوق ضعفي حد الطلب بشكل ملحوظ.")
             });
         }
 
@@ -270,8 +292,10 @@ public class DashboardService
             {
                 Tone = "warning",
                 Icon = "bi-receipt",
-                Title = "مصروف غير معتاد",
-                Message = $"إجمالي مصروفات «{unusualExpense.Key}» مرتفع نسبيا في الفترة الأخيرة."
+                Title = T("Unusual expense", "مصروف غير معتاد"),
+                Message = T(
+                    $"Total \"{unusualExpense.Key}\" expenses are running relatively high recently.",
+                    $"إجمالي مصروفات «{unusualExpense.Key}» مرتفع نسبيا في الفترة الأخيرة.")
             });
         }
 
@@ -281,8 +305,10 @@ public class DashboardService
             {
                 Tone = "success",
                 Icon = "bi-check2-circle",
-                Title = "كل شيء يعمل بسلاسة",
-                Message = "لا توجد تنبيهات حرجة في الوقت الحالي."
+                Title = T("Everything is running smoothly", "كل شيء يعمل بسلاسة"),
+                Message = T(
+                    "No critical alerts at this time.",
+                    "لا توجد تنبيهات حرجة في الوقت الحالي.")
             });
         }
 

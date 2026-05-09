@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<title>Bestgen — Project Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 18mm 18mm 18mm 18mm; }
+  @page cover { size: A4; margin: 0; }
+  :root {
+    --canvas:#f7f6f1; --surface:#ffffff; --border:#e4e4e1; --text:#0f172a; --muted:#64748b;
+    --navy:#0f172a; --emerald:#10b981; --blue:#4f46e5; --warning:#f59e0b; --danger:#ef4444;
+    --tint:#eef2ff;
+  }
+  * { box-sizing:border-box; overflow-wrap:break-word; word-wrap:break-word; }
+  html, body { background:#fff; color:var(--text); font-family:'Inter','Helvetica Neue',Arial,sans-serif; font-size:11pt; line-height:1.55; margin:0; padding:0; }
+  h1,h2,h3,h4 { color:var(--navy); margin:0 0 .4em; line-height:1.2; }
+  h1 { font-size:30pt; letter-spacing:-.02em; }
+  h2 { font-size:18pt; letter-spacing:-.01em; padding-bottom:6px; border-bottom:2px solid var(--border); margin-top:18pt; }
+  h3 { font-size:13.5pt; margin-top:14pt; color:#1e293b; }
+  h4 { font-size:11.5pt; color:#334155; margin-top:10pt; }
+  p { margin:.4em 0 .8em; }
+  ul, ol { margin:.4em 0 .8em 1.2em; padding:0; }
+  li { margin:.18em 0; }
+  code, pre { font-family:'JetBrains Mono','SFMono-Regular',Menlo,monospace; font-size:9.5pt; }
+  pre { background:#0f172a; color:#e2e8f0; padding:14px 16px; border-radius:8px; overflow:hidden; white-space:pre-wrap; word-break:break-word; }
+  code { background:#eef2ff; color:#3730a3; padding:1px 6px; border-radius:4px; }
+  pre code { background:transparent; color:inherit; padding:0; }
+  .cover { page:cover; page-break-after:always; width:210mm; height:297mm; margin:0; padding:0; background:linear-gradient(155deg,#0f172a 0%,#1e293b 55%,#312e81 100%); color:#fff; position:relative; overflow:hidden; display:flex; }
+  .cover::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 80% 18%, rgba(79,70,229,.45) 0%, transparent 48%), radial-gradient(circle at 18% 88%, rgba(16,185,129,.28) 0%, transparent 52%); pointer-events:none; }
+  .cover-inner { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; padding:26mm 22mm; text-align:center; }
+  .cover-header { flex:0 0 auto; }
+  .cover-main { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+  .cover-footer { flex:0 0 auto; }
+  .cover .brand { display:flex; flex-direction:column; align-items:center; gap:10pt; }
+  .cover .brand .logo { width:70mm; max-width:85%; padding:14pt 18pt; background:linear-gradient(180deg,#ffffff 0%,#f1f5f9 100%); border-radius:18px; box-shadow:0 16px 40px rgba(15,23,42,.45), inset 0 0 0 1px rgba(255,255,255,.4); }
+  .cover .brand .logo img { width:100%; height:auto; display:block; }
+  .cover .kicker { color:#a5b4fc; font-size:9.5pt; font-weight:700; letter-spacing:.22em; text-transform:uppercase; margin-top:6pt; }
+  .cover h1 { color:#fff; font-size:46pt; line-height:1.05; margin:0 0 14pt; text-align:center; letter-spacing:-.02em; }
+  .cover .cover-tag { color:#818cf8; display:block; font-size:24pt; font-weight:600; margin-top:8pt; line-height:1.2; }
+  .cover .subtitle { color:#cbd5e1; font-size:12pt; line-height:1.7; max-width:160mm; margin:8pt auto 0; text-align:center; }
+  .cover .meta { display:grid; grid-template-columns:repeat(4,1fr); gap:10pt; }
+  .cover .meta div { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:10px; padding:10pt 12pt; text-align:center; }
+  .cover .meta div span { display:block; font-size:8pt; color:#a5b4fc; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4pt; font-weight:600; }
+  .cover .meta div strong { font-size:10.5pt; color:#fff; font-weight:600; }
+  .toc { page-break-after:always; }
+  .toc ol { columns:1; counter-reset:toc; list-style:none; margin-left:0; }
+  .toc ol li { counter-increment:toc; padding:6pt 0; border-bottom:1px dashed #d4d4d8; display:flex; justify-content:space-between; }
+  .toc ol li:before { content:counter(toc,decimal-leading-zero); color:var(--blue); font-weight:700; min-width:36px; }
+  .toc ol li span { color:var(--muted); }
+  .callout { background:#f1f5f9; border-left:4px solid var(--blue); padding:10pt 14pt; border-radius:6px; margin:10pt 0; }
+  .callout.warn { background:#fef3c7; border-color:var(--warning); }
+  .callout.success { background:#ecfdf5; border-color:var(--emerald); }
+  .callout strong { color:var(--navy); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12pt; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10pt; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8pt; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10pt 12pt; }
+  .card .icon { width:32px; height:32px; border-radius:8px; background:var(--tint); color:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:6pt; font-size:11pt; }
+  .card h4 { margin:0 0 4pt; font-size:10.5pt; color:#1e293b; }
+  .card p { margin:0; font-size:9.5pt; color:var(--muted); }
+  .pill { display:inline-block; padding:2pt 9pt; border-radius:999px; font-size:8.5pt; font-weight:600; background:var(--tint); color:var(--blue); margin:0 3pt 3pt 0; }
+  .pill.green { background:#dcfce7; color:#166534; }
+  .pill.amber { background:#fef3c7; color:#92400e; }
+  .pill.red   { background:#fee2e2; color:#991b1b; }
+  .pill.gray  { background:#f1f5f9; color:#475569; }
+  table.matrix { width:100%; border-collapse:collapse; font-size:9.5pt; margin:8pt 0; }
+  table.matrix th, table.matrix td { border:1px solid #e2e8f0; padding:6pt 8pt; text-align:left; vertical-align:top; }
+  table.matrix th { background:#f8fafc; font-weight:700; color:var(--navy); }
+  table.matrix tr:nth-child(2n) td { background:#fafafa; }
+  .figure { page-break-inside:avoid; margin:12pt 0; text-align:center; }
+  .figure img { max-width:100%; max-height:200mm; border:1px solid var(--border); border-radius:8px; box-shadow:0 6px 18px rgba(15,23,42,.08); }
+  .figure .caption { font-size:9pt; color:var(--muted); margin-top:6pt; }
+  .arch { background:#fafafa; border:1px solid var(--border); border-radius:10px; padding:14pt; }
+  .legend-row { display:flex; gap:8pt; flex-wrap:wrap; margin-top:6pt; }
+  .legend-row .pill { margin:0; }
+  .palette { display:grid; grid-template-columns:repeat(8,1fr); gap:6pt; }
+  .swatch { aspect-ratio:1.4/1; border-radius:8px; display:flex; align-items:flex-end; padding:6pt; font-size:8pt; font-weight:600; color:#fff; }
+  .swatch small { display:block; opacity:.7; font-weight:500; font-size:7.5pt; }
+  .module-row { display:grid; grid-template-columns:30mm 1fr 36mm; gap:10pt; padding:8pt 0; border-bottom:1px solid #e2e8f0; align-items:start; }
+  .module-row strong { color:var(--navy); font-size:10.5pt; }
+  .module-row em { color:var(--muted); font-style:normal; font-size:9pt; }
+  .phase { background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid var(--blue); padding:10pt 14pt; border-radius:8px; margin:10pt 0; page-break-inside:avoid; }
+  .phase.done { border-left-color:var(--emerald); background:#f0fdf4; }
+  .phase.pending { border-left-color:var(--warning); background:#fffbeb; }
+  .phase h4 { display:flex; align-items:center; justify-content:space-between; margin:0 0 4pt; }
+  hr { border:0; border-top:1px solid var(--border); margin:18pt 0; }
+  .keyline { font-size:8.5pt; color:var(--muted); }
+  section { page-break-inside:auto; }
+  .pagebreak { page-break-after:always; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="cover-inner">
+    <header class="cover-header">
+      <div class="brand">
+        <div class="logo"><img src="img/logo.png" alt="Bestgen ERP" /></div>
+        <div class="kicker">Project Documentation</div>
+      </div>
+    </header>
+    <div class="cover-main">
+      <h1>Bestgen<span class="cover-tag">Production-grade Arabic SaaS<br/>accounting &amp; inventory</span></h1>
+      <p class="subtitle">A bilingual ASP.NET Core MVC application engineered for the Saudi market — double-entry ledger, perpetual inventory, ZATCA-aware invoicing, role-based identity, and a dedicated Reports Center, all on a single codebase with a unified design system.</p>
+    </div>
+    <footer class="cover-footer">
+      <div class="meta">
+        <div><span>Framework</span><strong>.NET 8 · ASP.NET Core</strong></div>
+        <div><span>Database</span><strong>EF Core 8 + SQLite</strong></div>
+        <div><span>Locales</span><strong>Arabic · English</strong></div>
+        <div><span>Version</span><strong>1.0 · May 2026</strong></div>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<section class="toc">
+<h2 style="border:0;margin-top:0;">Table of contents</h2>
+<ol>
+<li>Executive overview <span>3</span></li>
+<li>Technology stack &amp; build <span>4</span></li>
+<li>System architecture <span>6</span></li>
+<li>Frontend &amp; design system <span>9</span></li>
+<li>Backend services &amp; the posting engine <span>13</span></li>
+<li>Module catalog (sidebar) <span>17</span></li>
+<li>Reports Center <span>22</span></li>
+<li>Settings &amp; identity <span>25</span></li>
+<li>Data model &amp; chart of accounts <span>27</span></li>
+<li>Current status &amp; what is left <span>30</span></li>
+<li>Operating the application <span>34</span></li>
+</ol>
+</section>
+
+<h2>1 · Executive overview</h2>
+<p><strong>Bestgen</strong> is a premium Arabic SaaS accounting + inventory web application targeted at Saudi small and mid-sized enterprises. The product replaces fragmented spreadsheets and entry-level point-of-sale tools with a single, cohesive system that handles the entire commercial cycle — from quotation through delivery, invoicing, collection, and posting to the general ledger — with full Arabic-first UX and ZATCA-aware invoicing primitives.</p>
+
+<div class="grid-3">
+  <div class="card"><div class="icon">⚖︎</div><h4>Double-entry GL</h4><p>Every business document automatically posts a balanced journal: every debit has a matching credit, validated before save.</p></div>
+  <div class="card"><div class="icon">📦</div><h4>Perpetual inventory</h4><p>Sales, purchases, transfers, and counts mutate stock through an audited <code>StockMovement</code> trail.</p></div>
+  <div class="card"><div class="icon">🇸🇦</div><h4>Arabic-first UX</h4><p>RTL layout, native Arabic typography, bilingual labels, and locale-aware money/dates.</p></div>
+  <div class="card"><div class="icon">🔐</div><h4>Role-based identity</h4><p>9 built-in roles (Owner, Admin, Accountant, Sales, Purchases, Warehouse, HR, Cashier, Viewer) wired to ASP.NET Core Identity.</p></div>
+  <div class="card"><div class="icon">📊</div><h4>Live reports</h4><p>13 reports backed by real ledger queries — Trial Balance, P&amp;L, Balance Sheet, aging, VAT return, customer/supplier statements, and more.</p></div>
+  <div class="card"><div class="icon">🧩</div><h4>Generic CRUD framework</h4><p>Master tables share a single generic <code>CrudController&lt;T&gt;</code> + Razor templates — adding an entity is a 5-line affair.</p></div>
+</div>
+
+<div class="callout"><strong>Where Bestgen fits.</strong> A small business adopting Bestgen replaces three things at once: the manual books (or spreadsheet), a separate inventory tracker, and the discipline of producing tax-ready statements. Everything lives in one product, in one language pair, on one server.</div>
+
+<h2>2 · Technology stack &amp; build</h2>
+
+<div class="grid-2">
+  <div>
+    <h3>Runtime &amp; framework</h3>
+    <ul>
+      <li><strong>.NET 8</strong> (target framework <code>net8.0</code>)</li>
+      <li><strong>ASP.NET Core MVC</strong> with Razor Views</li>
+      <li>C# with <code>Nullable</code> and <code>ImplicitUsings</code> enabled</li>
+      <li>Root namespace <code>bestgen</code> (lowercase) · assembly name <code>Bestgen</code></li>
+    </ul>
+    <h3>Persistence</h3>
+    <ul>
+      <li><strong>Entity Framework Core 8</strong></li>
+      <li><strong>SQLite</strong> file <code>bestgen.db</code> at the project root</li>
+      <li><code>EnsureCreatedAsync()</code> at boot — schema regenerates if the file is deleted</li>
+      <li><code>decimal(18,2)</code> precision configured for every monetary field</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Frontend stack</h3>
+    <ul>
+      <li><strong>Bootstrap 5 RTL</strong> (<code>bootstrap.rtl.min.css</code>) for layout primitives</li>
+      <li><strong>Bootstrap Icons</strong> for iconography</li>
+      <li><strong>Chart.js 4</strong> for dashboard charts</li>
+      <li><strong>Inter</strong> + <strong>Droid Arabic Kufi</strong> webfonts</li>
+      <li>Single hand-tuned stylesheet at <code>wwwroot/css/site.css</code></li>
+    </ul>
+    <h3>Identity &amp; security</h3>
+    <ul>
+      <li><strong>ASP.NET Core Identity</strong> with custom <code>ApplicationUser</code></li>
+      <li>9 seeded roles wired through <code>RoleManager</code></li>
+      <li><code>[Authorize]</code> default on every CRUD controller</li>
+      <li><code>[ValidateAntiForgeryToken]</code> on every POST</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Build &amp; run</h3>
+<pre><code>dotnet clean
+dotnet restore
+dotnet build
+dotnet run            # listens on http://localhost:5000 by default</code></pre>
+
+<h3>Default seeded credentials</h3>
+<table class="matrix">
+  <thead><tr><th>Email</th><th>Password</th><th>Roles</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>max@bestgen.com</code></td><td><code>123</code></td><td>Owner, Admin</td><td>Primary developer login</td></tr>
+    <tr><td><code>admin@ledgerflow.local</code></td><td><code>Admin@12345</code></td><td>Owner, Admin</td><td>Legacy login</td></tr>
+  </tbody>
+</table>
+<p>The seeder calls <code>ResetPasswordAsync</code> on every run, so the credentials remain valid even after the password rules are tightened.</p>
+
+<h3>Database lifecycle</h3>
+<div class="callout warn"><strong>No migrations.</strong> Bestgen relies on <code>EnsureCreatedAsync()</code>. When you change an entity, delete <code>bestgen.db</code> and re-run — the schema is recreated from the model on the next boot. Suitable for rapid iteration; needs to be replaced with EF migrations before going to production with real customer data.</div>
+
+<div class="figure">
+  <img src="img/login.png" alt="Bestgen sign-in" />
+  <div class="caption">Figure 1 — Sign-in screen. Identity is configured with relaxed dev passwords; production rules are queued for Phase 9.</div>
+</div>
+
+<h2>3 · System architecture</h2>
+
+<div class="arch">
+<svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+  <defs>
+    <linearGradient id="brand" x1="0" x2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+  </defs>
+  <rect x="20" y="20" width="840" height="80" rx="10" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="40" y="48" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#312e81">Browser layer</text>
+  <text x="40" y="68" font-family="Inter,Arial" font-size="11" fill="#4338ca">Razor views · Bootstrap 5 RTL · Chart.js · site.css · site.js</text>
+  <text x="40" y="86" font-family="Inter,Arial" font-size="10" fill="#64748b">Bilingual sidebar · sticky topbar · responsive form panels</text>
+
+  <rect x="20" y="120" width="840" height="120" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="40" y="148" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#0f172a">ASP.NET Core MVC pipeline</text>
+  <g font-family="Inter,Arial" font-size="10.5" fill="#1e293b">
+    <rect x="40" y="160" width="170" height="64" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+    <text x="50" y="180" font-weight="700">Controllers</text>
+    <text x="50" y="198" fill="#78350f">CrudController&lt;T&gt;</text>
+    <text x="50" y="214" fill="#78350f">SalesInvoices, JE, Reports</text>
+
+    <rect x="222" y="160" width="180" height="64" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+    <text x="232" y="180" font-weight="700">Services</text>
+    <text x="232" y="198" fill="#1e3a8a">Posting · Inventory · HR</text>
+    <text x="232" y="214" fill="#1e3a8a">DocumentNumbering</text>
+
+    <rect x="414" y="160" width="180" height="64" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text x="424" y="180" font-weight="700">Reports dispatcher</text>
+    <text x="424" y="198" fill="#14532d">Ledger · Party · Inventory</text>
+    <text x="424" y="214" fill="#14532d">Tax (VAT return)</text>
+
+    <rect x="606" y="160" width="234" height="64" rx="8" fill="#ede9fe" stroke="#c4b5fd"/>
+    <text x="616" y="180" font-weight="700">Identity</text>
+    <text x="616" y="198" fill="#5b21b6">UserManager · RoleManager</text>
+    <text x="616" y="214" fill="#5b21b6">Owner / Admin / 7 more</text>
+  </g>
+
+  <rect x="20" y="260" width="840" height="100" rx="10" fill="#0f172a"/>
+  <text x="40" y="288" font-family="Inter,Arial" font-size="13" font-weight="700" fill="#fff">Persistence layer</text>
+  <text x="40" y="308" font-family="Inter,Arial" font-size="11" fill="#a5b4fc">EF Core 8 · ApplicationDbContext · SQLite (bestgen.db)</text>
+  <text x="40" y="326" font-family="Inter,Arial" font-size="10" fill="#94a3b8">~70 entities · enums stored as strings · decimal(18,2) for money · paired stock movements</text>
+  <text x="40" y="346" font-family="Inter,Arial" font-size="10" fill="#94a3b8">Schema regenerates from models on boot — no migrations checked in</text>
+
+  <line x1="440" y1="100" x2="440" y2="120" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="440" y1="240" x2="440" y2="260" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+</svg>
+</div>
+
+<h3>Layered responsibilities</h3>
+<ul>
+  <li><strong>Browser layer</strong> renders Razor views compiled by ASP.NET. The right-side RTL sidebar, sticky topbar, and form panels are reused across every screen via shared partials.</li>
+  <li><strong>Controllers</strong> stay thin. The generic <code>CrudController&lt;TEntity&gt;</code> handles index/create/edit/delete for ~30 simple modules; only Sales/Purchase invoices, Journal Entries, Reports, and Settings have hand-rolled controllers.</li>
+  <li><strong>Services</strong> hold the business rules. Each transaction type has a dedicated service that orchestrates calculation → stock movement → journal posting in the right order.</li>
+  <li><strong>Reports dispatcher</strong> centralizes 13 live reports. <code>ReportService.RunAsync(key, filters)</code> returns a generic <code>ReportResult</code> structure rendered by a single Razor view.</li>
+  <li><strong>Persistence</strong> is a single EF Core <code>DbContext</code> writing to SQLite. Decimal precision, enum-to-string conversions, unique indexes, and FK delete behaviors are configured in <code>OnModelCreating</code>.</li>
+</ul>
+
+<h3>The transaction lifecycle</h3>
+<p>Every transaction module that mutates the ledger or stock follows the same three-step lifecycle, exposed through hooks on <code>CrudController</code>:</p>
+
+<table class="matrix">
+  <thead><tr><th style="width:25%">Hook</th><th style="width:35%">When it fires</th><th>Service contract</th></tr></thead>
+  <tbody>
+    <tr><td><code>BeforeCreateSaveAsync</code></td><td>Before the row is added to the change tracker</td><td><code>service.PrepareAsync(entity)</code> — generate document number, default missing fields</td></tr>
+    <tr><td><code>AfterAddBeforeSaveAsync</code></td><td>After the row is added but before <code>SaveChanges</code></td><td><code>service.PostAsync(entity)</code> — append journal lines, append stock movements</td></tr>
+    <tr><td><code>AfterSaveAsync(entity, isCreate)</code></td><td>After <code>SaveChanges</code> returns the new id</td><td><code>service.ApplyAsync(entity)</code> — recalc party balance, stamp links that need the id</td></tr>
+  </tbody>
+</table>
+
+<p>This pattern means every transaction is atomic: either the source document, the journal entry, the stock movement, and the party balance recalculation all commit together, or nothing does.</p>
+
+<h2>4 · Frontend &amp; design system</h2>
+
+<p>The UI is intentionally restrained: a calm, premium palette built around a navy-and-emerald accent system, generous whitespace, and a strict typographic scale. Nothing is borrowed from competing accounting products.</p>
+
+<h3>Color palette (CSS variables)</h3>
+<div class="palette">
+  <div class="swatch" style="background:#f7f6f1;color:#0f172a;">--canvas<small>#f7f6f1</small></div>
+  <div class="swatch" style="background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;">--surface<small>#ffffff</small></div>
+  <div class="swatch" style="background:#0f172a;">--navy<small>#0f172a</small></div>
+  <div class="swatch" style="background:#10b981;">--emerald<small>#10b981</small></div>
+  <div class="swatch" style="background:#4f46e5;">--blue<small>#4f46e5</small></div>
+  <div class="swatch" style="background:#f59e0b;">--warning<small>#f59e0b</small></div>
+  <div class="swatch" style="background:#ef4444;">--danger<small>#ef4444</small></div>
+  <div class="swatch" style="background:#64748b;">--muted<small>#64748b</small></div>
+</div>
+
+<h3>Layout grammar</h3>
+<ul>
+  <li><strong>Right-side RTL sidebar</strong> with collapsible groups and sub-icons — collapses to a 64-pixel rail on demand and re-expands on hover with a smooth animation.</li>
+  <li><strong>Sticky topbar</strong> with workspace search, language chip (AR/EN), dark-mode chip, and a user menu.</li>
+  <li><strong>Page header</strong> on every screen via <code>_PageHeader</code> partial: title + description + optional CTA.</li>
+  <li><strong>Metric grid</strong> for KPI dashboards (<code>.metrics-grid</code>), <strong>data panel</strong> for tables, <strong>form panel</strong> for create/edit, <strong>details panel</strong> for read-only views, <strong>report grid</strong> for the Reports Center.</li>
+</ul>
+
+<h3>Reusable partials</h3>
+<div class="grid-3">
+  <div class="card"><h4>_PageHeader</h4><p>Title, description, optional create button. Top of every page.</p></div>
+  <div class="card"><h4>_DashboardCard</h4><p>KPI cards with sparkline and delta vs. last month.</p></div>
+  <div class="card"><h4>_StatusBadge</h4><p>Colored badge resolved via <code>EntityDisplayHelper.StatusClass</code>.</p></div>
+  <div class="card"><h4>_SearchBar</h4><p>List-view filter — search + status + apply.</p></div>
+  <div class="card"><h4>_EmptyState</h4><p>Friendly message when a list/index has no rows.</p></div>
+  <div class="card"><h4>_ActionButtons</h4><p>View / Edit / Delete trio with anti-forgery on delete.</p></div>
+</div>
+
+<h3>Bilingual rendering</h3>
+<p>Every view begins with <code>CultureInfo.CurrentUICulture</code>; a tiny inline <code>T(en, ar)</code> helper picks the right string. Entity field labels, module titles, status enum translations, and report column headers all live in <code>Helpers/EntityDisplayHelper.cs</code> as bilingual dictionaries — adding a new language requires only an extra dictionary, not new views.</p>
+
+<div class="figure">
+  <img src="img/dashboard.png" alt="Bestgen Dashboard (English)" />
+  <div class="caption">Figure 2 — Dashboard in English LTR mode. KPIs are computed by <code>DashboardService</code> from live ledger and inventory data.</div>
+</div>
+
+<div class="figure">
+  <img src="img/dashboard-ar.png" alt="Bestgen Dashboard (Arabic)" />
+  <div class="caption">Figure 3 — The same Dashboard in Arabic RTL mode. Layout, charts, currency, and labels all flip on the language switch.</div>
+</div>
+
+<h2>5 · Backend services &amp; the posting engine</h2>
+
+<p>The backend is service-oriented. Controllers stay thin and delegate to a dedicated service per transaction type. The services share a small cluster of foundation primitives that every business operation routes through.</p>
+
+<h3>Foundation services</h3>
+<table class="matrix">
+  <thead><tr><th>Service</th><th>Responsibility</th></tr></thead>
+  <tbody>
+    <tr><td><code>ChartOfAccounts</code></td><td>Single source of truth for canonical account codes (Cash 1000, AR 1100, Inventory 1200, AP 2000, VAT 2100/2110, Sales 4000, COGS 5000, …). Throws <code>MissingAccountException</code> if a required code is absent.</td></tr>
+    <tr><td><code>StockMovementService</code></td><td>The only path that mutates stock. Writes paired audit rows with sign convention <em>positive = inbound, negative = outbound</em> and a typed reference (<code>EntityName:Id</code>).</td></tr>
+    <tr><td><code>AccountingService</code></td><td>Builds and validates journal entries. <code>BuildAndAddEntryAsync(date, sourceModule, description, lines)</code> validates that debits = credits and adds the entry to the change tracker.</td></tr>
+    <tr><td><code>PartyBalanceService</code></td><td>Recomputes <code>Customer.CurrentBalance</code> / <code>Supplier.CurrentBalance</code> from the primary documents — invoices minus receipts, credits, refunds, plus opening balance.</td></tr>
+    <tr><td><code>InvoiceCalculationService</code></td><td>Front-and-back recalculation of invoice subtotal, discount, VAT, and grand total — used by both Sales and Purchase invoices and validated server-side after the form posts.</td></tr>
+    <tr><td><code>DocumentNumberingService</code></td><td>Per-document numbering with format strings (<code>{prefix}-{yyyy}-{0000}</code>), annual reset, current sequence persistence.</td></tr>
+  </tbody>
+</table>
+
+<h3>Posting flow — Sales Invoice example</h3>
+<div class="arch">
+<svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+  <g font-family="Inter,Arial" font-size="10.5">
+    <rect x="20" y="20" width="160" height="60" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="30" y="42" font-weight="700" fill="#312e81">User submits form</text>
+    <text x="30" y="60" fill="#4338ca">SalesInvoicesController</text>
+
+    <rect x="200" y="20" width="170" height="60" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+    <text x="210" y="42" font-weight="700" fill="#78350f">Calculate totals</text>
+    <text x="210" y="60" fill="#78350f">InvoiceCalculationService</text>
+
+    <rect x="390" y="20" width="170" height="60" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+    <text x="400" y="42" font-weight="700" fill="#1e3a8a">Reduce stock</text>
+    <text x="400" y="60" fill="#1e3a8a">StockMovementService</text>
+
+    <rect x="580" y="20" width="170" height="60" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text x="590" y="42" font-weight="700" fill="#14532d">Post journal</text>
+    <text x="590" y="60" fill="#14532d">AccountingService</text>
+
+    <rect x="770" y="20" width="90" height="60" rx="8" fill="#fde68a" stroke="#fbbf24"/>
+    <text x="780" y="42" font-weight="700" fill="#78350f">Save</text>
+    <text x="780" y="60" fill="#78350f">EF Core</text>
+
+    <rect x="20" y="120" width="320" height="80" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="30" y="142" font-weight="700" fill="#0f172a">Posted journal lines</text>
+    <text x="30" y="162" fill="#1e293b">DR 1100 Accounts Receivable  · grand total</text>
+    <text x="30" y="178" fill="#1e293b">CR 4000 Sales Revenue          · subtotal</text>
+    <text x="30" y="194" fill="#1e293b">CR 2100 VAT Output              · vat amount</text>
+
+    <rect x="360" y="120" width="320" height="80" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="370" y="142" font-weight="700" fill="#0f172a">Posted journal lines</text>
+    <text x="370" y="162" fill="#1e293b">DR 5000 COGS                   · cost of goods</text>
+    <text x="370" y="178" fill="#1e293b">CR 1200 Inventory              · cost of goods</text>
+    <text x="370" y="194" fill="#1e293b">+ paired StockMovement rows recorded</text>
+
+    <line x1="180" y1="50" x2="200" y2="50" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="370" y1="50" x2="390" y2="50" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="560" y1="50" x2="580" y2="50" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="750" y1="50" x2="770" y2="50" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+  </g>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10" fill="#64748b"/></marker></defs>
+</svg>
+</div>
+
+<h3>Transaction services (full inventory)</h3>
+<div class="grid-2">
+  <div>
+    <h4>Sales side</h4>
+    <ul>
+      <li><code>SalesInvoiceService</code> — DR AR, CR Sales + VAT, plus COGS/Inventory pair</li>
+      <li><code>SalesReceiptService</code> — DR Cash/Bank, CR AR</li>
+      <li><code>SalesRefundReceiptService</code> — DR Sales Returns, CR Cash/Bank</li>
+      <li><code>CreditNoteService</code> — DR Sales Returns + VAT-Out, CR AR</li>
+      <li><code>DeliveryNoteService</code> — number generation only (stock stays on the invoice flow)</li>
+    </ul>
+  </div>
+  <div>
+    <h4>Purchase side</h4>
+    <ul>
+      <li><code>PurchaseInvoiceService</code> — DR Inventory + VAT-In, CR AP</li>
+      <li><code>SupplierPaymentService</code> — DR AP, CR Cash/Bank</li>
+      <li><code>PurchaseRefundReceiptService</code> — DR Cash/Bank, CR Purchase Returns</li>
+      <li><code>DebitNoteService</code> — DR AP, CR Purchase Returns + VAT-In</li>
+      <li><code>GoodsReceiptService</code> — number generation only</li>
+    </ul>
+  </div>
+  <div>
+    <h4>Inventory ops</h4>
+    <ul>
+      <li><code>StockTransferService</code> — paired stock movements, no GL impact</li>
+      <li><code>InventoryCountService</code> — variance posted to <code>5800 Inventory Variance</code></li>
+      <li><code>OpeningBalanceService</code> — bootstraps the books against <code>3200 Opening Balance Equity</code></li>
+    </ul>
+  </div>
+  <div>
+    <h4>HR &amp; assets</h4>
+    <ul>
+      <li><code>PayrollService</code> · <code>EmployeeBonusService</code> · <code>EmployeeDeductionService</code></li>
+      <li><code>EmployeeLoanService</code> — DR AR-Employees, CR Cash on disbursement</li>
+      <li><code>EmployeeReceiptService</code> — DR Salaries Payable, CR Cash</li>
+      <li><code>FixedAssetService</code> — DR Fixed Assets, CR Cash on acquisition</li>
+      <li><code>AssetRentalService</code> — number generation (recurring revenue deferred)</li>
+    </ul>
+  </div>
+</div>
+
+<h2>6 · Module catalog (sidebar)</h2>
+
+<p>The right-side sidebar groups every module into nine canonical sections. Every link resolves to a working page — empty modules render a polished empty-state, never a 404.</p>
+
+<div class="module-row"><strong>1 · لوحة التحكم — Dashboard</strong><em>KPI grid with revenue, expenses, gross margin, AR/AP balances, stock alerts. Charts pull from <code>DashboardService</code>.</em><span><span class="pill green">Ready</span></span></div>
+
+<div class="module-row"><strong>2 · المبيعات — Sales</strong><em>Customers · Sales Quotations · Sales Invoices · Sales Receipts · Sales Refund Receipts · Credit Notes · Delivery Notes · Sales Pricing Policies.</em><span><span class="pill green">Posting wired</span></span></div>
+
+<div class="module-row"><strong>3 · المشتريات — Purchases</strong><em>Suppliers · Purchase Orders · Purchase Invoices · Supplier Payments · Purchase Refund Receipts · Debit Notes · Goods Receipts · Purchase Pricing Policies.</em><span><span class="pill green">Posting wired</span></span></div>
+
+<div class="module-row"><strong>4 · المنتجات والمخزون — Products &amp; inventory</strong><em>Product Categories · Products · Warehouses · Inventory Counts · Stock Transfers.</em><span><span class="pill green">Movements audited</span></span></div>
+
+<div class="module-row"><strong>5 · الأصول الثابتة — Fixed assets</strong><em>Fixed Assets · Asset Tags · Asset Rentals.</em><span><span class="pill green">Acquisition posts</span><span class="pill amber">Depreciation Phase 9</span></span></div>
+
+<div class="module-row"><strong>6 · المحاسبة المتقدمة — Advanced accounting</strong><em>Accounts (chart of accounts) · Journal Entries · General Receipts · Opening Balances · Reporting Dimensions.</em><span><span class="pill green">Live</span></span></div>
+
+<div class="module-row"><strong>7 · الموارد البشرية — Human resources</strong><em>Employees · Employee Documents · Payroll Entries · Deductions · Bonuses · Loans · Employee Receipts · Employee Requests.</em><span><span class="pill green">All post to GL</span></span></div>
+
+<div class="module-row"><strong>8 · التقارير — Reports Center</strong><em>13 live reports across Accounting · Sales · Purchases · Inventory · HR.</em><span><span class="pill green">Live data</span></span></div>
+
+<div class="module-row"><strong>9 · الإعدادات — Settings</strong><em>Company profile · Tax · Invoice numbering · Currency · Numbering policies · Branches · Users &amp; roles · Future integrations.</em><span><span class="pill green">All real forms</span></span></div>
+
+<div class="figure">
+  <img src="img/sales-list.png" alt="Sales invoices list" />
+  <div class="caption">Figure 4 — Sales invoices list view, rendered via the generic data-panel template with <code>_SearchBar</code> on top and <code>_ActionButtons</code> per row.</div>
+</div>
+
+<div class="figure">
+  <img src="img/sales-create.png" alt="Sales invoice create form" />
+  <div class="caption">Figure 5 — Sales invoice multi-line create form. The form posts to <code>SalesInvoicesController.Create</code>, which delegates to <code>SalesInvoiceService</code> for calc + stock + journal in a single transaction.</div>
+</div>
+
+<div class="figure">
+  <img src="img/products.png" alt="Products module" />
+  <div class="caption">Figure 6 — Products master with current stock, sell price, and minimum levels. Adding an entity is a 5-line affair against <code>CrudController&lt;T&gt;</code>.</div>
+</div>
+
+<div class="figure">
+  <img src="img/journal.png" alt="Journal entries" />
+  <div class="caption">Figure 7 — Journal entries module. Manual entries route through <code>JournalEntryService</code>, which validates that debits = credits before saving.</div>
+</div>
+
+<h2>7 · Reports Center</h2>
+
+<p>The Reports Center replaces what used to be 26 placeholder cards with a dispatcher pattern: <code>ReportService.RunAsync(string key, ReportFilters)</code> returns a generic <code>ReportResult</code> rendered by a single Razor view (<code>Views/Reports/Details.cshtml</code>). Adding a new report is a switch-case + a new method.</p>
+
+<h3>Live reports (Phase 7 — implemented)</h3>
+<div class="grid-2">
+  <div class="card"><h4>General ledger</h4><p>Account-by-account journal lines with running balance over the chosen period.</p></div>
+  <div class="card"><h4>Trial balance</h4><p>Sum of debits and credits per account; verification that the books are balanced.</p></div>
+  <div class="card"><h4>Income statement</h4><p>Revenue minus expenses for any period.</p></div>
+  <div class="card"><h4>Balance sheet</h4><p>Point-in-time assets vs. liabilities &amp; equity, including current-period net income flowing into retained.</p></div>
+  <div class="card"><h4>Account statement</h4><p>Movement &amp; balance for any single account.</p></div>
+  <div class="card"><h4>General receipts summary</h4><p>Receipt and payment vouchers grouped by category.</p></div>
+  <div class="card"><h4>Customer / supplier statements</h4><p>Document-level history with running balance per party.</p></div>
+  <div class="card"><h4>Customer / supplier balances</h4><p>Snapshot of all party balances.</p></div>
+  <div class="card"><h4>Aging receivables / payables</h4><p>0–30 / 31–60 / 61–90 / 91–120 / 120+ buckets.</p></div>
+  <div class="card"><h4>Current stock</h4><p>Per-warehouse on-hand quantity and valuation.</p></div>
+  <div class="card"><h4>Stock movement ledger</h4><p>Audit trail of every quantity change.</p></div>
+  <div class="card"><h4>VAT return</h4><p>Output VAT − input VAT, with credit/debit note adjustments.</p></div>
+</div>
+
+<div class="figure">
+  <img src="img/reports.png" alt="Reports Center" />
+  <div class="caption">Figure 8 — Reports Center hub. Reports are grouped into Accounting · Sales · Purchases · Inventory &amp; products · HR.</div>
+</div>
+
+<div class="figure">
+  <img src="img/report-tb.png" alt="Trial Balance report" />
+  <div class="caption">Figure 9 — Trial Balance report. Date filters route through <code>ReportFilters</code>; the column/row/total shape is universal across reports.</div>
+</div>
+
+<h2>8 · Settings &amp; identity</h2>
+
+<p>Settings is split into eight dedicated screens, each backed by a real form (no placeholders left).</p>
+
+<table class="matrix">
+  <thead><tr><th>Page</th><th>What it controls</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Company profile</strong></td><td>Names (AR/EN), VAT number, commercial registration, address, country, default VAT rate, invoice prefixes, logo upload.</td></tr>
+    <tr><td><strong>Tax settings</strong></td><td>Default VAT rate, VAT number, ZATCA enable flag, ZATCA taxpayer ID, invoice QR toggle.</td></tr>
+    <tr><td><strong>Invoice settings</strong></td><td>Sales/purchase invoice prefixes, AR/EN footer text, QR display toggle.</td></tr>
+    <tr><td><strong>Currency settings</strong></td><td>Base ISO currency code (default <code>SAR</code>) and display symbol.</td></tr>
+    <tr><td><strong>Numbering settings</strong></td><td>List of <code>NumberingPolicy</code> rows — one per document type, with prefix, format pattern, current sequence, annual-reset flag.</td></tr>
+    <tr><td><strong>Branches</strong></td><td>Branch CRUD (code, AR/EN name, city, address, phone, manager, active flag). Wired into the generic CRUD framework.</td></tr>
+    <tr><td><strong>Users &amp; permissions</strong></td><td>Identity-backed CRUD: list users with role badges and lock state, create user with role assignment, edit user (rename / change roles / reset password), delete user.</td></tr>
+    <tr><td><strong>Future integrations</strong></td><td>Roadmap card grid: payment gateways, bank reconciliation, WhatsApp Business, ZATCA Phase 2, delivery providers, transactional email.</td></tr>
+  </tbody>
+</table>
+
+<div class="figure">
+  <img src="img/settings.png" alt="Settings hub" />
+  <div class="caption">Figure 10 — Settings hub. Each card opens a real form; nothing is a placeholder.</div>
+</div>
+
+<div class="figure">
+  <img src="img/users.png" alt="Users &amp; permissions" />
+  <div class="caption">Figure 11 — Users &amp; permissions. Role badges, lock state, create / edit / delete actions wired through ASP.NET Core Identity.</div>
+</div>
+
+<div class="figure">
+  <img src="img/branches.png" alt="Branches" />
+  <div class="caption">Figure 12 — Branches. Auto-rendered through <code>CrudController&lt;Branch&gt;</code> — no controller code needed beyond the 5-line subclass.</div>
+</div>
+
+<h2>9 · Data model &amp; chart of accounts</h2>
+
+<h3>Entity inventory (high-level)</h3>
+<div class="grid-3">
+  <div class="card"><h4>Master data</h4><p>Customer · Supplier · Product · ProductCategory · Warehouse · Employee · AssetTag · Branch.</p></div>
+  <div class="card"><h4>Sales documents</h4><p>SalesQuotation(+Items) · SalesInvoice(+Items) · SalesReceipt · SalesRefundReceipt · CreditNote · DeliveryNote(+Items) · SalesPricePolicy.</p></div>
+  <div class="card"><h4>Purchase documents</h4><p>PurchaseOrder(+Items) · PurchaseInvoice(+Items) · SupplierPayment · PurchaseRefundReceipt · DebitNote · GoodsReceipt(+Items) · PurchasePricePolicy.</p></div>
+  <div class="card"><h4>Inventory ops</h4><p>InventoryCount(+Items) · StockTransfer(+Items) · StockMovement (audit trail).</p></div>
+  <div class="card"><h4>Accounting</h4><p>Account · JournalEntry(+Lines) · GeneralReceipt · OpeningBalance · ReportingDimension.</p></div>
+  <div class="card"><h4>HR</h4><p>Employee · EmployeeDocument · PayrollEntry · EmployeeDeduction · EmployeeBonus · EmployeeLoan · EmployeeReceipt · EmployeeRequest.</p></div>
+  <div class="card"><h4>Fixed assets</h4><p>FixedAsset · AssetRental · AssetTag.</p></div>
+  <div class="card"><h4>Cash &amp; banks</h4><p>CashBox · BankAccount · Expense.</p></div>
+  <div class="card"><h4>Configuration</h4><p>CompanySettings · Branch · NumberingPolicy.</p></div>
+</div>
+
+<h3>Seeded chart of accounts</h3>
+<table class="matrix">
+  <thead><tr><th>Code</th><th>Account</th><th>Type</th><th>Used by</th></tr></thead>
+  <tbody>
+    <tr><td>1000</td><td>Cash</td><td>Asset</td><td>All cash settlements</td></tr>
+    <tr><td>1010</td><td>Bank</td><td>Asset</td><td>All bank settlements</td></tr>
+    <tr><td>1100</td><td>Accounts Receivable</td><td>Asset</td><td>Sales invoices, receipts, credit notes</td></tr>
+    <tr><td>1110</td><td>AR – Employees</td><td>Asset</td><td>Employee loans</td></tr>
+    <tr><td>1200</td><td>Inventory</td><td>Asset</td><td>Stock-bearing flows (purchase, sale, transfer, count)</td></tr>
+    <tr><td>1500</td><td>Fixed Assets</td><td>Asset</td><td>Asset acquisition</td></tr>
+    <tr><td>1510</td><td>Accumulated Depreciation</td><td>Contra-asset</td><td>Reserved — depreciation runner pending</td></tr>
+    <tr><td>2000</td><td>Accounts Payable</td><td>Liability</td><td>Purchase invoices, payments, debit notes</td></tr>
+    <tr><td>2100</td><td>VAT Output</td><td>Liability</td><td>Sales VAT</td></tr>
+    <tr><td>2110</td><td>VAT Input</td><td>Asset</td><td>Purchase VAT</td></tr>
+    <tr><td>2200</td><td>Salaries Payable</td><td>Liability</td><td>Approved-but-unpaid payroll</td></tr>
+    <tr><td>2220</td><td>Loans Payable</td><td>Liability</td><td>Reserved</td></tr>
+    <tr><td>2230</td><td>Goods Received Not Invoiced</td><td>Liability</td><td>Reserved for goods-receipt clearing</td></tr>
+    <tr><td>2300</td><td>Customer Advances</td><td>Liability</td><td>Reserved</td></tr>
+    <tr><td>3000</td><td>Equity</td><td>Equity</td><td>—</td></tr>
+    <tr><td>3100</td><td>Retained Earnings</td><td>Equity</td><td>Balance sheet rollover</td></tr>
+    <tr><td>3200</td><td>Opening Balance Equity</td><td>Equity</td><td>OpeningBalance bootstrap</td></tr>
+    <tr><td>4000</td><td>Sales Revenue</td><td>Revenue</td><td>Sales invoices</td></tr>
+    <tr><td>4100</td><td>Service Revenue</td><td>Revenue</td><td>Reserved</td></tr>
+    <tr><td>4200</td><td>Asset Rental Revenue</td><td>Revenue</td><td>AssetRental</td></tr>
+    <tr><td>4900</td><td>Sales Returns</td><td>Contra-revenue</td><td>Refunds, credit notes</td></tr>
+    <tr><td>5000</td><td>COGS</td><td>Expense</td><td>Sales invoices</td></tr>
+    <tr><td>5100</td><td>Rent Expense</td><td>Expense</td><td>Recurring expenses</td></tr>
+    <tr><td>5200</td><td>Salary Expense</td><td>Expense</td><td>Payroll</td></tr>
+    <tr><td>5210</td><td>Bonus Expense</td><td>Expense</td><td>Bonuses</td></tr>
+    <tr><td>5300</td><td>Utilities Expense</td><td>Expense</td><td>Recurring expenses</td></tr>
+    <tr><td>5400</td><td>Misc Expense</td><td>Expense</td><td>Misc paid expenses</td></tr>
+    <tr><td>5700</td><td>Depreciation Expense</td><td>Expense</td><td>Reserved</td></tr>
+    <tr><td>5800</td><td>Inventory Variance</td><td>Expense</td><td>Inventory count adjustments</td></tr>
+    <tr><td>5900</td><td>Purchase Returns</td><td>Contra-expense</td><td>Refunds, debit notes</td></tr>
+  </tbody>
+</table>
+
+<h2>10 · Current status &amp; what is left</h2>
+
+<p>Bestgen has shipped through Phase 8 of the original 10-phase production plan. Phases 0 through 8 are complete and verified by smoke tests. Phases 9 and 10 are queued.</p>
+
+<div class="phase done">
+  <h4>Phase 0 · Foundation <span class="pill green">Done</span></h4>
+  <p><code>StockMovement</code> audit trail · <code>ChartOfAccounts</code> resolver · <code>PartyBalanceService</code> · <code>BuildAndAddEntryAsync</code> shared posting helper · 28 chart-of-account codes seeded.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 1 · Sales-side ledger wire-up <span class="pill green">Done</span></h4>
+  <p>SalesReceipts · SalesRefundReceipts · CreditNotes · DeliveryNotes — all post balanced journals; party balances recalculate on save.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 2 · Purchase-side ledger wire-up <span class="pill green">Done</span></h4>
+  <p>SupplierPayments · PurchaseRefundReceipts · DebitNotes · GoodsReceipts — symmetric to the sales side.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 3 · Inventory operations <span class="pill green">Done</span></h4>
+  <p>StockTransfers (paired movements) · InventoryCounts (variance posted) · OpeningBalances (bootstraps the books).</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 4 · Accounting documents <span class="pill green">Done</span></h4>
+  <p><code>JournalEntryService</code> extracted from the controller · <code>GeneralReceiptService</code> with cash-account rebalancing · period-lock hook in place.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 5 · HR to the ledger <span class="pill green">Done</span></h4>
+  <p>Payroll · Bonus · Deduction · Loan · EmployeeReceipt — all five flows post to the ledger with the right cash / payable split based on status.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 6 · Fixed assets &amp; rentals <span class="pill green">Done</span></h4>
+  <p><code>FixedAssetService.PostAcquisitionAsync</code> books the asset; <code>AssetRentalService</code> generates rental numbers. Recurring rental revenue and monthly depreciation are queued for Phase 9.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 7 · Reports Center <span class="pill green">Done</span></h4>
+  <p>Dispatcher pattern · 13 live reports · single Razor renderer · date filter wiring · placeholder fallback for the long-tail reports.</p>
+</div>
+
+<div class="phase done">
+  <h4>Phase 8 · Settings completion <span class="pill green">Done</span></h4>
+  <p>Real Tax / Invoice / Currency / Numbering / Branches forms · Identity Users CRUD · <code>DocumentNumberingService</code> · 8 default <code>NumberingPolicy</code> rows seeded · 2 default branches seeded · logo upload.</p>
+</div>
+
+<div class="phase pending">
+  <h4>Phase 9 · Hardening <span class="pill amber">Queued</span></h4>
+  <ul>
+    <li>Tighten Identity password rules in <code>Program.cs</code> (post-seed <code>ResetPasswordAsync</code> keeps dev login alive).</li>
+    <li><code>[Authorize(Roles = "...")]</code> on every controller per the role matrix.</li>
+    <li><code>[Timestamp] byte[] RowVersion</code> on financial entities for optimistic concurrency.</li>
+    <li><code>ServiceResult&lt;T&gt;</code> with validation error list returned to controllers.</li>
+    <li><code>CreatedBy</code> / <code>UpdatedBy</code> audit log via <code>SaveChangesInterceptor</code>.</li>
+    <li>Period locking — block journals dated before <code>CompanySettings.LockedThrough</code>.</li>
+    <li><code>MonthEndService</code> hosted job for depreciation runs and aging snapshots.</li>
+  </ul>
+</div>
+
+<div class="phase pending">
+  <h4>Phase 10 · Tests &amp; release <span class="pill amber">Queued</span></h4>
+  <ul>
+    <li>xUnit project at <code>tests/Bestgen.Tests/</code> with EF Core in-memory provider.</li>
+    <li>End-to-end coverage: sales invoice posts balanced journal + reduces stock, purchase invoice + payment, stock transfer pairs to zero, period lock blocks back-dated entries, <code>IsBalanced</code> rejects unbalanced journals, every report against a seeded fixture.</li>
+    <li><code>tests/SMOKE.md</code> 30-minute click-through manual checklist before each release.</li>
+  </ul>
+</div>
+
+<h3>Out-of-scope (deliberate)</h3>
+<ul>
+  <li><strong>EF Migrations</strong> — currently using <code>EnsureCreatedAsync</code>; should be replaced with proper migrations before going to production with real customer data.</li>
+  <li><strong>Multi-currency &amp; FX</strong> — base currency is single-tenant; multi-currency wallet not modeled.</li>
+  <li><strong>ZATCA Phase 2 clearance</strong> — taxpayer ID and QR toggle exist; the actual FATOORA submission integration is on the roadmap.</li>
+  <li><strong>EF Migrations / multi-tenant tenancy</strong> — Bestgen is single-tenant by design at this stage.</li>
+</ul>
+
+<h2>11 · Operating the application</h2>
+
+<h3>Day-zero bootstrap</h3>
+<ol>
+  <li>Clone the repository and run <code>dotnet restore</code>.</li>
+  <li>Run <code>dotnet run</code> — the seeder creates the SQLite file, seeds 9 roles, 28 accounts, 2 admin users, 2 branches, 8 numbering policies, plus demo data.</li>
+  <li>Visit <code>http://localhost:5000</code> and sign in with <code>max@bestgen.com / 123</code>.</li>
+  <li>Open <em>Settings → Company profile</em> and replace the seeded company name, VAT number, commercial registration, and logo.</li>
+  <li>Open <em>Settings → Users &amp; permissions</em> and add real users with the appropriate roles.</li>
+</ol>
+
+<h3>Day-to-day flows</h3>
+<ul>
+  <li><strong>Sell something</strong> — Customers → Sales Invoices → New. Lines, VAT, totals, journal, and stock all process in one save.</li>
+  <li><strong>Get paid</strong> — Sales Receipts → New. Pick the customer and the cash/bank account.</li>
+  <li><strong>Buy something</strong> — Suppliers → Purchase Invoices → New. Same multi-line shape as the sales side.</li>
+  <li><strong>Pay a supplier</strong> — Supplier Payments → New.</li>
+  <li><strong>Reconcile a count</strong> — Inventory Counts → New, mark <em>Approved</em> — variance is posted automatically.</li>
+  <li><strong>Look at the books</strong> — Reports → Trial Balance / Income Statement / Balance Sheet — all live.</li>
+</ul>
+
+<h3>Typical pitfalls &amp; how Bestgen catches them</h3>
+<table class="matrix">
+  <thead><tr><th>Pitfall</th><th>Built-in guard</th></tr></thead>
+  <tbody>
+    <tr><td>Unbalanced journal</td><td><code>AccountingService.BuildAndAddEntryAsync</code> throws if debits ≠ credits.</td></tr>
+    <tr><td>Missing chart-of-account code</td><td><code>ChartOfAccounts.ResolveAsync</code> throws <code>MissingAccountException</code>.</td></tr>
+    <tr><td>Stock mutation outside the audit trail</td><td>Nothing else writes to <code>Product.CurrentStock</code> — every change goes through <code>StockMovementService</code>.</td></tr>
+    <tr><td>Stale party balance</td><td><code>PartyBalanceService.RecalculateCustomer/SupplierAsync</code> recomputes from primary docs after every relevant save.</td></tr>
+    <tr><td>Duplicate document number</td><td>Unique indexes on every numbered document type — saved at <code>OnModelCreating</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>12 · Conclusion</h2>
+
+<p style="font-size:12pt;line-height:1.85;">In one sentence: <strong>Bestgen</strong> is a complete, bilingual accounting and inventory product engineered for Saudi small and mid-sized businesses. It solves three problems at once that owners face daily — scattered books across Excel sheets, no clear visibility into actual warehouse stock, and the time lost preparing tax and financial reports — by replacing them with one cohesive system that ships with proper double-entry accounting from day one.</p>
+
+<div class="grid-3" style="margin-top:14pt;">
+  <div class="card"><h4>What Bestgen does</h4><p>Runs the full business cycle: issues quotations, posts invoices, records payments, deducts stock, and writes the journal entry to the general ledger — all in a single save.</p></div>
+  <div class="card"><h4>Why it's different</h4><p>The UI is Arabic-native, not translated. The ledger is properly double-entry. Reports query the live database — no mocked figures. Identity and roles are built in from day one.</p></div>
+  <div class="card"><h4>Who it's for</h4><p>The bookkeeper, the warehouse manager, the sales clerk, the purchasing officer, and the HR clerk in a small or mid-sized company — each finds their section ready in the sidebar.</p></div>
+  <div class="card"><h4>Where it stands today</h4><p>9 sidebar sections complete. 9 roles. 28 chart-of-account codes. 13 live reports. ~70 entities in the database. 8 of 10 production-plan phases shipped.</p></div>
+  <div class="card"><h4>What's left to ship</h4><p>Three clusters of work: tighten password rules and per-controller role gates, add the period-lock guard, and write the automated test suite. Then replace <code>EnsureCreatedAsync</code> with proper EF migrations before the first real customer.</p></div>
+  <div class="card"><h4>When it's deployable</h4><p>Today, for in-house or private-server use. After Phases 9 and 10, it's ready for commercial release on real customer tenants.</p></div>
+</div>
+
+<div class="callout success" style="margin-top:18pt;"><strong>The takeaway in the simplest terms:</strong> Bestgen has crossed the line from scaffold to working product. Every save you make moves the ledger, the stock, and the party balance together. You can already pull real accounting and inventory reports out of it. What remains is a final hardening pass before commercial deployment — not a rebuild.</div>
+
+<hr/>
+<p class="keyline">© Bestgen — Project documentation generated from the live source tree on 2026-05-09.</p>
+
+</body>
+</html>

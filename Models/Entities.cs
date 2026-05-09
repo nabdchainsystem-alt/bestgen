@@ -422,4 +422,24 @@ public class CompanySettings
 
     [StringLength(260)]
     public string? LogoPath { get; set; }
+
+    [StringLength(8)]
+    public string BaseCurrency { get; set; } = "SAR";
+
+    [StringLength(16)]
+    public string CurrencySymbol { get; set; } = "ر.س";
+
+    [StringLength(600)]
+    public string? InvoiceFooterAr { get; set; }
+
+    [StringLength(600)]
+    public string? InvoiceFooterEn { get; set; }
+
+    public bool ShowInvoiceQr { get; set; } = true;
+    public bool ZatcaEnabled { get; set; }
+
+    [StringLength(60)]
+    public string? ZatcaTaxpayerId { get; set; }
+
+    public DateTime? LockedThrough { get; set; }
 }

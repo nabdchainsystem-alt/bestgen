@@ -1,12 +1,75 @@
+@using System.Globalization
 @model DashboardCardViewModel
+@{
+    var hasDelta = Model.DeltaPercent.HasValue;
+    var deltaClass = !hasDelta ? "flat"
+        : Model.DeltaPercent!.Value > 0 ? "up"
+        : Model.DeltaPercent!.Value < 0 ? "down"
+        : "flat";
+    var deltaIcon = !hasDelta ? "bi-dash"
+        : Model.DeltaPercent!.Value > 0 ? "bi-arrow-up"
+        : Model.DeltaPercent!.Value < 0 ? "bi-arrow-down"
+        : "bi-dash";
+
+    string FormatDelta(decimal d)
+    {
+        var sign = d > 0 ? "+" : (d < 0 ? "−" : "");
+        return $"{sign}{Math.Abs(d):0.#}%";
+    }
+
+    string BuildSparklinePath(IReadOnlyList<decimal> data, double width, double height)
+    {
+        if (data.Count < 2) return "";
+        var min = (double)data.Min();
+        var max = (double)data.Max();
+        var range = max - min == 0 ? 1.0 : max - min;
+        var stepX = width / (data.Count - 1);
+        var pad = 2.0;
+        var sb = new System.Text.StringBuilder();
+        for (var i = 0; i < data.Count; i++)
+        {
+            var x = i * stepX;
+            var y = height - pad - (((double)data[i] - min) / range) * (height - pad * 2);
+            sb.Append(i == 0 ? 'M' : 'L');
+            sb.Append(x.ToString("0.##", CultureInfo.InvariantCulture));
+            sb.Append(' ');
+            sb.Append(y.ToString("0.##", CultureInfo.InvariantCulture));
+            sb.Append(' ');
+        }
+        return sb.ToString().TrimEnd();
+    }
+}
 <div class="metric-card accent-@Model.Accent">
-    <div class="metric-icon"><i class="bi @Model.Icon"></i></div>
-    <div class="metric-body">
-        <span>@Model.Title</span>
-        <strong>@Model.Value</strong>
+    <div class="metric-head">
+        <span class="metric-label">@Model.Title</span>
         @if (!string.IsNullOrWhiteSpace(Model.Hint))
         {
-            <small>@Model.Hint</small>
+            <span class="metric-sublabel">@Model.Hint</span>
+        }
+    </div>
+    <div class="metric-icon"><i class="bi @Model.Icon"></i></div>
+
+    <div class="metric-value">@Model.Value</div>
+
+    <div class="metric-foot">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            @if (hasDelta)
+            {
+                <span class="metric-delta @deltaClass">
+                    <i class="bi @deltaIcon"></i>
+                    <span>@FormatDelta(Model.DeltaPercent!.Value)</span>
+                </span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.DeltaContext))
+            {
+                <span class="metric-delta-context">@Model.DeltaContext</span>
+            }
+        </div>
+        @if (Model.Sparkline != null && Model.Sparkline.Count >= 2)
+        {
+            <svg class="metric-spark" viewBox="0 0 80 24" preserveAspectRatio="none" aria-hidden="true">
+                <path d="@BuildSparklinePath(Model.Sparkline, 80, 24)" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
         }
     </div>
 </div>

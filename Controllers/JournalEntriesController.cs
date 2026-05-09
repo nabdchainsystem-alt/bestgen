@@ -14,12 +14,12 @@ namespace bestgen.Controllers;
 public class JournalEntriesController : Controller
 {
     private readonly ApplicationDbContext _context;
-    private readonly AccountingService _accountingService;
+    private readonly JournalEntryService _service;
 
-    public JournalEntriesController(ApplicationDbContext context, AccountingService accountingService)
+    public JournalEntriesController(ApplicationDbContext context, JournalEntryService service)
     {
         _context = context;
-        _accountingService = accountingService;
+        _service = service;
     }
 
     public async Task<IActionResult> Index(string? q, string? status)
@@ -56,12 +56,7 @@ public class JournalEntriesController : Controller
             .ThenInclude(line => line.Account)
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (entry is null)
-        {
-            return NotFound();
-        }
-
-        return View(entry);
+        return entry is null ? NotFound() : View(entry);
     }
 
     public async Task<IActionResult> Create()
@@ -74,8 +69,11 @@ public class JournalEntriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(JournalEntryFormViewModel model)
     {
-        var lines = BuildLines(model);
-        ValidateJournal(model, lines);
+        var lines = _service.BuildLines(model);
+        foreach (var error in _service.Validate(model, lines))
+        {
+            ModelState.AddModelError("Lines", error);
+        }
 
         if (!ModelState.IsValid)
         {
@@ -83,20 +81,7 @@ public class JournalEntriesController : Controller
             return View(model);
         }
 
-        var entry = new JournalEntry
-        {
-            EntryNumber = string.IsNullOrWhiteSpace(model.EntryNumber) ? await GenerateEntryNumberAsync() : model.EntryNumber,
-            EntryDate = model.EntryDate,
-            SourceModule = model.SourceModule,
-            Description = model.Description,
-            Status = model.Status,
-            TotalDebit = lines.Sum(line => line.Debit),
-            TotalCredit = lines.Sum(line => line.Credit),
-            Lines = lines
-        };
-
-        _context.JournalEntries.Add(entry);
-        await _context.SaveChangesAsync();
+        var entry = await _service.CreateAsync(model, lines);
         return RedirectToAction(nameof(Details), new { id = entry.Id });
     }
 
@@ -113,24 +98,18 @@ public class JournalEntriesController : Controller
         }
 
         await PopulateAccountsAsync();
-        return View(ToFormViewModel(entry));
+        return View(_service.ToFormViewModel(entry));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, JournalEntryFormViewModel model)
     {
-        var entry = await _context.JournalEntries
-            .Include(x => x.Lines)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (entry is null)
+        var lines = _service.BuildLines(model);
+        foreach (var error in _service.Validate(model, lines))
         {
-            return NotFound();
+            ModelState.AddModelError("Lines", error);
         }
-
-        var lines = BuildLines(model);
-        ValidateJournal(model, lines);
 
         if (!ModelState.IsValid)
         {
@@ -138,32 +117,14 @@ public class JournalEntriesController : Controller
             return View(model);
         }
 
-        entry.EntryDate = model.EntryDate;
-        entry.SourceModule = model.SourceModule;
-        entry.Description = model.Description;
-        entry.Status = model.Status;
-        entry.TotalDebit = lines.Sum(line => line.Debit);
-        entry.TotalCredit = lines.Sum(line => line.Credit);
-        _context.JournalEntryLines.RemoveRange(entry.Lines);
-        foreach (var line in lines)
-        {
-            line.JournalEntryId = entry.Id;
-        }
-        await _context.JournalEntryLines.AddRangeAsync(lines);
-
-        await _context.SaveChangesAsync();
+        await _service.UpdateAsync(id, model, lines);
         return RedirectToAction(nameof(Details), new { id });
     }
 
     public async Task<IActionResult> Delete(int id)
     {
         var entry = await _context.JournalEntries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        if (entry is null)
-        {
-            return NotFound();
-        }
-
-        return View(entry);
+        return entry is null ? NotFound() : View(entry);
     }
 
     [HttpPost, ActionName("Delete")]
@@ -184,61 +145,5 @@ public class JournalEntriesController : Controller
     {
         ViewBag.Accounts = await _context.Accounts.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.AccountCode).ToListAsync();
         ViewBag.Statuses = Enum.GetValues<JournalEntryStatus>();
-    }
-
-    private List<JournalEntryLine> BuildLines(JournalEntryFormViewModel model)
-    {
-        var lines = model.Lines
-            .Where(line => line.AccountId > 0 && (line.Debit > 0 || line.Credit > 0))
-            .Select(line => new JournalEntryLine
-            {
-                AccountId = line.AccountId,
-                Debit = line.Debit,
-                Credit = line.Credit,
-                Description = line.Description
-            })
-            .ToList();
-
-        model.TotalDebit = lines.Sum(line => line.Debit);
-        model.TotalCredit = lines.Sum(line => line.Credit);
-        return lines;
-    }
-
-    private void ValidateJournal(JournalEntryFormViewModel model, List<JournalEntryLine> lines)
-    {
-        if (lines.Count < 2)
-        {
-            ModelState.AddModelError("Lines", "يجب إضافة سطرين على الأقل للقيد.");
-        }
-
-        if (model.Status == JournalEntryStatus.Posted && !_accountingService.IsBalanced(lines))
-        {
-            ModelState.AddModelError("Lines", "لا يمكن ترحيل القيد قبل تساوي إجمالي المدين والدائن.");
-        }
-    }
-
-    private JournalEntryFormViewModel ToFormViewModel(JournalEntry entry) => new()
-    {
-        Id = entry.Id,
-        EntryNumber = entry.EntryNumber,
-        EntryDate = entry.EntryDate,
-        SourceModule = entry.SourceModule,
-        Description = entry.Description,
-        Status = entry.Status,
-        TotalDebit = entry.TotalDebit,
-        TotalCredit = entry.TotalCredit,
-        Lines = entry.Lines.Select(line => new JournalEntryLineFormViewModel
-        {
-            AccountId = line.AccountId,
-            Debit = line.Debit,
-            Credit = line.Credit,
-            Description = line.Description
-        }).ToList()
-    };
-
-    private async Task<string> GenerateEntryNumberAsync()
-    {
-        var next = await _context.JournalEntries.CountAsync() + 1;
-        return $"JE-{next:00000}";
     }
 }

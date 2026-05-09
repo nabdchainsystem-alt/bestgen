@@ -1,0 +1,51 @@
+@using System.Globalization
+@model IReadOnlyList<NumberingPolicy>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Numbering settings", "إعدادات الترقيم");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Numbering settings", "إعدادات الترقيم"),
+    T("Per-document-type numbering format and current sequence.", "تنسيق وتسلسل الترقيم لكل نوع من المستندات."),
+    "Create", "NumberingPolicies", T("Add numbering policy", "إضافة سياسة ترقيم")))" />
+
+<section class="data-panel">
+    @if (Model.Count == 0)
+    {
+        <partial name="_EmptyState" model="@(T("No numbering policies configured yet — using default per-service number generators.", "لا توجد سياسات ترقيم مكونة بعد — يتم استخدام المولدات الافتراضية في كل خدمة."))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@T("Document type", "نوع المستند")</th>
+                        <th>@T("Display name", "الاسم")</th>
+                        <th>@T("Prefix", "البادئة")</th>
+                        <th>@T("Format", "النمط")</th>
+                        <th>@T("Sequence", "التسلسل")</th>
+                        <th>@T("Reset annually", "إعادة سنوية")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.DocumentType</td>
+                            <td>@(isArabic ? p.DisplayNameAr : (p.DisplayNameEn ?? p.DisplayNameAr))</td>
+                            <td><code>@p.Prefix</code></td>
+                            <td><code>@p.Format</code></td>
+                            <td>@p.CurrentSequence</td>
+                            <td>@(p.ResetAnnually ? T("Yes", "نعم") : T("No", "لا"))</td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="NumberingPolicies" asp-action="Edit" asp-route-id="@p.Id"><i class="bi bi-pencil"></i></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

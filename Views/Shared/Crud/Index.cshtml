@@ -1,21 +1,26 @@
+@using System.Globalization
 @model IReadOnlyList<object>
 @{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
     var controllerName = (string)ViewBag.ControllerName;
     var title = (string)ViewBag.EntityTitle;
     var description = (string)ViewBag.EntityDescription;
     var entityType = ViewBag.EntityType as Type ?? Model.FirstOrDefault()?.GetType();
     var properties = entityType is null ? new List<System.Reflection.PropertyInfo>() : EntityDisplayHelper.GetListProperties(entityType).ToList();
     ViewData["Title"] = title;
+    var createText = T($"Add {title}", $"إضافة {title}");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel(title, description, "Create", controllerName, $"إضافة {title}"))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(title, description, "Create", controllerName, createText))" />
 
 <section class="data-panel">
     <partial name="_SearchBar" />
 
     @if (!Model.Any() || entityType is null)
     {
-        <partial name="_EmptyState" model="@($"ابدأ بإضافة أول سجل في {title}.")" />
+        <partial name="_EmptyState" model="@(T($"Start by adding your first {title} record.", $"ابدأ بإضافة أول سجل في {title}."))" />
     }
     else
     {
@@ -27,7 +32,7 @@
                         {
                             <th>@EntityDisplayHelper.Label(property.Name)</th>
                         }
-                        <th class="text-nowrap">الإجراءات</th>
+                        <th class="text-nowrap">@T("Actions", "الإجراءات")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,9 +60,32 @@
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-between align-items-center text-muted small pt-2">
-            <span>إجمالي السجلات: @ViewBag.TotalRows</span>
-            <span>ترقيم الصفحات سيضاف في النسخة القادمة</span>
+        var page = (int)(ViewBag.Page ?? 1);
+        var totalPages = (int)(ViewBag.TotalPages ?? 1);
+        var totalRows = (int)(ViewBag.TotalRows ?? Model.Count);
+        var pageSize = (int)(ViewBag.PageSize ?? Model.Count);
+        var firstRow = totalRows == 0 ? 0 : ((page - 1) * pageSize) + 1;
+        var lastRow = Math.Min(page * pageSize, totalRows);
+        var currentSearch = (string?)ViewBag.CurrentSearch;
+        var currentStatus = (string?)ViewBag.CurrentStatus;
+        <div class="d-flex justify-content-between align-items-center text-muted small pt-2 flex-wrap gap-2">
+            <span>@T($"Showing {firstRow}–{lastRow} of {totalRows}", $"عرض {firstRow}–{lastRow} من {totalRows}")</span>
+            @if (totalPages > 1)
+            {
+                <nav class="pagination-nav">
+                    <a class="btn btn-sm btn-outline-secondary @(page <= 1 ? "disabled" : "")"
+                       asp-controller="@controllerName" asp-action="Index"
+                       asp-route-page="@(page - 1)" asp-route-q="@currentSearch" asp-route-status="@currentStatus">
+                        <i class="bi bi-chevron-@(isArabic ? "right" : "left")"></i> @T("Previous", "السابق")
+                    </a>
+                    <span class="px-2">@T($"Page {page} of {totalPages}", $"صفحة {page} من {totalPages}")</span>
+                    <a class="btn btn-sm btn-outline-secondary @(page >= totalPages ? "disabled" : "")"
+                       asp-controller="@controllerName" asp-action="Index"
+                       asp-route-page="@(page + 1)" asp-route-q="@currentSearch" asp-route-status="@currentStatus">
+                        @T("Next", "التالي") <i class="bi bi-chevron-@(isArabic ? "left" : "right")"></i>
+                    </a>
+                </nav>
+            }
         </div>
     }
 </section>

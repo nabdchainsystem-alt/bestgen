@@ -7,31 +7,31 @@ public class SalesInvoiceFormViewModel
 {
     public int? Id { get; set; }
 
-    [Display(Name = "رقم الفاتورة")]
+    [Display(Name = "Invoice number")]
     public string? InvoiceNumber { get; set; }
 
-    [Required(ErrorMessage = "تاريخ الفاتورة مطلوب")]
-    [Display(Name = "تاريخ الفاتورة")]
+    [Required(ErrorMessage = "Invoice date is required")]
+    [Display(Name = "Invoice date")]
     public DateTime InvoiceDate { get; set; } = DateTime.Today;
 
-    [Range(1, int.MaxValue, ErrorMessage = "اختر العميل")]
-    [Display(Name = "العميل")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a customer")]
+    [Display(Name = "Customer")]
     public int CustomerId { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "اختر المستودع")]
-    [Display(Name = "المستودع")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a warehouse")]
+    [Display(Name = "Warehouse")]
     public int WarehouseId { get; set; }
 
-    [Display(Name = "طريقة الدفع")]
+    [Display(Name = "Payment method")]
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Credit;
 
-    [Display(Name = "الحالة")]
+    [Display(Name = "Status")]
     public InvoiceStatus Status { get; set; } = InvoiceStatus.Draft;
 
-    [Display(Name = "المبلغ المدفوع")]
+    [Display(Name = "Paid amount")]
     public decimal PaidAmount { get; set; }
 
-    [Display(Name = "ملاحظات")]
+    [Display(Name = "Notes")]
     [StringLength(600)]
     public string? Notes { get; set; }
 
@@ -49,10 +49,10 @@ public class SalesInvoiceFormViewModel
 
 public class SalesInvoiceItemFormViewModel
 {
-    [Range(1, int.MaxValue, ErrorMessage = "اختر المنتج")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a product")]
     public int ProductId { get; set; }
 
-    [Range(0.01, double.MaxValue, ErrorMessage = "الكمية يجب أن تكون أكبر من صفر")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than zero")]
     public decimal Quantity { get; set; } = 1;
 
     [Range(0, double.MaxValue)]
@@ -71,35 +71,35 @@ public class PurchaseInvoiceFormViewModel
 {
     public int? Id { get; set; }
 
-    [Display(Name = "رقم فاتورة الشراء")]
+    [Display(Name = "Invoice number")]
     public string? PurchaseInvoiceNumber { get; set; }
 
-    [Display(Name = "مرجع فاتورة المورد")]
+    [Display(Name = "Supplier invoice reference")]
     [StringLength(80)]
     public string? SupplierInvoiceReference { get; set; }
 
-    [Required(ErrorMessage = "تاريخ الفاتورة مطلوب")]
-    [Display(Name = "تاريخ الفاتورة")]
+    [Required(ErrorMessage = "Invoice date is required")]
+    [Display(Name = "Invoice date")]
     public DateTime InvoiceDate { get; set; } = DateTime.Today;
 
-    [Range(1, int.MaxValue, ErrorMessage = "اختر المورد")]
-    [Display(Name = "المورد")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a supplier")]
+    [Display(Name = "Supplier")]
     public int SupplierId { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "اختر المستودع")]
-    [Display(Name = "المستودع")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a warehouse")]
+    [Display(Name = "Warehouse")]
     public int WarehouseId { get; set; }
 
-    [Display(Name = "طريقة الدفع")]
+    [Display(Name = "Payment method")]
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Credit;
 
-    [Display(Name = "الحالة")]
+    [Display(Name = "Status")]
     public PurchaseInvoiceStatus Status { get; set; } = PurchaseInvoiceStatus.Draft;
 
-    [Display(Name = "المبلغ المدفوع")]
+    [Display(Name = "Paid amount")]
     public decimal PaidAmount { get; set; }
 
-    [Display(Name = "ملاحظات")]
+    [Display(Name = "Notes")]
     [StringLength(600)]
     public string? Notes { get; set; }
 
@@ -117,10 +117,10 @@ public class PurchaseInvoiceFormViewModel
 
 public class PurchaseInvoiceItemFormViewModel
 {
-    [Range(1, int.MaxValue, ErrorMessage = "اختر المنتج")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a product")]
     public int ProductId { get; set; }
 
-    [Range(0.01, double.MaxValue, ErrorMessage = "الكمية يجب أن تكون أكبر من صفر")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than zero")]
     public decimal Quantity { get; set; } = 1;
 
     [Range(0, double.MaxValue)]

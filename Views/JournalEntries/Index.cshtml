@@ -1,22 +1,28 @@
+@using System.Globalization
 @model IReadOnlyList<JournalEntry>
 @{
-    ViewData["Title"] = "القيود اليومية";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Journal Entries", "القيود اليومية");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("القيود اليومية", "إنشاء ومراجعة القيود المحاسبية قبل الترحيل.", "Create", "JournalEntries", "قيد جديد"))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Journal Entries", "القيود اليومية"),
+    T("Create and review accounting journal entries before posting.", "إنشاء ومراجعة القيود المحاسبية قبل الترحيل."),
+    "Create", "JournalEntries", T("New entry", "قيد جديد")))" />
 
 <section class="data-panel">
     <partial name="_SearchBar" />
 
     @if (!Model.Any())
     {
-        <partial name="_EmptyState" model="@("لا توجد قيود يومية مطابقة للفلاتر الحالية.")" />
+        <partial name="_EmptyState" model="@(T("No journal entries match the current filters.", "لا توجد قيود يومية مطابقة للفلاتر الحالية."))" />
     }
     else
     {
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead><tr><th>رقم القيد</th><th>التاريخ</th><th>المصدر</th><th>مدين</th><th>دائن</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                <thead><tr><th>@T("Entry No.", "رقم القيد")</th><th>@T("Date", "التاريخ")</th><th>@T("Source", "المصدر")</th><th>@T("Debit", "مدين")</th><th>@T("Credit", "دائن")</th><th>@T("Status", "الحالة")</th><th>@T("Actions", "الإجراءات")</th></tr></thead>
                 <tbody>
                     @foreach (var entry in Model)
                     {

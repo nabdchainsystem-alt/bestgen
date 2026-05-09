@@ -57,6 +57,36 @@ public static class DbSeeder
         await SeedEmployeesAsync(context);
         await SeedHrAuxiliariesAsync(context);
         await SeedFixedAssetsAsync(context);
+        await SeedBranchesAsync(context);
+        await SeedNumberingPoliciesAsync(context);
+    }
+
+    private static async Task SeedBranchesAsync(ApplicationDbContext context)
+    {
+        if (await context.Branches.AnyAsync()) return;
+
+        context.Branches.AddRange(
+            new Branch { BranchCode = "HQ",  NameAr = "الفرع الرئيسي", NameEn = "Head Office", City = "الرياض", Phone = "+966 11 0000001", IsActive = true },
+            new Branch { BranchCode = "JED", NameAr = "فرع جدة",       NameEn = "Jeddah Branch", City = "جدة",   Phone = "+966 12 0000002", IsActive = true }
+        );
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedNumberingPoliciesAsync(ApplicationDbContext context)
+    {
+        if (await context.NumberingPolicies.AnyAsync()) return;
+
+        context.NumberingPolicies.AddRange(
+            new NumberingPolicy { DocumentType = "SalesInvoice",        DisplayNameAr = "فاتورة مبيعات",       DisplayNameEn = "Sales Invoice",        Prefix = "INV",  Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "PurchaseInvoice",     DisplayNameAr = "فاتورة مشتريات",      DisplayNameEn = "Purchase Invoice",     Prefix = "PINV", Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "SalesQuotation",      DisplayNameAr = "عرض سعر",             DisplayNameEn = "Sales Quotation",      Prefix = "QT",   Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "SalesReceipt",        DisplayNameAr = "إيصال مبيعات",         DisplayNameEn = "Sales Receipt",        Prefix = "REC",  Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "SupplierPayment",     DisplayNameAr = "دفعة مورد",            DisplayNameEn = "Supplier Payment",     Prefix = "PAY",  Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "JournalEntry",        DisplayNameAr = "قيد محاسبي",           DisplayNameEn = "Journal Entry",        Prefix = "JE",   Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "GeneralReceipt",      DisplayNameAr = "إيصال عام",            DisplayNameEn = "General Receipt",      Prefix = "GR",   Format = "{prefix}-{yyyy}-{00000}", ResetAnnually = true },
+            new NumberingPolicy { DocumentType = "PayrollEntry",        DisplayNameAr = "راتب",                 DisplayNameEn = "Payroll",              Prefix = "PR",   Format = "{prefix}-{yyyy}{MM}-{00000}", ResetAnnually = false }
+        );
+        await context.SaveChangesAsync();
     }
 
     private static async Task EnsureAdminAsync(
@@ -117,7 +147,10 @@ public static class DbSeeder
             Country = "Saudi Arabia",
             DefaultVatRate = 15,
             InvoicePrefix = "INV",
-            PurchaseInvoicePrefix = "PINV"
+            PurchaseInvoicePrefix = "PINV",
+            BaseCurrency = "SAR",
+            CurrencySymbol = "ر.س",
+            ShowInvoiceQr = true
         });
 
         await context.SaveChangesAsync();
@@ -132,22 +165,46 @@ public static class DbSeeder
 
         var accounts = new[]
         {
+            // Assets
             new Account { AccountCode = "1000", AccountNameAr = "الصندوق", AccountNameEn = "Cash", AccountType = AccountType.Asset },
             new Account { AccountCode = "1010", AccountNameAr = "البنك", AccountNameEn = "Bank", AccountType = AccountType.Asset },
             new Account { AccountCode = "1100", AccountNameAr = "ذمم مدينة", AccountNameEn = "Accounts Receivable", AccountType = AccountType.Asset },
+            new Account { AccountCode = "1110", AccountNameAr = "ذمم موظفين", AccountNameEn = "Employee Receivables", AccountType = AccountType.Asset },
             new Account { AccountCode = "1200", AccountNameAr = "المخزون", AccountNameEn = "Inventory", AccountType = AccountType.Asset },
+            new Account { AccountCode = "1300", AccountNameAr = "مصروفات مدفوعة مقدما", AccountNameEn = "Prepaid Expenses", AccountType = AccountType.Asset },
             new Account { AccountCode = "1500", AccountNameAr = "الأصول الثابتة", AccountNameEn = "Fixed Assets", AccountType = AccountType.Asset },
+            new Account { AccountCode = "1510", AccountNameAr = "مجمع الإهلاك", AccountNameEn = "Accumulated Depreciation", AccountType = AccountType.Asset },
+
+            // Liabilities
             new Account { AccountCode = "2000", AccountNameAr = "ذمم دائنة", AccountNameEn = "Accounts Payable", AccountType = AccountType.Liability },
-            new Account { AccountCode = "2100", AccountNameAr = "ضريبة قيمة مضافة مستحقة", AccountNameEn = "VAT Payable", AccountType = AccountType.Liability },
+            new Account { AccountCode = "2100", AccountNameAr = "ضريبة قيمة مضافة مستحقة", AccountNameEn = "VAT Payable (Output)", AccountType = AccountType.Liability },
+            new Account { AccountCode = "2110", AccountNameAr = "ضريبة قيمة مضافة مدخلات", AccountNameEn = "VAT Receivable (Input)", AccountType = AccountType.Liability },
             new Account { AccountCode = "2200", AccountNameAr = "رواتب مستحقة", AccountNameEn = "Salaries Payable", AccountType = AccountType.Liability },
+            new Account { AccountCode = "2220", AccountNameAr = "قروض موظفين", AccountNameEn = "Employee Loans Payable", AccountType = AccountType.Liability },
+            new Account { AccountCode = "2230", AccountNameAr = "بضاعة مستلمة دون فاتورة", AccountNameEn = "Goods Received Not Invoiced", AccountType = AccountType.Liability },
+            new Account { AccountCode = "2300", AccountNameAr = "دفعات مقدمة من العملاء", AccountNameEn = "Customer Advances", AccountType = AccountType.Liability },
+
+            // Equity
             new Account { AccountCode = "3000", AccountNameAr = "رأس مال المالك", AccountNameEn = "Owner Capital", AccountType = AccountType.Equity },
             new Account { AccountCode = "3100", AccountNameAr = "أرباح مبقاة", AccountNameEn = "Retained Earnings", AccountType = AccountType.Equity },
+            new Account { AccountCode = "3200", AccountNameAr = "حقوق ملكية الرصيد الافتتاحي", AccountNameEn = "Opening Balance Equity", AccountType = AccountType.Equity },
+
+            // Revenue
             new Account { AccountCode = "4000", AccountNameAr = "إيرادات المبيعات", AccountNameEn = "Sales Revenue", AccountType = AccountType.Revenue },
+            new Account { AccountCode = "4100", AccountNameAr = "إيرادات الخدمات", AccountNameEn = "Service Revenue", AccountType = AccountType.Revenue },
+            new Account { AccountCode = "4200", AccountNameAr = "إيرادات تأجير الأصول", AccountNameEn = "Asset Rental Revenue", AccountType = AccountType.Revenue },
+            new Account { AccountCode = "4900", AccountNameAr = "مردودات المبيعات", AccountNameEn = "Sales Returns", AccountType = AccountType.Revenue },
+
+            // Expenses / costs
             new Account { AccountCode = "5000", AccountNameAr = "تكلفة البضاعة المباعة", AccountNameEn = "Cost of Goods Sold", AccountType = AccountType.Expense },
             new Account { AccountCode = "5100", AccountNameAr = "مصروف الإيجار", AccountNameEn = "Rent Expense", AccountType = AccountType.Expense },
             new Account { AccountCode = "5200", AccountNameAr = "مصروف الرواتب", AccountNameEn = "Salaries Expense", AccountType = AccountType.Expense },
+            new Account { AccountCode = "5210", AccountNameAr = "مصروف المكافآت", AccountNameEn = "Bonus Expense", AccountType = AccountType.Expense },
             new Account { AccountCode = "5300", AccountNameAr = "مصروف الخدمات", AccountNameEn = "Utilities Expense", AccountType = AccountType.Expense },
-            new Account { AccountCode = "5400", AccountNameAr = "مصروفات أخرى", AccountNameEn = "Other Expenses", AccountType = AccountType.Expense }
+            new Account { AccountCode = "5400", AccountNameAr = "مصروفات أخرى", AccountNameEn = "Other Expenses", AccountType = AccountType.Expense },
+            new Account { AccountCode = "5700", AccountNameAr = "مصروف الإهلاك", AccountNameEn = "Depreciation Expense", AccountType = AccountType.Expense },
+            new Account { AccountCode = "5800", AccountNameAr = "فروق جرد المخزون", AccountNameEn = "Inventory Variance", AccountType = AccountType.Expense },
+            new Account { AccountCode = "5900", AccountNameAr = "مردودات المشتريات", AccountNameEn = "Purchase Returns", AccountType = AccountType.Expense }
         };
 
         context.Accounts.AddRange(accounts);

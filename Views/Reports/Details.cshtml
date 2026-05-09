@@ -1,85 +1,113 @@
-@model ReportCardViewModel
+@using System.Globalization
+@model ReportResult
 @{
-    ViewData["Title"] = Model.Title;
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    var card = ViewBag.Card as ReportCardViewModel;
+    var title = card?.Title ?? (isArabic ? Model.TitleAr : Model.TitleEn);
+    ViewData["Title"] = title;
+    var description = card?.Description ?? "";
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel(Model.Title, Model.Description))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(title, description))" />
 
 <section class="form-panel mb-4">
-    <form method="get" class="list-toolbar" style="grid-template-columns:1fr 1fr 1fr auto auto auto;">
+    <form method="get" class="list-toolbar" style="grid-template-columns:1fr 1fr 1fr auto auto;">
         <input type="hidden" name="id" value="@Model.ReportKey" />
         <div>
-            <label class="form-label">من تاريخ</label>
+            <label class="form-label">@T("From date", "من تاريخ")</label>
             <input class="form-control" type="date" name="fromDate" value="@ViewBag.FromDate" />
         </div>
         <div>
-            <label class="form-label">إلى تاريخ</label>
+            <label class="form-label">@T("To date", "إلى تاريخ")</label>
             <input class="form-control" type="date" name="toDate" value="@ViewBag.ToDate" />
         </div>
-        <div>
-            <label class="form-label">بحث</label>
-            <input class="form-control" type="search" placeholder="بحث في التقرير..." />
-        </div>
+        <div></div>
         <div class="d-flex align-items-end">
-            <button class="btn btn-primary w-100" type="submit"><i class="bi bi-funnel"></i> تطبيق</button>
-        </div>
-        <div class="d-flex align-items-end">
-            <button class="btn btn-outline-secondary w-100" type="button"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+            <button class="btn btn-primary w-100" type="submit"><i class="bi bi-funnel"></i> @T("Apply", "تطبيق")</button>
         </div>
         <div class="d-flex align-items-end gap-2">
-            <button class="btn btn-outline-secondary w-100" type="button"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
-            <button class="btn btn-outline-secondary" type="button" title="طباعة"><i class="bi bi-printer"></i></button>
+            <button class="btn btn-outline-secondary" type="button" title="@T("Print", "طباعة")" onclick="window.print()"><i class="bi bi-printer"></i></button>
         </div>
     </form>
 </section>
 
 <section class="details-panel">
     <div class="summary-grid">
-        <div class="summary-card"><span>الفئة</span><strong>@Model.Category</strong></div>
-        <div class="summary-card"><span>عدد السجلات</span><strong>0</strong></div>
-        <div class="summary-card"><span>الفترة من</span><strong>@ViewBag.FromDate</strong></div>
-        <div class="summary-card"><span>الفترة إلى</span><strong>@ViewBag.ToDate</strong></div>
+        <div class="summary-card"><span>@T("Category", "الفئة")</span><strong>@(card?.Category ?? "-")</strong></div>
+        <div class="summary-card"><span>@T("Records", "عدد السجلات")</span><strong>@Model.Rows.Count(r => r.Style is null)</strong></div>
+        <div class="summary-card"><span>@T("Period from", "الفترة من")</span><strong>@ViewBag.FromDate</strong></div>
+        <div class="summary-card"><span>@T("Period to", "الفترة إلى")</span><strong>@ViewBag.ToDate</strong></div>
     </div>
 
-    <div class="panel-title">
-        <h2>تفاصيل التقرير</h2>
-        <span class="badge bg-secondary-subtle text-secondary">قيد التجهيز</span>
-    </div>
+    @if (!Model.IsImplemented)
+    {
+        <div class="panel-title">
+            <h2>@T("Report details", "تفاصيل التقرير")</h2>
+            <span class="badge bg-secondary-subtle text-secondary">@T("In progress", "قيد التجهيز")</span>
+        </div>
+        <partial name="_EmptyState" model="@(T("This report is in the roadmap and will be wired to live data in a future update.", "هذا التقرير مدرج في خطة التطوير وسيتم ربطه بالبيانات الحقيقية قريبا."))" />
+    }
+    else
+    {
+        <div class="panel-title">
+            <h2>@T("Report details", "تفاصيل التقرير")</h2>
+            <span class="badge bg-emerald-soft text-emerald">@T("Live data", "بيانات مباشرة")</span>
+        </div>
 
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>التاريخ</th>
-                    <th>المرجع</th>
-                    <th>الوصف</th>
-                    <th>مدين</th>
-                    <th>دائن</th>
-                    <th>الرصيد</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="6">
-                        <partial name="_EmptyState" model="@($"سيتم ربط تقرير «{Model.Title}» بقاعدة البيانات في المرحلة القادمة. الفلاتر والتصدير جاهزة للاستخدام.")" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="panel-title mt-4">
-        <h2>خطة تطوير التقرير</h2>
-        <span class="badge bg-blue-soft text-blue">Roadmap</span>
-    </div>
-    <div class="roadmap-list">
-        <span>ربط مصادر البيانات</span>
-        <span>تنسيق الأعمدة</span>
-        <span>إجماليات أسبوعية وشهرية</span>
-        <span>مقارنة الفترات</span>
-        <span>تصدير Excel فعلي</span>
-        <span>تصدير PDF فعلي</span>
-        <span>طباعة محسنة</span>
-        <span>حفظ كقالب مفضل</span>
-    </div>
+        @if (!Model.Rows.Any())
+        {
+            <partial name="_EmptyState" model="@(T("No records match the chosen filters.", "لا توجد سجلات تطابق الفلاتر المحددة."))" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            @foreach (var col in Model.Columns)
+                            {
+                                <th style="text-align:@col.Align">@(isArabic ? col.LabelAr : col.LabelEn)</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            if (row.Cells.TryGetValue("__group__", out var groupLabel) && row.Style == "group")
+                            {
+                                <tr style="background:var(--accent-tint);font-weight:700;">
+                                    <td colspan="@Model.Columns.Count">@groupLabel</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr style="@(row.Style == "total" ? "font-weight:700;background:var(--bg-canvas);" : "")">
+                                    @foreach (var col in Model.Columns)
+                                    {
+                                        row.Cells.TryGetValue(col.Key, out var value);
+                                        <td style="text-align:@col.Align;@(col.IsMoney ? "font-feature-settings:'tnum';white-space:nowrap;" : "")">
+                                            @(value ?? "-")
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    @if (Model.Totals.Any())
+                    {
+                        <tfoot>
+                            @foreach (var total in Model.Totals)
+                            {
+                                <tr>
+                                    <th colspan="@(Model.Columns.Count - 1)" style="text-align:@total.Align">@(isArabic ? total.LabelAr : total.LabelEn)</th>
+                                    <th style="text-align:@total.Align;font-feature-settings:'tnum';">@total.Value</th>
+                                </tr>
+                            }
+                        </tfoot>
+                    }
+                </table>
+            </div>
+        }
+    }
 </section>

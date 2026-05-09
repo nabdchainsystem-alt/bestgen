@@ -1,19 +1,25 @@
+@using System.Globalization
 @model object
 @{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
     var controllerName = (string)ViewBag.ControllerName;
     var title = (string)ViewBag.EntityTitle;
     var id = (int)(Model.GetType().GetProperty("Id")?.GetValue(Model) ?? 0);
-    ViewData["Title"] = $"تعديل {title}";
+    ViewData["Title"] = T($"Edit {title}", $"تعديل {title}");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel($"تعديل {title}", "راجع البيانات ثم احفظ التغييرات."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T($"Edit {title}", $"تعديل {title}"),
+    T("Review the data, then save your changes.", "راجع البيانات ثم احفظ التغييرات.")))" />
 
 <section class="form-panel">
     <form asp-action="Edit" asp-route-id="@id" method="post">
         <partial name="_CrudFormFields" model="@Model" />
         <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> حفظ التغييرات</button>
-            <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save changes", "حفظ التغييرات")</button>
+            <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
         </div>
     </form>
 </section>

@@ -850,3 +850,114 @@ public class EmployeeRequest
 
     public Employee? Employee { get; set; }
 }
+
+public class Branch
+{
+    public int Id { get; set; }
+
+    [Required, StringLength(20)]
+    public string BranchCode { get; set; } = string.Empty;
+
+    [Required, StringLength(160)]
+    public string NameAr { get; set; } = string.Empty;
+
+    [StringLength(160)]
+    public string? NameEn { get; set; }
+
+    [StringLength(80)]
+    public string? City { get; set; }
+
+    [StringLength(300)]
+    public string? Address { get; set; }
+
+    [StringLength(40)]
+    public string? Phone { get; set; }
+
+    [StringLength(160)]
+    public string? Manager { get; set; }
+
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public class NumberingPolicy
+{
+    public int Id { get; set; }
+
+    [Required, StringLength(40)]
+    public string DocumentType { get; set; } = string.Empty;
+
+    [StringLength(60)]
+    public string DisplayNameAr { get; set; } = string.Empty;
+
+    [StringLength(60)]
+    public string? DisplayNameEn { get; set; }
+
+    [Required, StringLength(12)]
+    public string Prefix { get; set; } = string.Empty;
+
+    [Required, StringLength(40)]
+    public string Format { get; set; } = "{prefix}-{yyyy}-{0000}";
+
+    public int CurrentSequence { get; set; }
+    public bool ResetAnnually { get; set; } = true;
+    public int LastResetYear { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public class TaxRate
+{
+    public int Id { get; set; }
+
+    [Required, StringLength(20)]
+    public string Code { get; set; } = string.Empty;
+
+    [Required, StringLength(120)]
+    public string NameAr { get; set; } = string.Empty;
+
+    [StringLength(120)]
+    public string? NameEn { get; set; }
+
+    public decimal Rate { get; set; }
+
+    public bool IsDefault { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+}
+
+// =====================================================================
+// Audit log — populated by the SaveChanges interceptor in Data.
+// =====================================================================
+
+public enum AuditAction
+{
+    Create,
+    Update,
+    Delete
+}
+
+public class AuditEntry
+{
+    public int Id { get; set; }
+
+    [Required, StringLength(160)]
+    public string EntityName { get; set; } = string.Empty;
+
+    [StringLength(80)]
+    public string? EntityKey { get; set; }
+
+    public AuditAction Action { get; set; }
+
+    [StringLength(160)]
+    public string? UserName { get; set; }
+
+    [StringLength(2000)]
+    public string? Summary { get; set; }
+
+    public DateTime At { get; set; } = DateTime.UtcNow;
+}

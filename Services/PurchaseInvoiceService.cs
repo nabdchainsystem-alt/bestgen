@@ -11,17 +11,20 @@ public class PurchaseInvoiceService
     private readonly InvoiceCalculationService _calculationService;
     private readonly InventoryService _inventoryService;
     private readonly AccountingService _accountingService;
+    private readonly PartyBalanceService _partyBalanceService;
 
     public PurchaseInvoiceService(
         ApplicationDbContext context,
         InvoiceCalculationService calculationService,
         InventoryService inventoryService,
-        AccountingService accountingService)
+        AccountingService accountingService,
+        PartyBalanceService partyBalanceService)
     {
         _context = context;
         _calculationService = calculationService;
         _inventoryService = inventoryService;
         _accountingService = accountingService;
+        _partyBalanceService = partyBalanceService;
     }
 
     public async Task<PurchaseInvoice> CreateAsync(PurchaseInvoiceFormViewModel model)
@@ -60,9 +63,12 @@ public class PurchaseInvoiceService
         _context.PurchaseInvoices.Add(invoice);
         if (invoice.Status is PurchaseInvoiceStatus.Received or PurchaseInvoiceStatus.PartiallyPaid or PurchaseInvoiceStatus.Paid)
         {
-            await _inventoryService.IncreaseStockAsync(invoice.Items);
+            await _inventoryService.IncreaseStockAsync(invoice);
         }
         await _accountingService.CreatePurchaseJournalEntryAsync(invoice);
+        await _context.SaveChangesAsync();
+
+        await _partyBalanceService.RecalculateSupplierAsync(invoice.SupplierId);
         await _context.SaveChangesAsync();
         return invoice;
     }
@@ -108,6 +114,9 @@ public class PurchaseInvoiceService
         }).ToList();
         await _context.PurchaseInvoiceItems.AddRangeAsync(newItems);
 
+        await _context.SaveChangesAsync();
+
+        await _partyBalanceService.RecalculateSupplierAsync(invoice.SupplierId);
         await _context.SaveChangesAsync();
     }
 

@@ -1,0 +1,52 @@
+@using System.Globalization
+@model CompanySettings
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Tax settings", "إعدادات الضريبة");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Tax settings", "إعدادات الضريبة"),
+    T("Default VAT, ZATCA taxpayer details, and invoice QR.", "نسبة الضريبة الافتراضية، بيانات ZATCA، ورمز QR للفاتورة.")))" />
+
+@if (TempData["SettingsMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<section class="form-panel">
+    <form asp-action="TaxSettings" method="post">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-grid">
+            <div>
+                <label asp-for="DefaultVatRate" class="form-label">@T("Default VAT rate (%)", "نسبة الضريبة الافتراضية (%)")</label>
+                <input asp-for="DefaultVatRate" class="form-control" type="number" step="0.01" />
+            </div>
+            <div>
+                <label asp-for="VatNumber" class="form-label">@T("VAT number", "الرقم الضريبي")</label>
+                <input asp-for="VatNumber" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="ZatcaTaxpayerId" class="form-label">@T("ZATCA taxpayer ID", "معرف ZATCA")</label>
+                <input asp-for="ZatcaTaxpayerId" class="form-control" />
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-check form-switch m-0">
+                    <input asp-for="ZatcaEnabled" class="form-check-input" type="checkbox" />
+                    <label asp-for="ZatcaEnabled" class="form-check-label">@T("Enable ZATCA e-invoicing", "تفعيل الفوترة الإلكترونية ZATCA")</label>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-check form-switch m-0">
+                    <input asp-for="ShowInvoiceQr" class="form-check-input" type="checkbox" />
+                    <label asp-for="ShowInvoiceQr" class="form-check-label">@T("Print QR on invoices", "طباعة رمز QR على الفواتير")</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> @T("Save", "حفظ")</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@T("Back", "رجوع")</a>
+        </div>
+    </form>
+</section>

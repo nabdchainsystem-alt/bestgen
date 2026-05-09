@@ -1,5 +1,9 @@
+@using System.Globalization
 @model object
 @{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
     var controllerName = (string)ViewBag.ControllerName;
     var title = (string)ViewBag.EntityTitle;
     var entityType = Model.GetType();
@@ -7,20 +11,21 @@
     var properties = EntityDisplayHelper.GetFormProperties(entityType).ToList();
     var statusProperty = entityType.GetProperty("Status") ?? entityType.GetProperty("IsActive");
     var statusValue = statusProperty?.GetValue(Model);
-    ViewData["Title"] = $"تفاصيل {title}";
+    ViewData["Title"] = T($"{title} details", $"تفاصيل {title}");
 }
 
 <div class="page-header">
     <div>
-        <h1>تفاصيل @title</h1>
-        <p>عرض بيانات السجل والبيانات المرتبطة به.</p>
+        <h1>@T($"{title} details", $"تفاصيل {title}")</h1>
+        <p>@T("View the record and its related data.", "عرض بيانات السجل والبيانات المرتبطة به.")</p>
     </div>
     <div class="d-flex gap-2">
         @if (statusProperty is not null)
         {
             <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(statusValue))" />
         }
-        <a asp-controller="@controllerName" asp-action="Edit" asp-route-id="@id" class="btn btn-primary"><i class="bi bi-pencil"></i> تعديل</a>
+        <a asp-controller="@controllerName" asp-action="Edit" asp-route-id="@id" class="btn btn-primary"><i class="bi bi-pencil"></i> @T("Edit", "تعديل")</a>
+        <a asp-controller="@controllerName" asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back to list", "العودة إلى القائمة")</a>
     </div>
 </div>
 
@@ -59,19 +64,58 @@
         </table>
     </div>
 
+    @{
+        var auditEntries = ViewBag.AuditEntries as List<bestgen.Models.AuditEntry> ?? new List<bestgen.Models.AuditEntry>();
+        string ActionLabel(bestgen.Models.AuditAction a) => a switch
+        {
+            bestgen.Models.AuditAction.Create => T("Created", "إنشاء"),
+            bestgen.Models.AuditAction.Update => T("Updated", "تعديل"),
+            bestgen.Models.AuditAction.Delete => T("Deleted", "حذف"),
+            _ => a.ToString()
+        };
+        string ActionBadge(bestgen.Models.AuditAction a) => a switch
+        {
+            bestgen.Models.AuditAction.Create => "bg-emerald-soft text-emerald",
+            bestgen.Models.AuditAction.Update => "bg-blue-soft text-blue",
+            bestgen.Models.AuditAction.Delete => "bg-danger-soft text-danger",
+            _ => "bg-secondary-subtle text-secondary"
+        };
+    }
     <ul class="nav nav-tabs mt-4" role="tablist">
-        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#related" type="button">بيانات مرتبطة</button></li>
-        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit" type="button">سجل النشاط</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#audit" type="button">@T("Activity log", "سجل النشاط") <span class="badge bg-secondary-subtle text-secondary ms-1">@auditEntries.Count</span></button></li>
     </ul>
     <div class="tab-content pt-3">
-        <div class="tab-pane fade show active" id="related">
-            <div class="table-responsive">
-                <table class="table table-sm">
-                    <thead><tr><th>النوع</th><th>الوصف</th><th>الحالة</th></tr></thead>
-                    <tbody><tr><td>Placeholder</td><td>سيتم عرض الحركات المرتبطة في مرحلة لاحقة.</td><td><span class="badge bg-secondary-subtle text-secondary">MVP</span></td></tr></tbody>
-                </table>
-            </div>
+        <div class="tab-pane fade show active" id="audit">
+            @if (auditEntries.Count == 0)
+            {
+                <p class="text-muted">@T("No activity recorded yet for this record.", "لا يوجد نشاط مسجل لهذا السجل بعد.")</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>@T("When", "التاريخ")</th>
+                                <th>@T("Action", "الإجراء")</th>
+                                <th>@T("User", "المستخدم")</th>
+                                <th>@T("Changed fields", "الحقول المعدلة")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var audit in auditEntries)
+                            {
+                                <tr>
+                                    <td class="text-nowrap">@audit.At.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td><span class="badge @ActionBadge(audit.Action)">@ActionLabel(audit.Action)</span></td>
+                                    <td>@(audit.UserName ?? "-")</td>
+                                    <td class="text-muted">@(audit.Summary ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-        <div class="tab-pane fade" id="audit">سجل النشاط التفصيلي placeholder.</div>
     </div>
 </section>

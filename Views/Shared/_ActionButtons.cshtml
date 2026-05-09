@@ -1,6 +1,11 @@
+@using System.Globalization
 @model int
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+}
 <div class="table-actions">
-    <a asp-action="Details" asp-route-id="@Model" class="btn btn-sm btn-light" title="عرض"><i class="bi bi-eye"></i></a>
-    <a asp-action="Edit" asp-route-id="@Model" class="btn btn-sm btn-light" title="تعديل"><i class="bi bi-pencil"></i></a>
-    <a asp-action="Delete" asp-route-id="@Model" class="btn btn-sm btn-light text-danger" title="حذف"><i class="bi bi-trash"></i></a>
+    <a asp-action="Details" asp-route-id="@Model" class="btn btn-sm btn-light" title="@T("View", "عرض")"><i class="bi bi-eye"></i></a>
+    <a asp-action="Edit" asp-route-id="@Model" class="btn btn-sm btn-light" title="@T("Edit", "تعديل")"><i class="bi bi-pencil"></i></a>
+    <a asp-action="Delete" asp-route-id="@Model" class="btn btn-sm btn-light text-danger" title="@T("Delete", "حذف")"><i class="bi bi-trash"></i></a>
 </div>

@@ -7,22 +7,22 @@ public class JournalEntryFormViewModel
 {
     public int? Id { get; set; }
 
-    [Display(Name = "رقم القيد")]
+    [Display(Name = "Entry number")]
     public string? EntryNumber { get; set; }
 
     [Required]
-    [Display(Name = "تاريخ القيد")]
+    [Display(Name = "Entry date")]
     public DateTime EntryDate { get; set; } = DateTime.Today;
 
-    [Display(Name = "المصدر")]
+    [Display(Name = "Source")]
     [StringLength(80)]
     public string? SourceModule { get; set; }
 
-    [Display(Name = "الوصف")]
+    [Display(Name = "Description")]
     [StringLength(600)]
     public string? Description { get; set; }
 
-    [Display(Name = "الحالة")]
+    [Display(Name = "Status")]
     public JournalEntryStatus Status { get; set; } = JournalEntryStatus.Draft;
 
     public decimal TotalDebit { get; set; }
@@ -37,7 +37,7 @@ public class JournalEntryFormViewModel
 
 public class JournalEntryLineFormViewModel
 {
-    [Range(1, int.MaxValue, ErrorMessage = "اختر الحساب")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please select an account")]
     public int AccountId { get; set; }
 
     [Range(0, double.MaxValue)]

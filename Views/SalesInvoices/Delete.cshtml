@@ -1,18 +1,24 @@
+@using System.Globalization
 @model SalesInvoice
 @{
-    ViewData["Title"] = "حذف فاتورة بيع";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Delete Sales Invoice", "حذف فاتورة بيع");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("حذف فاتورة بيع", "تأكيد حذف الفاتورة المحددة."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Delete Sales Invoice", "حذف فاتورة بيع"),
+    T("Confirm removal of the selected invoice.", "تأكيد حذف الفاتورة المحددة.")))" />
 
 <section class="details-panel">
-    <div class="alert alert-danger">هل تريد حذف الفاتورة @Model.InvoiceNumber؟</div>
+    <div class="alert alert-danger">@T($"Delete invoice {Model.InvoiceNumber}?", $"هل تريد حذف الفاتورة {Model.InvoiceNumber}؟")</div>
     <dl class="row">
-        <dt class="col-md-3">العميل</dt><dd class="col-md-9">@Model.Customer?.NameAr</dd>
-        <dt class="col-md-3">الإجمالي</dt><dd class="col-md-9">@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</dd>
+        <dt class="col-md-3">@T("Customer", "العميل")</dt><dd class="col-md-9">@(Model.Customer == null ? "-" : pickName(Model.Customer.NameAr, Model.Customer.NameEn))</dd>
+        <dt class="col-md-3">@T("Total", "الإجمالي")</dt><dd class="col-md-9">@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</dd>
     </dl>
     <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
-        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> حذف</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+        <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> @T("Delete", "حذف")</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
     </form>
 </section>

@@ -1,0 +1,32 @@
+@using System.Globalization
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Future integrations", "التكاملات المستقبلية");
+
+    var roadmap = new[]
+    {
+        (Icon: "bi-credit-card", TitleEn: "Payment gateways", TitleAr: "بوابات الدفع", DescEn: "HyperPay, Moyasar, Tabby, Tamara — collect online payments against invoices.", DescAr: "HyperPay وMoyasar وTabby وTamara — قبول مدفوعات عبر الإنترنت مرتبطة بالفواتير.", Status: "Planned"),
+        (Icon: "bi-bank2",        TitleEn: "Bank reconciliation", TitleAr: "التسوية البنكية", DescEn: "Import statements (MT940/CSV), match against journal entries.", DescAr: "استيراد كشوف الحسابات (MT940/CSV) ومطابقتها مع القيود.", Status: "Planned"),
+        (Icon: "bi-whatsapp",     TitleEn: "WhatsApp Business", TitleAr: "واتساب للأعمال", DescEn: "Send invoices, receipts, and payment reminders via WhatsApp.", DescAr: "إرسال الفواتير والإيصالات والتذكيرات عبر واتساب.", Status: "Planned"),
+        (Icon: "bi-receipt-cutoff", TitleEn: "ZATCA Phase 2", TitleAr: "ZATCA المرحلة الثانية", DescEn: "FATOORA clearance and reporting integration.", DescAr: "ربط مع نظام فاتورة للإقرار والاعتماد.", Status: "Roadmap"),
+        (Icon: "bi-truck",        TitleEn: "Delivery providers", TitleAr: "مزودو التوصيل", DescEn: "Aramex, SMSA, J&T — push delivery notes to provider APIs.", DescAr: "أرامكس وSMSA وJ&T — إرسال سندات التسليم لواجهات البرمجة.", Status: "Planned"),
+        (Icon: "bi-envelope",     TitleEn: "Transactional email", TitleAr: "البريد التشغيلي", DescEn: "SMTP/SendGrid/Postmark for invoice and statement emailing.", DescAr: "SMTP أو SendGrid أو Postmark لإرسال الفواتير والكشوف.", Status: "Planned")
+    };
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Future integrations", "التكاملات المستقبلية"),
+    T("Connectors planned to extend Bestgen with payments, ZATCA, and messaging.", "تكاملات مخططة لإضافة المدفوعات وZATCA والمراسلات إلى Bestgen.")))" />
+
+<section class="report-grid">
+    @foreach (var card in roadmap)
+    {
+        <article class="report-card">
+            <div class="report-card-icon"><i class="bi @card.Icon"></i></div>
+            <h3>@(isArabic ? card.TitleAr : card.TitleEn)</h3>
+            <p>@(isArabic ? card.DescAr : card.DescEn)</p>
+            <span class="badge bg-secondary-subtle text-secondary">@card.Status</span>
+        </article>
+    }
+</section>

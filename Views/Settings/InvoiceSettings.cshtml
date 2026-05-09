@@ -1,0 +1,50 @@
+@using System.Globalization
+@model CompanySettings
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Invoice settings", "إعدادات الفواتير");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Invoice settings", "إعدادات الفواتير"),
+    T("Numbering prefixes, invoice footer, and QR.", "بادئات الترقيم، تذييل الفاتورة، ورمز QR.")))" />
+
+@if (TempData["SettingsMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<section class="form-panel">
+    <form asp-action="InvoiceSettings" method="post">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-grid">
+            <div>
+                <label asp-for="InvoicePrefix" class="form-label">@T("Sales invoice prefix", "بادئة فواتير البيع")</label>
+                <input asp-for="InvoicePrefix" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="PurchaseInvoicePrefix" class="form-label">@T("Purchase invoice prefix", "بادئة فواتير الشراء")</label>
+                <input asp-for="PurchaseInvoicePrefix" class="form-control" />
+            </div>
+            <div class="full-width">
+                <label asp-for="InvoiceFooterAr" class="form-label">@T("Invoice footer (AR)", "تذييل الفاتورة عربي")</label>
+                <textarea asp-for="InvoiceFooterAr" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="full-width">
+                <label asp-for="InvoiceFooterEn" class="form-label">@T("Invoice footer (EN)", "تذييل الفاتورة إنجليزي")</label>
+                <textarea asp-for="InvoiceFooterEn" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-check form-switch m-0">
+                    <input asp-for="ShowInvoiceQr" class="form-check-input" type="checkbox" />
+                    <label asp-for="ShowInvoiceQr" class="form-check-label">@T("Print QR on invoices", "طباعة رمز QR على الفواتير")</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> @T("Save", "حفظ")</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@T("Back", "رجوع")</a>
+        </div>
+    </form>
+</section>

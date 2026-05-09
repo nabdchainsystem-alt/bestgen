@@ -22,9 +22,18 @@
     --text-muted: #6f6a59;
     --text-faint: #9a9482;
 
-    --accent: #138a6b;
-    --accent-soft: #def0e7;
-    --accent-strong: #0f6f55;
+    --accent: #5B5BD6;
+    --accent-soft: #ECECFD;
+    --accent-strong: #4845C9;
+    --accent-tint: #F5F5FE;
+
+    /* Semantic tones for KPI deltas / status pills */
+    --positive: #166D44;
+    --positive-soft: #E8F5EE;
+    --negative: #B23B40;
+    --negative-soft: #FCEBEC;
+    --neutral: #6f6a59;
+    --neutral-soft: #f1ede1;
 
     --shadow-sm: 0 1px 2px 0 rgba(31, 29, 24, 0.04);
     --shadow-md: 0 1px 3px 0 rgba(31, 29, 24, 0.06), 0 1px 2px 0 rgba(31, 29, 24, 0.04);
@@ -35,13 +44,14 @@
     --radius-lg: 12px;
 
     --sidebar-width: 232px;
+    --sidebar-rail: 60px;
     --topbar-h: 52px;
     --shell-pad: 10px;
     --shell-gap: 10px;
 
     /* Smooth collapse easing — used by sidebar grid + opacity */
     --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-    --dur-collapse: 420ms;
+    --dur-collapse: 220ms;
 
     /* Backwards-compatible aliases used by existing views */
     --canvas: var(--bg-canvas);
@@ -52,9 +62,11 @@
     --muted: var(--text-muted);
     --navy: #1f1d18;
     --navy-soft: #2c2924;
-    --emerald: var(--accent);
-    --emerald-deep: var(--accent-strong);
+    --emerald: var(--positive);
+    --emerald-deep: #11502F;
     --blue: #2563eb;
+    --indigo: var(--accent);
+    --indigo-deep: var(--accent-strong);
     --warning: #b7791f;
     --danger: #dc3545;
     --shadow: var(--shadow-md);
@@ -92,6 +104,37 @@ input, select, textarea, button,
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 
+/* Avoid the brief white flash between page loads while the new document parses */
+html { background: var(--bg-app); }
+
+/* =====================================================
+   Page transitions (cross-document, modern browsers)
+   Falls back gracefully where unsupported.
+   ===================================================== */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 180ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Top-of-page navigation progress bar (driven by site.js) */
+#nav-progress {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    height: 2px;
+    width: 0;
+    z-index: 2147483647;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--accent), #8B8BE5);
+    box-shadow: 0 0 8px rgba(91, 91, 214, 0.45);
+    opacity: 0;
+    transition: width 220ms ease, opacity 200ms ease;
+}
+#nav-progress.show { opacity: 1; }
+
 /* =====================================================
    App shell
    ===================================================== */
@@ -105,21 +148,180 @@ button { font-family: inherit; cursor: pointer; }
     padding: var(--shell-pad);
     background: var(--bg-app);
     transition: grid-template-columns var(--dur-collapse) var(--ease-soft);
+    will-change: grid-template-columns;
 }
+.app-sidebar { contain: layout; }
 
+/* Collapsed: shrink the sidebar to a thin icon rail (does NOT hide it). */
 .app-shell.sidebar-collapsed {
-    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-rail) minmax(0, 1fr);
 }
 
-.app-shell.sidebar-collapsed .app-sidebar {
-    transform: translateX(-12px) scale(0.985);
+/* Labels fade with opacity only (GPU-composited, zero layout work).
+   Width snaps to 0 instantly when the sidebar collapses — the snap is
+   imperceptible since it happens in 1 frame while the grid is animating
+   around it, and avoids the per-label reflow that caused the shake. */
+.brand-meta,
+.sidebar-profile-meta,
+.sidebar-nav .nav-link > span,
+.sidebar-nav details > summary > span,
+.sidebar-nav details > summary > .chev,
+.sidebar-nav .nav-sublink > span,
+.mini-badge {
+    transition: opacity 140ms ease;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.app-shell.sidebar-collapsed .brand-meta,
+.app-shell.sidebar-collapsed .sidebar-profile-meta,
+.app-shell.sidebar-collapsed .sidebar-nav .nav-link > span,
+.app-shell.sidebar-collapsed .sidebar-nav details > summary > span,
+.app-shell.sidebar-collapsed .sidebar-nav details > summary > .chev,
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink > span,
+.app-shell.sidebar-collapsed .mini-badge {
     opacity: 0;
+    width: 0;
+    margin: 0;
     pointer-events: none;
-    visibility: hidden;
 }
 
-[dir="rtl"] .app-shell.sidebar-collapsed .app-sidebar {
-    transform: translateX(12px) scale(0.985);
+/* Center icons inside the rail */
+.app-shell.sidebar-collapsed .brand,
+.app-shell.sidebar-collapsed .sidebar-profile {
+    padding: 8px 6px;
+}
+.app-shell.sidebar-collapsed .brand .brand-card,
+.app-shell.sidebar-collapsed .sidebar-profile .sidebar-profile-card {
+    justify-content: center;
+    padding: 4px;
+    gap: 0;
+}
+.app-shell.sidebar-collapsed .sidebar-nav {
+    padding: 10px 6px;
+    overflow: visible;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-link,
+.app-shell.sidebar-collapsed .sidebar-nav details > summary {
+    justify-content: center;
+    padding: 8px 0;
+    gap: 0;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-link > i,
+.app-shell.sidebar-collapsed .sidebar-nav details > summary > i:first-child {
+    font-size: 16px;
+}
+/* Active marker stays glued to the inline-start edge of the rail */
+.app-shell.sidebar-collapsed .sidebar-nav .nav-link.active::before {
+    inset-inline-start: -2px;
+}
+.app-shell.sidebar-collapsed .nav-group > summary {
+    cursor: pointer;
+}
+
+/* Sub-collapse animates to max-height + opacity on group hover/focus.
+   Closed state: visible but height-zero so the transition can run.
+   In rail mode the open state renders as a soft indigo "tray" so the sub-icons
+   read as a distinct sub-level rather than blending with the parent column. */
+.app-shell.sidebar-collapsed .sidebar-nav .nav-collapse {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+        max-height var(--dur-collapse) var(--ease-soft),
+        opacity 220ms var(--ease-soft),
+        padding var(--dur-collapse) var(--ease-soft),
+        margin var(--dur-collapse) var(--ease-soft),
+        background 220ms var(--ease-soft),
+        border-color 220ms var(--ease-soft);
+}
+
+.app-shell.sidebar-collapsed .nav-group:hover > .nav-collapse,
+.app-shell.sidebar-collapsed .nav-group:focus-within > .nav-collapse,
+.app-shell.sidebar-collapsed .nav-group[open] > .nav-collapse {
+    max-height: 520px;
+    opacity: 1;
+    padding: 6px 4px 7px;
+    margin: 3px 4px 5px;
+    background: var(--accent-tint);
+    border-color: rgba(91, 91, 214, 0.10);
+    pointer-events: auto;
+}
+
+/* Sub-links become icon-only chips, centered in the rail.
+   Lighter indigo tone so children visibly differ from the dark-gray parent icons. */
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    transform: translateY(-4px);
+    opacity: 0;
+    transition:
+        transform 280ms var(--ease-soft),
+        opacity 220ms var(--ease-soft),
+        background 140ms ease,
+        color 140ms ease;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink > i {
+    font-size: 13px;
+    color: var(--accent-strong);
+    opacity: 0.55;
+    width: auto;
+    transition: opacity 140ms ease, color 140ms ease;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink::before {
+    display: none;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink:hover {
+    background: rgba(91, 91, 214, 0.12);
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink:hover > i {
+    opacity: 1;
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink.active {
+    background: var(--accent);
+    box-shadow: 0 2px 6px rgba(91, 91, 214, 0.30);
+}
+.app-shell.sidebar-collapsed .sidebar-nav .nav-sublink.active > i {
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* Stagger sub-icon entry when the group expands */
+.app-shell.sidebar-collapsed .nav-group:hover > .nav-collapse .nav-sublink,
+.app-shell.sidebar-collapsed .nav-group:focus-within > .nav-collapse .nav-sublink,
+.app-shell.sidebar-collapsed .nav-group[open] > .nav-collapse .nav-sublink {
+    transform: translateY(0);
+    opacity: 1;
+}
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(1) { transition-delay: 20ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(2) { transition-delay: 40ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(3) { transition-delay: 60ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(4) { transition-delay: 80ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(5) { transition-delay: 100ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(6) { transition-delay: 120ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(7) { transition-delay: 140ms; }
+.app-shell.sidebar-collapsed .nav-collapse .nav-sublink:nth-child(8) { transition-delay: 160ms; }
+
+/* Smooth open/close on the chevron in normal (expanded) mode */
+.app-shell:not(.sidebar-collapsed) .nav-collapse {
+    overflow: hidden;
+    transition: max-height var(--dur-collapse) var(--ease-soft);
 }
 
 /* =====================================================
@@ -135,19 +337,6 @@ button { font-family: inherit; cursor: pointer; }
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
-    transform-origin: center;
-    transition:
-        transform var(--dur-collapse) var(--ease-soft),
-        opacity calc(var(--dur-collapse) - 80ms) var(--ease-soft),
-        visibility var(--dur-collapse) step-end;
-    will-change: transform, opacity;
-}
-
-.app-shell:not(.sidebar-collapsed) .app-sidebar {
-    transition:
-        transform var(--dur-collapse) var(--ease-soft),
-        opacity calc(var(--dur-collapse) - 80ms) var(--ease-soft) 60ms,
-        visibility 0s step-start;
 }
 
 .brand {
@@ -171,18 +360,38 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 7px;
+    width: 36px;
+    height: 36px;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, var(--accent) 0%, #1bbd92 100%);
-    color: #fff;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: -0.02em;
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(19, 138, 107, 0.22);
+}
+.brand-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Topbar logo lockup — shown alongside the breadcrumb */
+.topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    margin-inline-end: 4px;
+    flex-shrink: 0;
+    transition: transform 120ms ease;
+}
+.topbar-brand:hover {
+    transform: translateY(-1px);
+}
+.topbar-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-meta { flex: 1; min-width: 0; }
@@ -246,7 +455,10 @@ button { font-family: inherit; cursor: pointer; }
     width: 100%;
     text-align: start;
     border: 1px solid transparent;
-    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+    transition:
+        background 120ms ease,
+        color 120ms ease,
+        border-color 120ms ease;
     position: relative;
 }
 
@@ -257,6 +469,22 @@ button { font-family: inherit; cursor: pointer; }
     color: var(--text-muted);
     flex-shrink: 0;
     text-align: center;
+}
+
+.sidebar-nav .nav-sublink > i {
+    width: 14px;
+    font-size: 11px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.sidebar-nav .nav-sublink:hover > i {
+    color: var(--text-base);
+}
+
+.sidebar-nav .nav-sublink.active > i {
+    color: var(--accent-strong);
 }
 
 .sidebar-nav .nav-link:hover,
@@ -393,7 +621,7 @@ button { font-family: inherit; cursor: pointer; }
 .sidebar-profile-card .avatar {
     width: 28px;
     height: 28px;
-    background: linear-gradient(135deg, #5fc09a, var(--accent));
+    background: linear-gradient(135deg, #8B8BE5, var(--accent));
     color: #fff;
     font-weight: 600;
     font-size: 10.5px;
@@ -506,6 +734,14 @@ button { font-family: inherit; cursor: pointer; }
     height: 31px;
 }
 
+.chip-button.lang-chip span {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 11px;
+    min-width: 18px;
+    text-align: center;
+}
+
 .topbar-search,
 .search-input {
     min-height: 31px;
@@ -561,7 +797,7 @@ button { font-family: inherit; cursor: pointer; }
     display: grid;
     place-items: center;
     color: #fff;
-    background: linear-gradient(135deg, #5fc09a, var(--accent));
+    background: linear-gradient(135deg, #8B8BE5, var(--accent));
     font-weight: 600;
     font-size: 10.5px;
     flex-shrink: 0;
@@ -713,6 +949,8 @@ button { font-family: inherit; cursor: pointer; }
 .text-emerald { color: var(--accent-strong); }
 .bg-blue-soft { background: #e6efff; }
 .text-blue { color: var(--blue); }
+.bg-danger-soft { background: var(--negative-soft); }
+.text-danger { color: var(--negative); }
 
 .empty-state {
     text-align: center;
@@ -745,14 +983,17 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .metric-card {
-    min-height: 105px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    position: relative;
+    min-height: 130px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    column-gap: 10px;
+    row-gap: 4px;
     background: var(--bg-surface);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-lg);
-    padding: 14px;
+    padding: 16px 18px;
     box-shadow: var(--shadow-sm);
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
@@ -763,24 +1004,123 @@ button { font-family: inherit; cursor: pointer; }
     border-color: var(--border-strong);
 }
 
+.metric-card .metric-head {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.metric-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.metric-sublabel {
+    font-size: 10px;
+    color: var(--text-faint);
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .metric-icon {
-    width: 38px;
-    height: 38px;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-md);
     display: grid;
     place-items: center;
-    font-size: 17px;
+    font-size: 15px;
     flex-shrink: 0;
+    align-self: start;
 }
 
-.accent-emerald .metric-icon { background: var(--accent-soft); color: var(--accent-strong); }
-.accent-blue    .metric-icon { background: #e6efff;          color: var(--blue); }
-.accent-navy    .metric-icon { background: #ede9df;          color: var(--text-strong); }
-.accent-warning .metric-icon { background: #fbf1d9;          color: var(--warning); }
-.accent-danger  .metric-icon { background: #fbe4e6;          color: var(--danger); }
+.accent-emerald .metric-icon { background: var(--positive-soft); color: var(--positive); }
+.accent-blue    .metric-icon { background: #e6efff;              color: var(--blue); }
+.accent-navy    .metric-icon { background: #ede9df;              color: var(--text-strong); }
+.accent-warning .metric-icon { background: #fbf1d9;              color: var(--warning); }
+.accent-danger  .metric-icon { background: var(--negative-soft); color: var(--negative); }
+.accent-indigo  .metric-icon { background: var(--accent-soft);   color: var(--accent-strong); }
 
+.metric-value {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-strong);
+    line-height: 1.15;
+    margin: 4px 0 2px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-feature-settings: "tnum";
+}
+
+.metric-foot {
+    grid-column: 1 / 3;
+    grid-row: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 22px;
+}
+
+.metric-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.metric-delta i { font-size: 10px; }
+
+.metric-delta.up    { background: var(--positive-soft); color: var(--positive); }
+.metric-delta.down  { background: var(--negative-soft); color: var(--negative); }
+.metric-delta.flat  { background: var(--neutral-soft);  color: var(--neutral); }
+
+.metric-delta-context {
+    color: var(--text-muted);
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+.metric-spark {
+    display: block;
+    width: 80px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.accent-emerald .metric-spark { color: var(--positive); }
+.accent-blue    .metric-spark { color: var(--blue); }
+.accent-warning .metric-spark { color: var(--warning); }
+.accent-danger  .metric-spark { color: var(--negative); }
+.accent-navy    .metric-spark { color: var(--text-strong); }
+.accent-indigo  .metric-spark { color: var(--accent); }
+
+/* Backwards compatibility for legacy usage of <span>/<strong>/<small> inside .metric-body */
 .metric-body { min-width: 0; overflow: hidden; }
-
 .metric-body span,
 .report-card span {
     color: var(--text-muted);
@@ -791,7 +1131,6 @@ button { font-family: inherit; cursor: pointer; }
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .metric-body strong {
     display: block;
     font-size: 18px;
@@ -802,7 +1141,6 @@ button { font-family: inherit; cursor: pointer; }
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .metric-body small {
     color: var(--text-muted);
     font-size: 10px;
@@ -905,6 +1243,26 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .full-width { grid-column: 1 / -1; }
+
+.form-validation-summary {
+    display: none;
+}
+.form-validation-summary.validation-summary-errors {
+    display: block;
+    background: var(--negative-soft);
+    border: 1px solid rgba(178, 59, 64, 0.25);
+    border-inline-start: 3px solid var(--negative);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    color: var(--negative);
+    font-size: 11.5px;
+}
+.form-validation-summary ul {
+    margin: 0;
+    padding-inline-start: 18px;
+}
+.form-validation-summary li { line-height: 1.7; }
 
 .form-control,
 .form-select {

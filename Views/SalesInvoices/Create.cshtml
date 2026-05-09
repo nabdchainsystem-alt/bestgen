@@ -1,16 +1,21 @@
+@using System.Globalization
 @model SalesInvoiceFormViewModel
 @{
-    ViewData["Title"] = "فاتورة بيع جديدة";
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("New Sales Invoice", "فاتورة بيع جديدة");
 }
 
-<partial name="_PageHeader" model="@(new PageHeaderViewModel("فاتورة بيع جديدة", "أضف بيانات العميل والأصناف وسيتم احتساب الضريبة والإجماليات تلقائيا."))" />
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("New Sales Invoice", "فاتورة بيع جديدة"),
+    T("Add the customer and items — VAT and totals are computed automatically.", "أضف بيانات العميل والأصناف وسيتم احتساب الضريبة والإجماليات تلقائيا.")))" />
 
 <section class="form-panel">
     <form asp-action="Create" method="post" data-invoice-form data-mode="sales">
         <partial name="_Form" model="@Model" />
         <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> حفظ الفاتورة</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save invoice", "حفظ الفاتورة")</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
         </div>
     </form>
 </section>
