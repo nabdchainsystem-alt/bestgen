@@ -37,3 +37,4 @@ dotnet ef database update
 ## Notes
 
 Arabic RTL is the default UI. English/LTR and full resource localization are prepared structurally and can be expanded from the `Resources` folder.
+# bestgen
