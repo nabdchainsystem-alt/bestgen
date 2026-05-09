@@ -73,23 +73,18 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        if (builder.Environment.IsDevelopment())
+        // Relaxed rules everywhere so the seeded "123" admin accounts work in
+        // production demos. Tighten before opening the app to real users:
+        // bump RequiredLength and re-enable the Require* flags.
+        options.Password.RequiredLength = 1;
+        options.Password.RequireDigit = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredUniqueChars = 1;
+
+        if (!builder.Environment.IsDevelopment())
         {
-            options.Password.RequiredLength = 1;
-            options.Password.RequireDigit = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredUniqueChars = 1;
-        }
-        else
-        {
-            options.Password.RequiredLength = 8;
-            options.Password.RequireDigit = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequiredUniqueChars = 4;
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         }
