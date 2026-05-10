@@ -370,9 +370,9 @@
                     <span class="breadcrumb-sep">/</span>
                     <span class="breadcrumb-item-text current">@pageLabel</span>
                 </div>
-                <form class="topbar-search" method="get" action="@Url.Action("Index", string.IsNullOrEmpty(currentController) ? "Dashboard" : currentController)" role="search">
+                <form class="topbar-search" method="get" action="/Search" role="search">
                     <i class="bi bi-search"></i>
-                    <input type="search" name="q" value="@(Context.Request.Query["q"])" placeholder="@T("Search this page...", "بحث في هذه الصفحة...")" />
+                    <input type="search" name="q" value="@(Context.Request.Query["q"])" placeholder="@T("Search everything…  (customers, invoices, products, suppliers)", "بحث شامل…  (العملاء، الفواتير، المنتجات، الموردين)")" />
                 </form>
                 <div class="topbar-actions">
                     <button type="button" id="themeToggle"

@@ -1,0 +1,97 @@
+@using System.Globalization
+@using bestgen.Services.Search
+@model SearchResults
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Query) ? T("Search", "بحث") : $"{T("Search", "بحث")}: {Model.Query}";
+
+    string TypeLabel(string t) => t switch
+    {
+        "Customer"        => T("Customers", "العملاء"),
+        "Supplier"        => T("Suppliers", "الموردين"),
+        "Product"         => T("Products", "المنتجات"),
+        "SalesInvoice"    => T("Sales Invoices", "فواتير البيع"),
+        "PurchaseInvoice" => T("Purchase Invoices", "فواتير الشراء"),
+        "Quotation"       => T("Quotations", "عروض الأسعار"),
+        _ => t
+    };
+    string TypeIcon(string t) => t switch
+    {
+        "Customer"        => "bi-person",
+        "Supplier"        => "bi-truck",
+        "Product"         => "bi-box",
+        "SalesInvoice"    => "bi-file-earmark-text",
+        "PurchaseInvoice" => "bi-file-earmark-text",
+        "Quotation"       => "bi-file-earmark-spreadsheet",
+        _ => "bi-search"
+    };
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Search", "البحث"),
+    string.IsNullOrEmpty(Model.Query)
+        ? T("Type a customer name, invoice number, SKU, VAT number, phone — anything.",
+            "اكتب اسم عميل، رقم فاتورة، رمز صنف، رقم ضريبي، هاتف — أي شيء.")
+        : $@"{Model.Total} {T("results for", "نتيجة عن")} ""{Model.Query}""",
+    null, null, null))" />
+
+<form method="get" action="/Search" class="mb-3">
+    <div class="input-group input-group-lg">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="search" name="q" value="@Model.Query" class="form-control" autofocus />
+        <button type="submit" class="btn btn-primary">@T("Search", "بحث")</button>
+    </div>
+</form>
+
+@if (string.IsNullOrEmpty(Model.Query))
+{
+    <div class="alert alert-light">
+        <h5 class="mb-2">@T("Try searches like:", "جرّب عمليات بحث مثل:")</h5>
+        <ul class="mb-0 small text-muted">
+            <li><code>INV-2026</code> — @T("partial invoice number", "جزء من رقم الفاتورة")</li>
+            <li><code>966555</code> — @T("phone number", "رقم هاتف")</li>
+            <li><code>3000000000</code> — @T("VAT number", "رقم ضريبي")</li>
+            <li><code>قهوة</code> / <code>coffee</code> — @T("product name in either language", "اسم منتج بأي لغة")</li>
+        </ul>
+    </div>
+    return;
+}
+
+@if (Model.Total == 0)
+{
+    <section class="data-panel text-center py-5">
+        <i class="bi bi-search" style="font-size:48px;color:#94A3B8;"></i>
+        <h3 class="h5 mt-2">@T("No results", "لا توجد نتائج")</h3>
+        <p class="text-muted">@T("Try a shorter or different query.", "جرّب بحثاً أقصر أو مختلفاً.")</p>
+    </section>
+    return;
+}
+
+<div class="row g-3">
+@foreach (var group in Model.ByType)
+{
+    <div class="col-12">
+        <section class="data-panel">
+            <h2 class="h6 mb-3"><i class="bi @TypeIcon(group.Key)"></i> @TypeLabel(group.Key) <span class="badge bg-secondary">@group.Value.Count</span></h2>
+            <div class="list-group list-group-flush">
+                @foreach (var hit in group.Value)
+                {
+                    <a href="@hit.Url" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold">@hit.Title</div>
+                                @if (!string.IsNullOrEmpty(hit.Subtitle))
+                                {
+                                    <small class="text-muted">@hit.Subtitle</small>
+                                }
+                            </div>
+                            <i class="bi bi-arrow-@(isArabic ? "left" : "right") text-muted"></i>
+                        </div>
+                    </a>
+                }
+            </div>
+        </section>
+    </div>
+}
+</div>

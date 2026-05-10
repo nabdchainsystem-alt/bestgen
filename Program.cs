@@ -322,6 +322,20 @@ builder.Services.AddScoped<bestgen.Services.Delivery.InvoiceDeliveryService>();
 // Approvals (single-step workflow keyed off ApprovalPolicy thresholds).
 builder.Services.AddScoped<ApprovalService>();
 
+// Granular RBAC — per-action permission checks beyond Identity roles.
+builder.Services.AddScoped<bestgen.Services.Authorization.PermissionService>();
+
+// Web Push notifications.
+builder.Services.AddScoped<bestgen.Services.Notifications.WebPushService>();
+builder.Services.AddScoped<bestgen.Services.Notifications.NotificationDispatcher>();
+
+// Multi-org consolidation (cross-tenant read-only roll-ups).
+builder.Services.AddScoped<bestgen.Services.Consolidation.ConsolidationService>();
+
+// Universal cross-entity search. Default LIKE-on-tables works on both
+// SQLite + Postgres; swap by binding ISearchService to a different impl.
+builder.Services.AddScoped<bestgen.Services.Search.ISearchService, bestgen.Services.Search.LikeSearchService>();
+
 // Onboarding industry templates (Restaurant / Trading / Services / Contractor).
 builder.Services.AddScoped<bestgen.Services.Onboarding.IndustryTemplateService>();
 
