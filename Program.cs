@@ -118,11 +118,20 @@ if (!string.IsNullOrWhiteSpace(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
+// Connection string. At EF design-time we don't actually connect — a fake but
+// valid Npgsql string is enough to let migration SQL get generated.
+var efDesignTimeBootstrap = string.Equals(Environment.GetEnvironmentVariable("EF_DESIGN_TIME"), "1", StringComparison.Ordinal);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? (efDesignTimeBootstrap ? "Host=localhost;Port=5432;Database=design;Username=design;Password=design" : null)
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
 // DatabaseProvider: "Sqlite" (default, local dev) or "Postgres" (production).
-var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
+// EF tooling discovery (dotnet ef migrations add) is forced to Postgres so
+// generated migrations always target prod-shape SQL types.
+var efDesignTime = string.Equals(Environment.GetEnvironmentVariable("EF_DESIGN_TIME"), "1", StringComparison.Ordinal);
+var dbProvider = efDesignTime
+    ? "Postgres"
+    : (builder.Configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite");
 var isPostgres = string.Equals(dbProvider, "Postgres", StringComparison.OrdinalIgnoreCase);
 
 if (isPostgres)
@@ -482,7 +491,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 
-if (app.Configuration.GetValue("SeedDatabase", true))
+// Skip seeding at EF design-time so `dotnet ef` doesn't try to open a real
+// connection while it's just building the model.
+if (!efDesignTime && app.Configuration.GetValue("SeedDatabase", true))
 {
     await DbSeeder.SeedAsync(app.Services);
 }
