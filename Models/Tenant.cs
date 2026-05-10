@@ -28,4 +28,13 @@ public class Tenant
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Optional parent group (holding company). When set, the consolidation
+    /// page can roll this tenant's metrics up with its siblings under the
+    /// same Organization. Null = standalone workspace.
+    /// </summary>
+    public int? OrganizationId { get; set; }
+
+    public Organization? Organization { get; set; }
 }

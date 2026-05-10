@@ -1,0 +1,146 @@
+@using System.Globalization
+@using bestgen.Services.Consolidation
+@model ConsolidatedReport
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Consolidation", "التوحيد");
+    var noOrg = ViewBag.NoOrg as bool? ?? false;
+    var org = ViewBag.Org as Org;
+    var from = ViewBag.From as DateTime?;
+    var to = ViewBag.To as DateTime?;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Consolidated reporting", "التقارير الموحّدة"),
+    T("Roll up revenue, cash, and outstanding receivables across every workspace in your organization.",
+      "اجمع الإيرادات والسيولة والذمم عبر جميع المساحات في مؤسستك."),
+    null, null, null))" />
+
+@if (noOrg)
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        @T("This workspace isn't part of an organization yet. Set Tenant.OrganizationId on at least two workspaces to roll them up here.",
+           "هذه المساحة ليست جزءاً من مؤسسة. اضبط Tenant.OrganizationId على مساحتين على الأقل لرؤية التوحيد هنا.")
+    </div>
+    <p class="text-muted small">
+        @T("In the database, set ", "في قاعدة البيانات، اضبط ")
+        <code>UPDATE Tenants SET OrganizationId = 1 WHERE Id IN (1, 2);</code>
+        @T(" after inserting an Organization row.", " بعد إنشاء سجل في جدول Organizations.")
+    </p>
+    return;
+}
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-2">
+        <label class="form-label">@T("From", "من")</label>
+        <input type="date" name="from" value="@from?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">@T("To", "إلى")</label>
+        <input type="date" name="to" value="@to?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> @T("Apply", "تطبيق")</button>
+    </div>
+    <div class="col text-end">
+        <span class="text-muted small">
+            @T("Organization:", "المؤسسة:") <strong>@org?.Name</strong>
+            · @org?.Tenants.Count @T("workspaces", "مساحات")
+        </span>
+    </div>
+</form>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-3">
+        <div class="summary-card text-center">
+            <div class="text-muted small">@T("Total revenue", "إجمالي الإيرادات")</div>
+            <div class="display-6 fw-bold">@Model.TotalRevenue.ToString("N0")</div>
+            <small class="text-muted">SAR</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card text-center">
+            <div class="text-muted small">@T("VAT collected", "الضريبة المحصلة")</div>
+            <div class="display-6 fw-bold">@Model.TotalVat.ToString("N0")</div>
+            <small class="text-muted">SAR</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card text-center">
+            <div class="text-muted small">@T("Outstanding", "ذمم مستحقة")</div>
+            <div class="display-6 fw-bold @(Model.TotalOutstanding > 0 ? "text-danger" : "")">@Model.TotalOutstanding.ToString("N0")</div>
+            <small class="text-muted">SAR</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card text-center">
+            <div class="text-muted small">@T("Net cash", "صافي السيولة")</div>
+            <div class="display-6 fw-bold @(Model.TotalNetCash >= 0 ? "text-success" : "text-danger")">@Model.TotalNetCash.ToString("N0")</div>
+            <small class="text-muted">SAR</small>
+        </div>
+    </div>
+</div>
+
+<section class="data-panel">
+    <h3 class="h6 mb-3">@T("Per-workspace breakdown", "التفصيل لكل مساحة")</h3>
+    @if (Model.PerTenant.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No data in the selected range.", "لا توجد بيانات في الفترة المحددة.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@T("Workspace", "المساحة")</th>
+                        <th class="text-end">@T("Invoices", "فواتير")</th>
+                        <th class="text-end">@T("Revenue", "الإيرادات")</th>
+                        <th class="text-end">@T("VAT", "الضريبة")</th>
+                        <th class="text-end">@T("Outstanding", "المستحق")</th>
+                        <th class="text-end">@T("Cash in", "تدفق داخل")</th>
+                        <th class="text-end">@T("Cash out", "تدفق خارج")</th>
+                        <th class="text-end">@T("Net cash", "صافي السيولة")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in Model.PerTenant)
+                {
+                    <tr>
+                        <td><strong>@r.TenantName</strong></td>
+                        <td class="text-end">@r.InvoiceCount</td>
+                        <td class="text-end">@r.Revenue.ToString("N2")</td>
+                        <td class="text-end">@r.Vat.ToString("N2")</td>
+                        <td class="text-end @(r.Outstanding > 0 ? "text-danger" : "")">@r.Outstanding.ToString("N2")</td>
+                        <td class="text-end text-success">@r.CashIn.ToString("N2")</td>
+                        <td class="text-end text-muted">@r.CashOut.ToString("N2")</td>
+                        <td class="text-end fw-bold @(r.NetCash >= 0 ? "text-success" : "text-danger")">@r.NetCash.ToString("N2")</td>
+                    </tr>
+                }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th>@T("Total", "الإجمالي")</th>
+                        <th class="text-end">@Model.TotalInvoices</th>
+                        <th class="text-end">@Model.TotalRevenue.ToString("N2")</th>
+                        <th class="text-end">@Model.TotalVat.ToString("N2")</th>
+                        <th class="text-end">@Model.TotalOutstanding.ToString("N2")</th>
+                        <th class="text-end">@Model.TotalCashIn.ToString("N2")</th>
+                        <th class="text-end">@Model.TotalCashOut.ToString("N2")</th>
+                        <th class="text-end">@Model.TotalNetCash.ToString("N2")</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="details-panel mt-3">
+    <h3 class="h6">@T("Inter-company transactions (F5 — partial)", "المعاملات بين الشركات (F5 — جزئي)")</h3>
+    <p class="text-muted small">
+        @T("Schema is in place: Customer.LinkedTenantId points at another workspace's tenant id. When set, a sales invoice to that customer should mirror as a purchase invoice in the linked workspace. The cross-tenant SaveChanges path is intentionally NOT enabled by default — see ADR-0012.",
+           "البنية جاهزة: Customer.LinkedTenantId يشير إلى مساحة أخرى. عند ضبطه، يجب أن تنعكس فاتورة البيع كفاتورة شراء في المساحة المرتبطة. تنفيذ الكتابة عبر المساحات معطّل افتراضياً — انظر ADR-0012.")
+    </p>
+</section>

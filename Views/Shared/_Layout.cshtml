@@ -302,6 +302,9 @@
                 <a asp-controller="Reports" asp-action="Index" class="nav-link nav-item @(IsActive("Reports") ? "active" : "")" title="@T("Reports", "التقارير")">
                     <i class="bi bi-bar-chart-line"></i><span>@T("Reports", "التقارير")</span>
                 </a>
+                <a asp-controller="Consolidation" asp-action="Index" class="nav-link nav-item @(IsActive("Consolidation") ? "active" : "")" title="@T("Consolidation", "التوحيد")">
+                    <i class="bi bi-diagram-3"></i><span>@T("Consolidation", "التوحيد")</span>
+                </a>
                 <a asp-controller="Approvals" asp-action="Index" class="nav-link nav-item @(IsActive("Approvals") ? "active" : "")" title="@T("Approvals", "الموافقات")">
                     <i class="bi bi-check2-square"></i><span>@T("Approvals", "الموافقات")</span>
                 </a>

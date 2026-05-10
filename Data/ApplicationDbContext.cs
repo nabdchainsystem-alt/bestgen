@@ -44,6 +44,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
     }
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<EInvoice> EInvoices => Set<EInvoice>();
     public DbSet<InvoiceDeliveryLog> InvoiceDeliveryLogs => Set<InvoiceDeliveryLog>();
     public DbSet<ApprovalPolicy> ApprovalPolicies => Set<ApprovalPolicy>();

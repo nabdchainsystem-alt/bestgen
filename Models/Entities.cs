@@ -37,6 +37,14 @@ public class Customer
     public decimal CreditLimit { get; set; }
     public decimal CurrentBalance { get; set; }
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// When set, this Customer represents another Tenant in the same Organization
+    /// — used by inter-company sync to mirror sales→purchase across tenants.
+    /// Null for normal external customers.
+    /// </summary>
+    public int? LinkedTenantId { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
