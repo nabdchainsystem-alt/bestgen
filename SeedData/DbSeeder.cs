@@ -42,6 +42,39 @@ public static class DbSeeder
             var destroy = string.Equals(
                 Environment.GetEnvironmentVariable("BESTGEN_DESTROY_AND_REBUILD"),
                 "1", StringComparison.Ordinal);
+
+            // Auto-detect corrupt schema: a previous bootstrap may have written
+            // an InitialCreate row into __EFMigrationsHistory without actually
+            // creating the tables. If the migration is "applied" but a sentinel
+            // table from it (Tenants) doesn't exist, the schema is unsalvageable
+            // — drop and rebuild.
+            if (!destroy && dbExists)
+            {
+                try
+                {
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                            ""MigrationId"" character varying(150) PRIMARY KEY,
+                            ""ProductVersion"" character varying(32) NOT NULL
+                        );");
+                    var preCheck = (await context.Database.GetAppliedMigrationsAsync()).ToList();
+                    if (preCheck.Contains(firstMigration))
+                    {
+                        var sentinelExists = await context.Database.SqlQueryRaw<int>(
+                            "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'Tenants' LIMIT 1")
+                            .AnyAsync();
+                        if (!sentinelExists)
+                        {
+                            destroy = true; // corrupt state — auto-recover
+                        }
+                    }
+                }
+                catch
+                {
+                    // best-effort detection; if the probe itself fails, fall through.
+                }
+            }
+
             if (destroy && hasTables)
             {
                 await context.Database.ExecuteSqlRawAsync(
