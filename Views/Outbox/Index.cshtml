@@ -1,0 +1,108 @@
+@using System.Globalization
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Offline Outbox", "صندوق الإرسال للأوفلاين");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Offline outbox", "صندوق الإرسال أوفلاين"),
+    T("Forms submitted while offline are queued in your browser's IndexedDB until the connection comes back. They drain automatically; this page is for manual control.",
+      "النماذج المُرسلة في وضع عدم الاتصال يتم تخزينها في متصفحك حتى عودة الاتصال. تُرسَل تلقائياً، وهذه الصفحة للتحكم اليدوي."),
+    null, null, null))" />
+
+<section class="data-panel">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <strong id="outboxStatus">@T("Loading…", "جارٍ التحميل…")</strong>
+            <small class="text-muted ms-2" id="outboxConn"></small>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" id="outboxRefreshBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> @T("Refresh", "تحديث")</button>
+            <button type="button" id="outboxDrainBtn" class="btn btn-primary btn-sm"><i class="bi bi-cloud-arrow-up"></i> @T("Send all now", "إرسال الكل الآن")</button>
+        </div>
+    </div>
+
+    <div id="outboxEmpty" class="text-center text-muted py-5" style="display:none;">
+        <i class="bi bi-inbox" style="font-size:48px;"></i>
+        <p class="mt-2 mb-0">@T("Outbox is empty.", "صندوق الإرسال فارغ.")</p>
+        <small>@T("Forms with the data-offline-safe attribute will queue here when you're offline.",
+                  "النماذج المُعلَّمة data-offline-safe تُحفظ هنا في وضع عدم الاتصال.")</small>
+    </div>
+
+    <ul id="outboxList" class="list-group"></ul>
+</section>
+
+<script>
+(async function () {
+    const status = document.getElementById('outboxStatus');
+    const conn = document.getElementById('outboxConn');
+    const empty = document.getElementById('outboxEmpty');
+    const list = document.getElementById('outboxList');
+    const drainBtn = document.getElementById('outboxDrainBtn');
+    const refreshBtn = document.getElementById('outboxRefreshBtn');
+
+    function describe(item) {
+        const params = new URLSearchParams(item.body || '');
+        const visible = [];
+        for (const [k, v] of params.entries()) {
+            if (k.startsWith('__') || k === 'RequestVerificationToken') continue;
+            if (visible.length >= 6) break;
+            visible.push(`${k}=${v.length > 40 ? v.substring(0, 40) + '…' : v}`);
+        }
+        return visible.join(', ');
+    }
+
+    async function render() {
+        const ob = window.bestgenOutbox;
+        if (!ob) { status.textContent = '@T("Outbox unavailable in this browser.", "صندوق الإرسال غير متاح في هذا المتصفح.")'; return; }
+        const items = await ob.list();
+        conn.textContent = navigator.onLine ? '@T("Online", "متصل")' : '@T("Offline", "غير متصل")';
+        if (items.length === 0) {
+            status.textContent = '@T("No queued items.", "لا توجد عناصر معلقة.")';
+            empty.style.display = 'block';
+            list.innerHTML = '';
+            return;
+        }
+        empty.style.display = 'none';
+        status.textContent = '@T("Queued items:", "عناصر معلقة:")' + ' ' + items.length;
+        list.innerHTML = items.map(i => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${i.label || i.url}</strong>
+                    <div class="text-muted small">${i.method} ${i.url}</div>
+                    <div class="text-muted small">${describe(i)}</div>
+                    <small class="text-muted">${new Date(i.queuedAt).toLocaleString()}</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" data-action="retry" data-id="${i.id}"><i class="bi bi-arrow-up-circle"></i> @T("Retry", "إعادة المحاولة")</button>
+                    <button class="btn btn-sm btn-outline-danger" data-action="discard" data-id="${i.id}"><i class="bi bi-trash"></i> @T("Discard", "تجاهل")</button>
+                </div>
+            </li>
+        `).join('');
+    }
+
+    list.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = +btn.dataset.id;
+        const action = btn.dataset.action;
+        const ob = window.bestgenOutbox;
+        if (action === 'discard') {
+            if (!confirm('@T("Discard this queued submission?", "تجاهل هذا الطلب المعلق؟")')) return;
+            await ob.remove(id);
+            await ob.refreshBadge();
+            await render();
+        } else if (action === 'retry') {
+            await ob.drain(false);
+            await render();
+        }
+    });
+    drainBtn.addEventListener('click', async () => { await window.bestgenOutbox.drain(false); await render(); });
+    refreshBtn.addEventListener('click', render);
+    window.addEventListener('online', render);
+    window.addEventListener('offline', render);
+
+    await render();
+})();
+</script>

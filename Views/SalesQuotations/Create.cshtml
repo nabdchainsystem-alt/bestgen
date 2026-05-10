@@ -11,7 +11,8 @@
     T("Build a quotation for the customer — totals and VAT compute live as you add items.", "أنشئ عرض سعر للعميل — تُحسب الضريبة والإجماليات تلقائياً مع كل صنف.")))" />
 
 <section class="form-panel">
-    <form asp-action="Create" method="post" data-invoice-form data-mode="sales">
+    <form asp-action="Create" method="post" data-invoice-form data-mode="sales"
+          data-offline-safe="true" data-offline-label="@T("New quotation", "عرض سعر جديد")">
         <partial name="_Form" model="@Model" />
         <div class="d-flex gap-2 mt-4">
             <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save quotation", "حفظ عرض السعر")</button>
