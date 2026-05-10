@@ -39,15 +39,30 @@ shipping.
 
 ### Database lifecycle
 
-There are no EF migrations checked in. `Program.cs` runs `DbSeeder.SeedAsync`
-which calls `EnsureCreatedAsync()` — that creates the schema only if the
-database file is missing, so **changing the entity model requires deleting
-`bestgen.db` and letting it regenerate**. When you add or change models:
+Two paths, picked at runtime:
 
+- **SQLite (local dev)**: `EnsureCreatedAsync()` — fast iteration. Changing
+  entity models still requires `rm bestgen.db; dotnet run` so the schema
+  re-creates from the current model.
+- **Postgres (production)**: `MigrateAsync()` against the migrations in
+  `Migrations/`. Schema changes ship as new migration files (see
+  [ADR-0011](docs/adr/0011-ef-migrations-for-postgres.md)). The seeder
+  bootstraps legacy `EnsureCreated`-built Postgres DBs by writing the
+  `InitialCreate` row into `__EFMigrationsHistory` automatically.
+
+To add a new migration (after changing a model):
+
+```bash
+DatabaseProvider=Postgres \
+ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=design;Username=design;Password=design" \
+SeedDatabase=false \
+ASPNETCORE_ENVIRONMENT=Production \
+dotnet ef migrations add MyNewMigration --project Bestgen.csproj --output-dir Migrations
 ```
-rm bestgen.db
-dotnet run
-```
+
+The connection string is fictional — EF only uses it for SQL generation.
+
+For local SQLite dev: still `rm bestgen.db; dotnet run`.
 
 ## Architecture
 

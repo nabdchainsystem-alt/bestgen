@@ -1,0 +1,172 @@
+@using System.Globalization
+@using bestgen.Services.Onboarding
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    var info = (bestgen.Services.Onboarding.TemplateInfo)ViewBag.Info;
+    var preview = (IndustryTemplateService.SeedSet)ViewBag.Preview;
+    var title = isArabic ? info.TitleAr : info.TitleEn;
+    var summary = isArabic ? info.SummaryAr : info.SummaryEn;
+    var bullets = isArabic ? info.BulletsAr : info.BulletsEn;
+    ViewData["Title"] = title;
+
+    string AcctTypeLabel(bestgen.Models.AccountType t) => t switch
+    {
+        bestgen.Models.AccountType.Asset     => T("Asset",     "أصل"),
+        bestgen.Models.AccountType.Liability => T("Liability", "التزام"),
+        bestgen.Models.AccountType.Equity    => T("Equity",    "حقوق ملكية"),
+        bestgen.Models.AccountType.Revenue   => T("Revenue",   "إيراد"),
+        bestgen.Models.AccountType.Expense   => T("Expense",   "مصروف"),
+        _ => t.ToString()
+    };
+    string AcctTypeBadge(bestgen.Models.AccountType t) => t switch
+    {
+        bestgen.Models.AccountType.Asset     => "bg-primary",
+        bestgen.Models.AccountType.Liability => "bg-warning text-dark",
+        bestgen.Models.AccountType.Equity    => "bg-info text-dark",
+        bestgen.Models.AccountType.Revenue   => "bg-success",
+        bestgen.Models.AccountType.Expense   => "bg-secondary",
+        _ => "bg-light text-dark"
+    };
+}
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <span class="industry-icon-large"><i class="bi @info.Icon"></i></span>
+        <div>
+            <h1 class="m-0">@title</h1>
+            <p class="text-muted m-0">@summary</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back to all templates", "العودة لكل القوالب")</a>
+        <form asp-action="Apply" method="post" class="m-0"
+              onsubmit="return confirm('@T($"Apply the {title} template?", $"تطبيق قالب {title}؟")');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="template" value="@info.Template" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-magic"></i> @T("Apply this template", "تطبيق هذا القالب")</button>
+        </form>
+    </div>
+</div>
+
+<section class="details-panel mb-3">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="summary-card text-center">
+                <div class="text-muted small">@T("Categories", "التصنيفات")</div>
+                <div class="display-6 fw-bold">@preview.Categories.Count</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="summary-card text-center">
+                <div class="text-muted small">@T("Products / Services", "المنتجات / الخدمات")</div>
+                <div class="display-6 fw-bold">@preview.Products.Count</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="summary-card text-center">
+                <div class="text-muted small">@T("Accounts", "الحسابات")</div>
+                <div class="display-6 fw-bold">@preview.Accounts.Count</div>
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-info mt-3 mb-0 small">
+        <i class="bi bi-info-circle"></i>
+        @T("Re-applying is safe — anything that already exists in your workspace (by category name, SKU, or account code) is skipped. New rows only.",
+           "إعادة التطبيق آمنة — أي عنصر موجود مسبقاً في حسابك (باسم التصنيف أو رمز الصنف أو رمز الحساب) سيتم تجاهله. تُضاف العناصر الجديدة فقط.")
+    </div>
+    @if (bullets.Length > 0)
+    {
+        <ul class="small text-muted mb-0 ps-4 mt-3">
+            @foreach (var b in bullets) { <li>@b</li> }
+        </ul>
+    }
+</section>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <section class="data-panel h-100">
+            <h2 class="h6"><i class="bi bi-folder"></i> @T("Categories", "التصنيفات") <span class="badge bg-secondary">@preview.Categories.Count</span></h2>
+            <ul class="list-group list-group-flush">
+                @foreach (var c in preview.Categories)
+                {
+                    <li class="list-group-item px-0 d-flex justify-content-between">
+                        <span>@(isArabic ? c.NameAr : (c.NameEn ?? c.NameAr))</span>
+                        <small class="text-muted">@(isArabic ? c.NameEn : c.NameAr)</small>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+
+    <div class="col-lg-8">
+        <section class="data-panel h-100">
+            <h2 class="h6"><i class="bi bi-box-seam"></i> @T("Products / Services", "المنتجات / الخدمات") <span class="badge bg-secondary">@preview.Products.Count</span></h2>
+            <div class="table-responsive" style="max-height: 480px;">
+                <table class="table table-sm align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>@T("SKU", "الرمز")</th>
+                            <th>@T("Name", "الاسم")</th>
+                            <th>@T("Category", "التصنيف")</th>
+                            <th>@T("Unit", "الوحدة")</th>
+                            <th class="text-end">@T("Cost", "التكلفة")</th>
+                            <th class="text-end">@T("Selling", "البيع")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var p in preview.Products)
+                    {
+                        <tr>
+                            <td><code class="small">@p.SKU</code></td>
+                            <td>@(isArabic ? p.NameAr : (p.NameEn ?? p.NameAr))</td>
+                            <td><small class="text-muted">@p.CategoryNameAr</small></td>
+                            <td><small>@p.Unit</small></td>
+                            <td class="text-end">@p.PurchasePrice.ToString("N2")</td>
+                            <td class="text-end fw-semibold">@p.SellingPrice.ToString("N2")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="data-panel">
+            <h2 class="h6"><i class="bi bi-journal-bookmark"></i> @T("Cost / Revenue accounts", "حسابات التكلفة / الإيراد") <span class="badge bg-secondary">@preview.Accounts.Count</span></h2>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>@T("Code", "الرمز")</th>
+                            <th>@T("Name", "الاسم")</th>
+                            <th>@T("Type", "النوع")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var a in preview.Accounts)
+                    {
+                        <tr>
+                            <td><code>@a.Code</code></td>
+                            <td>@(isArabic ? a.NameAr : (a.NameEn ?? a.NameAr))<br/><small class="text-muted">@(isArabic ? a.NameEn : a.NameAr)</small></td>
+                            <td><span class="badge @AcctTypeBadge(a.Type)">@AcctTypeLabel(a.Type)</span></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    .industry-icon-large {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 64px; height: 64px;
+        border-radius: 16px;
+        background: var(--accent-tint, #F5F5FE);
+        color: var(--accent, #1B2E4B);
+        font-size: 32px;
+    }
+</style>

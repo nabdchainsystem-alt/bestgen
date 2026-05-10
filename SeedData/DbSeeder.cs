@@ -20,8 +20,37 @@ public static class DbSeeder
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        if (context.Database.GetMigrations().Any())
+        // Schema bootstrap:
+        //   • SQLite (local dev): EnsureCreatedAsync — keep dev-loop fast (rm + run).
+        //   • Postgres (prod):    MigrateAsync + bootstrap for legacy EnsureCreated-built DBs.
+        var providerName = context.Database.ProviderName ?? string.Empty;
+        var isPostgres = providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase);
+
+        if (isPostgres && context.Database.GetMigrations().Any())
         {
+            var creator = Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions
+                .GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>(context.Database);
+            var dbExists = await creator.ExistsAsync();
+            var hasTables = dbExists && await creator.HasTablesAsync();
+            var applied = dbExists ? (await context.Database.GetAppliedMigrationsAsync()).ToList() : new List<string>();
+
+            // Legacy DB built by EnsureCreated has tables but no __EFMigrationsHistory.
+            // Mark InitialCreate as applied without running its SQL — Migrate then no-ops it
+            // and applies anything newer.
+            if (hasTables && applied.Count == 0)
+            {
+                var firstMigration = context.Database.GetMigrations().First();
+                await context.Database.ExecuteSqlRawAsync(@"
+                    CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                        ""MigrationId"" character varying(150) PRIMARY KEY,
+                        ""ProductVersion"" character varying(32) NOT NULL
+                    );");
+                await context.Database.ExecuteSqlRawAsync(
+                    $@"INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                       VALUES ('{firstMigration}', '8.0.5')
+                       ON CONFLICT DO NOTHING;");
+            }
+
             await context.Database.MigrateAsync();
         }
         else

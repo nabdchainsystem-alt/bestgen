@@ -260,10 +260,13 @@ public class IndustryTemplateService
     }
 
     // ---------- Seed data ----------
-    private sealed record CatRow(string NameAr, string? NameEn);
-    private sealed record ProdRow(string SKU, string NameAr, string? NameEn, string CategoryNameAr, string Unit, decimal PurchasePrice, decimal SellingPrice);
-    private sealed record AcctRow(string Code, string NameAr, string? NameEn, AccountType Type);
-    private sealed record SeedSet(IReadOnlyList<CatRow> Categories, IReadOnlyList<ProdRow> Products, IReadOnlyList<AcctRow> Accounts);
+    public sealed record CatRow(string NameAr, string? NameEn);
+    public sealed record ProdRow(string SKU, string NameAr, string? NameEn, string CategoryNameAr, string Unit, decimal PurchasePrice, decimal SellingPrice);
+    public sealed record AcctRow(string Code, string NameAr, string? NameEn, AccountType Type);
+    public sealed record SeedSet(IReadOnlyList<CatRow> Categories, IReadOnlyList<ProdRow> Products, IReadOnlyList<AcctRow> Accounts);
+
+    /// <summary>Public preview of what a template would seed — used by the details page.</summary>
+    public SeedSet Preview(IndustryTemplate template) => BuildSeed(template);
 
     private SeedSet BuildSeed(IndustryTemplate template) => template switch
     {

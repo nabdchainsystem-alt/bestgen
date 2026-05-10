@@ -20,6 +20,16 @@ public class OnboardingController : Controller
         return View();
     }
 
+    public IActionResult Details(IndustryTemplate template)
+    {
+        var info = _templates.Catalog.FirstOrDefault(t => t.Template == template);
+        if (info is null) return NotFound();
+        var preview = _templates.Preview(template);
+        ViewBag.Info = info;
+        ViewBag.Preview = preview;
+        return View();
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Apply(IndustryTemplate template)

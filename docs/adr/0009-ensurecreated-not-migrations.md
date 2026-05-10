@@ -1,7 +1,8 @@
 # ADR-0009: `EnsureCreatedAsync` instead of EF migrations (initial phase)
 
-- **Status**: Accepted, time-boxed — replace before customer onboarding
+- **Status**: Superseded by ADR-0011 — Postgres now uses migrations
 - **Date**: 2026-04-10
+- **Superseded**: 2026-05-10
 
 ## Context
 EF Core gives two ways to create the schema:
