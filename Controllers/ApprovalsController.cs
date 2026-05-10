@@ -33,6 +33,7 @@ public class ApprovalsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [bestgen.Services.Idempotency.Idempotent]
+    [bestgen.Services.Authorization.RequirePermission("approvals.act")]
     public async Task<IActionResult> Approve(int id, string? comment)
     {
         if (await ResolveGuardAsync(id) is { } guard) return guard;
@@ -46,6 +47,7 @@ public class ApprovalsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [bestgen.Services.Idempotency.Idempotent]
+    [bestgen.Services.Authorization.RequirePermission("approvals.act")]
     public async Task<IActionResult> Reject(int id, string? comment)
     {
         if (await ResolveGuardAsync(id) is { } guard) return guard;
@@ -72,6 +74,7 @@ public class ApprovalsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("approvals.policies")]
     public async Task<IActionResult> SavePolicy(ApprovalPolicy policy)
     {
         if (policy.MinAmount < 0) policy.MinAmount = 0;
@@ -82,6 +85,7 @@ public class ApprovalsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("approvals.policies")]
     public async Task<IActionResult> DeletePolicy(int id)
     {
         await _approvals.DeletePolicyAsync(id);

@@ -35,7 +35,10 @@ public class PortalInvitationsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Generate(int customerId, string email)
+    [bestgen.Services.Authorization.RequirePermission("portal.invite")]
+    public async Task<IActionResult> Generate(int customerId, string email,
+        [FromServices] bestgen.Services.Delivery.EmailDeliveryService emailService,
+        [FromServices] IConfiguration config)
     {
         var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
         if (customer is null)
@@ -65,9 +68,35 @@ public class PortalInvitationsController : Controller
         });
         await _db.SaveChangesAsync();
 
-        var url = Url.Action("Register", "Portal", new { token }, Request.Scheme);
+        var url = Url.Action("Register", "Portal", new { token }, Request.Scheme) ?? "";
+        var customerLabel = string.IsNullOrWhiteSpace(customer.NameEn) ? customer.NameAr : customer.NameEn;
+
+        // If SMTP is configured, fire-and-forget the invitation email.
+        if (emailService.IsConfigured)
+        {
+            var senderName = config["Smtp:FromName"] ?? "Bestgen";
+            var subject = $"You're invited to {senderName}'s portal";
+            var body =
+                $"Hello {customerLabel},\n\n" +
+                $"{senderName} has invited you to their customer portal where you can view your invoices, quotations, and outstanding balance.\n\n" +
+                $"Activate your portal access here (link expires in 14 days):\n{url}\n\n" +
+                $"If you didn't expect this invitation, you can safely ignore this email.\n\n" +
+                $"— {senderName}";
+
+            var (ok, err, _) = await emailService.SendAsync(email.Trim(), subject, body);
+            if (ok)
+            {
+                TempData["InvitationEmailed"] = $"Invitation emailed to {email}.";
+            }
+            else
+            {
+                TempData["InvitationError"] = $"Email send failed: {err}";
+            }
+        }
+
+        // Always show the link as a fallback (and for SMTP-not-configured case).
         TempData["InvitationLink"] = url;
-        TempData["InvitationCustomer"] = customer.NameAr;
+        TempData["InvitationCustomer"] = customerLabel;
         TempData["InvitationEmail"] = email;
         return RedirectToAction(nameof(Index));
     }

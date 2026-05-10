@@ -15,12 +15,18 @@
       "أرسل رابطاً لمرة واحدة ليتمكن العميل من تسجيل الدخول إلى بوابته والاطلاع على فواتيره وعروض الأسعار."),
     null, null, null))" />
 
+@if (TempData["InvitationEmailed"] is string mailedMsg)
+{
+    <div class="alert alert-success py-2"><i class="bi bi-envelope-check"></i> @mailedMsg</div>
+}
 @if (TempData["InvitationLink"] is string link)
 {
-    <div class="alert alert-success">
+    <div class="alert alert-info">
         <strong>@T("Invitation generated", "تم إنشاء الدعوة")</strong>
-        @T($" for {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}). Copy this link and share it with the customer:",
-           $" لـ {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}). انسخ هذا الرابط وأرسله للعميل:")
+        @T($" for {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}).",
+           $" لـ {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}).")
+        @T(" Share this link with the customer (also emailed if SMTP is configured):",
+           " شارك هذا الرابط مع العميل (يُرسل بالبريد إن كان SMTP مكوّناً):")
         <code class="user-select-all d-block mt-2 p-2" style="background:#fff;border-radius:6px;font-size:13px;word-break:break-all;">@link</code>
         <small class="text-muted">@T("The link expires in 14 days and can be used once.", "ينتهي الرابط بعد 14 يوماً ويصلح للاستخدام مرة واحدة.")</small>
     </div>

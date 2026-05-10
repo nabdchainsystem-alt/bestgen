@@ -23,6 +23,7 @@ public class WebhooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("webhooks.manage")]
     public async Task<IActionResult> Create(string name, string url, string events, string? secret)
     {
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(url))
@@ -50,6 +51,7 @@ public class WebhooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("webhooks.manage")]
     public async Task<IActionResult> Toggle(int id)
     {
         var w = await _db.Webhooks.FirstOrDefaultAsync(x => x.Id == id);
@@ -63,6 +65,7 @@ public class WebhooksController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("webhooks.manage")]
     public async Task<IActionResult> Delete(int id)
     {
         var w = await _db.Webhooks.FirstOrDefaultAsync(x => x.Id == id);

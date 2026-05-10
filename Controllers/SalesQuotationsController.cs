@@ -119,6 +119,7 @@ public class SalesQuotationsController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("quotations.delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var quotation = await _context.SalesQuotations.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == id);
@@ -132,6 +133,7 @@ public class SalesQuotationsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [bestgen.Services.Idempotency.Idempotent]
+    [bestgen.Services.Authorization.RequirePermission("invoices.create")]
     public async Task<IActionResult> ConvertToInvoice(int id, [FromServices] SalesInvoiceService invoiceService)
     {
         var quotation = await _context.SalesQuotations.AsNoTracking()

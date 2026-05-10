@@ -464,6 +464,7 @@ else
 // HTTPS redirect intentionally omitted: Render terminates SSL at the edge.
 // Forwarded headers above make the app see the original https scheme for cookies.
 app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<bestgen.Services.Observability.LoginRateLimitMiddleware>();
 app.UseStaticFiles();
 app.UseRouting();
 

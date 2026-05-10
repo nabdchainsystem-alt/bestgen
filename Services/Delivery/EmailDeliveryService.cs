@@ -35,8 +35,8 @@ public class EmailDeliveryService
         string toEmail,
         string subject,
         string body,
-        byte[] attachment,
-        string attachmentName,
+        byte[]? attachment = null,
+        string? attachmentName = null,
         CancellationToken ct = default)
     {
         var o = _options.Value;
@@ -53,7 +53,10 @@ public class EmailDeliveryService
             msg.Subject = subject;
 
             var builder = new BodyBuilder { TextBody = body };
-            builder.Attachments.Add(attachmentName, attachment, new ContentType("application", "pdf"));
+            if (attachment is { Length: > 0 } && !string.IsNullOrWhiteSpace(attachmentName))
+            {
+                builder.Attachments.Add(attachmentName, attachment, new ContentType("application", "pdf"));
+            }
             msg.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();

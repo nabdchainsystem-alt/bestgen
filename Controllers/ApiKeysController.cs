@@ -21,6 +21,7 @@ public class ApiKeysController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("apikeys.manage")]
     public async Task<IActionResult> Create(string name, string? scopes)
     {
         if (string.IsNullOrWhiteSpace(name)) name = "Untitled key";
@@ -46,6 +47,7 @@ public class ApiKeysController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("apikeys.manage")]
     public async Task<IActionResult> Revoke(int id)
     {
         var k = await _db.ApiKeys.FirstOrDefaultAsync(x => x.Id == id);
