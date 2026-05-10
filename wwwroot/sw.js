@@ -10,7 +10,7 @@
 //
 // Bump VERSION whenever you change cached assets to invalidate old caches.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const STATIC_CACHE = `bestgen-static-${VERSION}`;
 const PAGE_CACHE = `bestgen-pages-${VERSION}`;
 const OFFLINE_URL = '/offline.html';
