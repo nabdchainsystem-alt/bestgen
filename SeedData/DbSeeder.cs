@@ -35,15 +35,26 @@ public static class DbSeeder
             var allMigrations = context.Database.GetMigrations().ToList();
             var firstMigration = allMigrations.First();
 
-            // Bootstrap path. Triggers when tables already exist (legacy
-            // EnsureCreated builds, or partially-applied prior deploys whose
-            // __EFMigrationsHistory has stale rows from a previous migration
-            // ID that's no longer in the project).
-            //
-            // We mark the CURRENT InitialCreate as applied without running its
-            // CREATE TABLE statements — they'd error on "relation already
-            // exists". MigrateAsync then no-ops InitialCreate and applies any
-            // newer migrations cleanly.
+            // Allow operators to opt into a destructive rebuild via env var.
+            // Use this when a prior deploy crashed mid-migration and left the
+            // schema partially built. Set BESTGEN_DESTROY_AND_REBUILD=1 ONCE,
+            // redeploy, then unset.
+            var destroy = string.Equals(
+                Environment.GetEnvironmentVariable("BESTGEN_DESTROY_AND_REBUILD"),
+                "1", StringComparison.Ordinal);
+            if (destroy && hasTables)
+            {
+                await context.Database.ExecuteSqlRawAsync(
+                    "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public;");
+                hasTables = false;
+            }
+
+            // Bootstrap path. Triggers ONLY when tables exist but no
+            // __EFMigrationsHistory entries do — the legacy EnsureCreated case.
+            // For partial schemas (a prior migration crashed mid-flight),
+            // bootstrap is unsafe and we throw so the operator can decide:
+            // either DROP SCHEMA public CASCADE manually, or set
+            // BESTGEN_DESTROY_AND_REBUILD=1 and redeploy.
             if (hasTables)
             {
                 await context.Database.ExecuteSqlRawAsync(@"
@@ -53,12 +64,26 @@ public static class DbSeeder
                     );");
 
                 var applied = (await context.Database.GetAppliedMigrationsAsync()).ToList();
-                if (!applied.Contains(firstMigration))
+
+                if (applied.Count == 0)
                 {
+                    // Legacy EnsureCreated build — schema fully matches model. Mark applied.
                     await context.Database.ExecuteSqlRawAsync(
                         $@"INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
                            VALUES ('{firstMigration}', '8.0.5')
                            ON CONFLICT DO NOTHING;");
+                }
+                else if (!applied.Contains(firstMigration))
+                {
+                    // Stale history rows from a prior failed deploy. Schema is
+                    // partial — we cannot safely fake-apply InitialCreate.
+                    throw new InvalidOperationException(
+                        $"Postgres schema is in an inconsistent state. " +
+                        $"__EFMigrationsHistory has rows ({string.Join(", ", applied)}) " +
+                        $"but the current InitialCreate ({firstMigration}) isn't applied. " +
+                        $"Recover by either:\n" +
+                        $"  1. Set BESTGEN_DESTROY_AND_REBUILD=1 in env and redeploy (drops + rebuilds schema), or\n" +
+                        $"  2. Connect to Postgres and run: DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public;");
                 }
             }
 
