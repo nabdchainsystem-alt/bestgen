@@ -48,6 +48,8 @@ public class SalesInvoiceService
             PaymentMethod = model.PaymentMethod,
             Status = model.Status,
             Notes = model.Notes,
+            CurrencyCode = string.IsNullOrWhiteSpace(model.CurrencyCode) ? "SAR" : model.CurrencyCode,
+            ExchangeRate = model.ExchangeRate <= 0 ? 1m : model.ExchangeRate,
             Items = model.Items.Select(item => new SalesInvoiceItem
             {
                 ProductId = item.ProductId,
@@ -98,6 +100,8 @@ public class SalesInvoiceService
         invoice.PaymentMethod = model.PaymentMethod;
         invoice.Status = model.Status;
         invoice.Notes = model.Notes;
+        invoice.CurrencyCode = string.IsNullOrWhiteSpace(model.CurrencyCode) ? "SAR" : model.CurrencyCode;
+        invoice.ExchangeRate = model.ExchangeRate <= 0 ? 1m : model.ExchangeRate;
         invoice.UpdatedAt = DateTime.UtcNow;
 
         _context.SalesInvoiceItems.RemoveRange(invoice.Items);
@@ -135,6 +139,8 @@ public class SalesInvoiceService
         PaymentMethod = invoice.PaymentMethod,
         Status = invoice.Status,
         Notes = invoice.Notes,
+        CurrencyCode = invoice.CurrencyCode,
+        ExchangeRate = invoice.ExchangeRate,
         Items = invoice.Items.Select(item => new SalesInvoiceItemFormViewModel
         {
             ProductId = item.ProductId,

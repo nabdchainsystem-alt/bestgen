@@ -10,6 +10,8 @@
     var products = ViewBag.Products as List<Product> ?? new List<Product>();
     var paymentMethods = ViewBag.PaymentMethods as PaymentMethod[] ?? Array.Empty<PaymentMethod>();
     var statuses = ViewBag.Statuses as InvoiceStatus[] ?? Array.Empty<InvoiceStatus>();
+    var currencies = ViewBag.Currencies as List<Currency> ?? new List<Currency>();
+    var fxRates = ViewBag.FxRates as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
     var invariant = CultureInfo.InvariantCulture;
     string number(decimal value) => value.ToString("0.##", invariant);
 }
@@ -67,6 +69,24 @@
             }
         </select>
     </div>
+    @if (currencies.Count > 0)
+    {
+        <div>
+            <label asp-for="CurrencyCode" class="form-label">@T("Currency", "العملة")</label>
+            <select asp-for="CurrencyCode" class="form-select" id="invCurrency"
+                    data-fx="@System.Text.Json.JsonSerializer.Serialize(fxRates)">
+                @foreach (var cur in currencies.Where(c => c.IsActive))
+                {
+                    <option value="@cur.Code">@cur.Code — @(isArabic ? cur.NameAr : (cur.NameEn ?? cur.NameAr))</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label asp-for="ExchangeRate" class="form-label">@T("Exchange rate (→ SAR)", "سعر الصرف (إلى SAR)")</label>
+            <input asp-for="ExchangeRate" class="form-control" type="number" step="0.0001" min="0.0001" id="invFxRate" />
+            <span asp-validation-for="ExchangeRate" class="text-danger"></span>
+        </div>
+    }
     <div class="full-width">
         <label asp-for="Notes" class="form-label">@T("Notes", "ملاحظات")</label>
         <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
@@ -157,3 +177,18 @@
     <input asp-for="GrandTotal" type="hidden" data-hidden-total="grand" />
     <input asp-for="RemainingAmount" type="hidden" data-hidden-total="remaining" />
 </div>
+
+<script>
+    (function () {
+        var sel = document.getElementById('invCurrency');
+        var rate = document.getElementById('invFxRate');
+        if (!sel || !rate) return;
+        var fx = {};
+        try { fx = JSON.parse(sel.getAttribute('data-fx') || '{}'); } catch (e) { /* ignore */ }
+        sel.addEventListener('change', function () {
+            var code = sel.value;
+            if (code === 'SAR') { rate.value = 1; return; }
+            if (fx[code] != null) { rate.value = fx[code]; }
+        });
+    })();
+</script>

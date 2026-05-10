@@ -170,18 +170,31 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+var strictPasswords = builder.Configuration.GetValue("Identity:StrictPasswords",
+    !builder.Environment.IsDevelopment());
+
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        // Relaxed rules everywhere so the seeded "123" admin accounts work in
-        // production demos. Tighten before opening the app to real users:
-        // bump RequiredLength and re-enable the Require* flags.
-        options.Password.RequiredLength = 1;
-        options.Password.RequireDigit = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredUniqueChars = 1;
+        if (strictPasswords)
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredUniqueChars = 4;
+        }
+        else
+        {
+            // Demo rules — seeded "123" works. Toggle Identity:StrictPasswords=true to harden.
+            options.Password.RequiredLength = 1;
+            options.Password.RequireDigit = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredUniqueChars = 1;
+        }
 
         if (!builder.Environment.IsDevelopment())
         {
@@ -195,6 +208,54 @@ builder.Services
     .AddDefaultUI()
     .AddDefaultTokenProviders()
     .AddClaimsPrincipalFactory<bestgen.Services.Tenancy.AppUserClaimsPrincipalFactory>();
+
+// API key authentication scheme — works alongside cookie auth.
+builder.Services.AddAuthentication()
+    .AddScheme<bestgen.Services.Api.ApiKeyAuthenticationOptions, bestgen.Services.Api.ApiKeyAuthenticationHandler>(
+        bestgen.Services.Api.ApiKeyAuthenticationHandler.SchemeName, _ => { });
+
+// OpenAPI / Swagger documentation for the public API.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Bestgen API",
+        Version = "v1",
+        Description = "Public REST API for Bestgen ERP. Auth via X-Api-Key header (issue keys at /ApiKeys)."
+    });
+    c.AddSecurityDefinition("ApiKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Name = "X-Api-Key",
+        Description = "Issue keys at /ApiKeys. Format: bgk_<64 hex>."
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        [new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+            { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "ApiKey" }
+        }] = Array.Empty<string>()
+    });
+});
+
+// Memory cache (in-process, free) plus optional distributed Redis cache when configured.
+builder.Services.AddMemoryCache();
+var redisConn = builder.Configuration["Redis:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(redisConn))
+{
+    builder.Services.AddStackExchangeRedisCache(o =>
+    {
+        o.Configuration = redisConn;
+        o.InstanceName = "bestgen:";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 var mvcBuilder = builder.Services
@@ -438,6 +499,15 @@ app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.Health
     Predicate = check => check.Tags.Contains("ready")
 }).AllowAnonymous();
 app.MapHealthChecks("/health").AllowAnonymous();
+
+// Public API docs at /swagger.
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bestgen API v1");
+    c.RoutePrefix = "swagger";
+    c.DocumentTitle = "Bestgen API";
+});
 
 // Prometheus scrape endpoint. Behind a proxy in production.
 app.MapMetrics("/metrics").AllowAnonymous();

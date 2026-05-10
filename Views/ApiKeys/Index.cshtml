@@ -1,0 +1,108 @@
+@using System.Globalization
+@model IReadOnlyList<bestgen.Models.ApiKey>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("API Keys", "مفاتيح API");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("API Keys", "مفاتيح API"),
+    T("Issue API keys for integrations. Each key is tenant-scoped — it can only see this workspace's data.",
+      "أنشئ مفاتيح API للتكاملات. كل مفتاح مرتبط بالمستأجر — يرى بيانات هذا الفضاء فقط."),
+    null, null, null))" />
+
+@if (TempData["NewApiKey"] is string newKey)
+{
+    <div class="alert alert-success">
+        <strong>@T("Save this key — it will not be shown again:", "احفظ هذا المفتاح — لن يُعرض مجدداً:")</strong>
+        <code class="user-select-all d-block mt-2 p-2" style="background:#fff;border-radius:6px;font-size:14px;">@newKey</code>
+        <small class="text-muted">@T("Send it as the X-Api-Key header on every API request.", "أرسله في رأس X-Api-Key مع كل طلب API.")</small>
+    </div>
+}
+
+<section class="form-panel mb-3">
+    <h3 class="h6">@T("Issue a new key", "إصدار مفتاح جديد")</h3>
+    <form asp-action="Create" method="post" class="row g-2 align-items-end">
+        @Html.AntiForgeryToken()
+        <div class="col-md-5">
+            <label class="form-label">@T("Name", "الاسم")</label>
+            <input type="text" name="name" class="form-control" placeholder="@T("e.g. Zapier integration", "مثال: تكامل Zapier")" required />
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">@T("Scopes", "الصلاحيات")</label>
+            <input type="text" name="scopes" class="form-control" value="*" placeholder="customers:read,invoices:*" />
+        </div>
+        <div class="col-md-2 text-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-key"></i> @T("Issue", "إصدار")</button>
+        </div>
+    </form>
+</section>
+
+<section class="data-panel">
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No keys issued yet.", "لم يتم إصدار أي مفاتيح بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@T("Name", "الاسم")</th>
+                        <th>@T("Last 4", "آخر 4 أحرف")</th>
+                        <th>@T("Scopes", "الصلاحيات")</th>
+                        <th>@T("Created", "تاريخ الإنشاء")</th>
+                        <th>@T("Last used", "آخر استخدام")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var k in Model)
+                {
+                    <tr>
+                        <td>@k.Name</td>
+                        <td><code>•••• @(k.LastFour ?? "")</code></td>
+                        <td><small><code>@k.Scopes</code></small></td>
+                        <td>@k.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@(k.LastUsedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                        <td>
+                            @if (k.IsActive)
+                            {
+                                <span class="badge bg-success">@T("Active", "نشط")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@T("Revoked", "ملغى")</span>
+                            }
+                        </td>
+                        <td>
+                            @if (k.IsActive)
+                            {
+                                <form asp-action="Revoke" method="post" class="d-inline" onsubmit="return confirm('@T("Revoke this key?", "هل تريد إلغاء هذا المفتاح؟")');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@k.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> @T("Revoke", "إلغاء")</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="details-panel mt-4">
+    <h3 class="h6">@T("Quick start", "بدء سريع")</h3>
+    <p class="text-muted small">@T("Once you have a key, browse the live API docs at",
+                                   "بعد إصدار المفتاح، تصفّح توثيق API المباشر في")
+        <code><a href="/swagger" target="_blank">/swagger</a></code>.</p>
+    <pre class="bg-light p-3 rounded small" style="overflow-x:auto;">curl -H "X-Api-Key: bgk_..." https://your-bestgen.example/api/v1/customers
+curl -H "X-Api-Key: bgk_..." -X POST https://your-bestgen.example/api/v1/customers \
+  -H "Content-Type: application/json" \
+  -d '{"nameAr":"عميل جديد","nameEn":"New Customer","email":"x@y.com"}'</pre>
+</section>

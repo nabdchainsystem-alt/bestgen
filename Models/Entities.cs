@@ -426,6 +426,9 @@ public class CompanySettings
 
     public decimal DefaultVatRate { get; set; } = 15;
 
+    /// <summary>When true, invoice PDFs and key dates show the Hijri equivalent alongside Gregorian.</summary>
+    public bool UseHijriDates { get; set; } = false;
+
     [StringLength(12)]
     public string InvoicePrefix { get; set; } = "INV";
 

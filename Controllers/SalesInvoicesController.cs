@@ -180,6 +180,7 @@ public class SalesInvoicesController : Controller
     public async Task<IActionResult> Create()
     {
         await PopulateInvoiceLookupsAsync();
+        await PopulateCurrencyLookupsAsync();
         return View(new SalesInvoiceFormViewModel());
     }
 
@@ -194,6 +195,7 @@ public class SalesInvoicesController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateInvoiceLookupsAsync();
+        await PopulateCurrencyLookupsAsync();
             return View(model);
         }
 
@@ -214,6 +216,7 @@ public class SalesInvoicesController : Controller
         }
 
         await PopulateInvoiceLookupsAsync();
+        await PopulateCurrencyLookupsAsync();
         return View(_salesInvoiceService.ToFormViewModel(invoice));
     }
 
@@ -227,6 +230,7 @@ public class SalesInvoicesController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateInvoiceLookupsAsync();
+        await PopulateCurrencyLookupsAsync();
             return View(model);
         }
 
@@ -261,6 +265,20 @@ public class SalesInvoicesController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task PopulateCurrencyLookupsAsync()
+    {
+        ViewBag.Currencies = await _context.Currencies.AsNoTracking()
+            .Where(c => c.IsActive).OrderByDescending(c => c.IsBase).ThenBy(c => c.Code).ToListAsync();
+        // Most recent FX rate per FromCurrency, where ToCurrencyCode = SAR.
+        var rates = await _context.FxRates.AsNoTracking()
+            .Where(r => r.ToCurrencyCode == "SAR")
+            .OrderByDescending(r => r.Date)
+            .ToListAsync();
+        ViewBag.FxRates = rates
+            .GroupBy(r => r.FromCurrencyCode)
+            .ToDictionary(g => g.Key, g => g.First().Rate);
     }
 
     private async Task PopulateInvoiceLookupsAsync()

@@ -1,0 +1,109 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<Webhook>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Webhooks", "خطافات الويب");
+    var recent = (List<WebhookDelivery>)ViewBag.Recent;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Webhooks", "خطافات الويب"),
+    T("Subscribe an external URL to events (invoice.created, invoice.paid, customer.created…). Each event POSTs JSON with an HMAC signature in X-Bestgen-Signature.",
+      "اشترك بعنوان URL خارجي لاستقبال الأحداث (فاتورة جديدة، دفع فاتورة، عميل جديد…). كل حدث يُرسل كطلب POST بصيغة JSON مع توقيع HMAC في X-Bestgen-Signature."),
+    null, null, null))" />
+
+@if (TempData["WebhookMessage"] is string m) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @m</div> }
+@if (TempData["WebhookError"] is string e) { <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @e</div> }
+
+<section class="form-panel mb-3">
+    <h3 class="h6">@T("Register webhook", "تسجيل خطاف")</h3>
+    <form asp-action="Create" method="post" class="row g-2 align-items-end">
+        @Html.AntiForgeryToken()
+        <div class="col-md-3">
+            <label class="form-label">@T("Name", "الاسم")</label>
+            <input name="name" class="form-control" required placeholder="@T("e.g. Slack alerts", "مثال: تنبيهات Slack")" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">URL</label>
+            <input name="url" type="url" class="form-control" required placeholder="https://example.com/hook" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">@T("Events", "الأحداث")</label>
+            <input name="events" class="form-control" value="*" placeholder="invoice.created,invoice.paid" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("Secret", "السر")</label>
+            <input name="secret" class="form-control" placeholder="(optional)" />
+        </div>
+        <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-square"></i> @T("Register", "تسجيل")</button>
+        </div>
+    </form>
+</section>
+
+<section class="data-panel mb-3">
+    <h3 class="h6">@T("Subscribers", "المشتركون")</h3>
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No webhooks registered.", "لا توجد خطافات مسجلة.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr>
+                    <th>@T("Name", "الاسم")</th><th>URL</th><th>@T("Events", "الأحداث")</th>
+                    <th>@T("Last delivery", "آخر تسليم")</th><th>@T("Failures", "إخفاقات")</th>
+                    <th>@T("Status", "الحالة")</th><th></th>
+                </tr></thead>
+                <tbody>
+                @foreach (var w in Model)
+                {
+                    <tr>
+                        <td>@w.Name</td>
+                        <td><code class="small">@w.Url</code></td>
+                        <td><code class="small">@w.Events</code></td>
+                        <td>@(w.LastDeliveredAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                        <td>@w.FailureCount</td>
+                        <td>@(w.IsActive ? "<span class='badge bg-success'>" + T("Active", "نشط") + "</span>" : "<span class='badge bg-secondary'>" + T("Paused", "موقوف") + "</span>")</td>
+                        <td>
+                            <form asp-action="Toggle" method="post" class="d-inline m-0">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@w.Id" /><button class="btn btn-sm btn-outline-secondary"><i class="bi @(w.IsActive ? "bi-pause" : "bi-play")"></i></button></form>
+                            <form asp-action="Delete" method="post" class="d-inline m-0" onsubmit="return confirm('@T("Delete?", "حذف؟")');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@w.Id" /><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="data-panel">
+    <h3 class="h6">@T("Recent deliveries", "آخر التسليمات")</h3>
+    @if (recent.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No deliveries yet.", "لا توجد تسليمات بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr><th>@T("When", "متى")</th><th>@T("Event", "الحدث")</th><th>@T("Status", "الحالة")</th><th>@T("HTTP", "HTTP")</th><th>@T("Detail", "التفاصيل")</th></tr></thead>
+                <tbody>
+                @foreach (var d in recent)
+                {
+                    <tr>
+                        <td>@d.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td><code>@d.Event</code></td>
+                        <td>@d.Status</td>
+                        <td>@(d.ResponseStatus?.ToString() ?? "—")</td>
+                        <td><small class="text-muted">@(d.Error ?? d.ResponseBody ?? "")</small></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

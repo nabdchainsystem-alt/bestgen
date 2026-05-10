@@ -1,0 +1,173 @@
+@using System.Globalization
+@inject bestgen.Services.Ai.BrainChatService Brain
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Bestgen Brain", "دماغ بستجين");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    "🧠 " + T("Bestgen Brain", "دماغ بستجين"),
+    T("Ask anything about your books — outstanding balances, top customers, low stock, cashflow. Brain reads your data and answers in your language.",
+      "اسأل أي شيء عن دفاترك — الذمم، أفضل العملاء، المخزون المنخفض، السيولة. الدماغ يقرأ بياناتك ويجيبك بلغتك."),
+    null, null, null))" />
+
+@if (!Brain.IsConfigured)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        @T("Set the ANTHROPIC_API_KEY env var (or Ai:AnthropicApiKey config) and restart to enable Brain.",
+           "اضبط متغير ANTHROPIC_API_KEY وأعد تشغيل التطبيق لتفعيل دماغ بستجين.")
+    </div>
+}
+
+<section class="brain-shell">
+    <div id="brainMessages" class="brain-messages" aria-live="polite">
+        <div class="brain-msg brain-bot">
+            <div class="brain-bubble">
+                @T("Hi — I'm Bestgen Brain. Try one of these:", "أهلاً — أنا دماغ بستجين. جرّب أحد هذه الأسئلة:")
+                <div class="brain-suggestions">
+                    <button type="button" class="brain-chip" data-q="@T("Who are my top 5 customers this year?", "من هم أفضل 5 عملاء هذا العام؟")">@T("Top 5 customers this year", "أفضل 5 عملاء هذا العام")</button>
+                    <button type="button" class="brain-chip" data-q="@T("How much is outstanding from customers?", "كم المتبقي من العملاء؟")">@T("Total outstanding", "إجمالي الذمم")</button>
+                    <button type="button" class="brain-chip" data-q="@T("Which products are running low on stock?", "ما المنتجات قاربت على النفاد؟")">@T("Low stock", "مخزون منخفض")</button>
+                    <button type="button" class="brain-chip" data-q="@T("Net cash movement this month", "صافي السيولة هذا الشهر")">@T("Cashflow this month", "السيولة هذا الشهر")</button>
+                    <button type="button" class="brain-chip" data-q="@T("What was my revenue last 30 days?", "كم كانت إيراداتي خلال آخر 30 يوماً؟")">@T("Revenue last 30 days", "إيرادات آخر 30 يوماً")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="brainForm" class="brain-input">
+        @Html.AntiForgeryToken()
+        <input id="brainQ" type="text" class="form-control form-control-lg"
+               placeholder="@T("Ask anything…", "اسأل أي شيء…")" autocomplete="off" autofocus />
+        <button id="brainSend" type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-arrow-@(isArabic ? "left" : "right")"></i>
+        </button>
+    </form>
+</section>
+
+<style>
+    .brain-shell {
+        display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 240px); min-height: 480px;
+        max-width: 920px; margin: 0 auto;
+    }
+    .brain-messages {
+        flex: 1; overflow-y: auto;
+        background: var(--surface, #fff);
+        border: 1px solid var(--border, #e7eaf3);
+        border-radius: 14px;
+        padding: 18px;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .brain-msg { display: flex; }
+    .brain-msg.brain-user { justify-content: flex-end; }
+    .brain-msg.brain-bot  { justify-content: flex-start; }
+    .brain-bubble {
+        max-width: 78%;
+        padding: 10px 14px;
+        border-radius: 14px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .brain-user .brain-bubble {
+        background: var(--navy, #1B2E4B);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .brain-bot .brain-bubble {
+        background: #f3f5fa;
+        color: var(--text, #1B2E4B);
+        border-bottom-left-radius: 4px;
+    }
+    .brain-tools {
+        font-size: 11px; color: #6f6a59; margin-top: 6px;
+        display: flex; flex-wrap: wrap; gap: 4px;
+    }
+    .brain-tools span {
+        background: #fff; border: 1px solid var(--border, #e7eaf3);
+        border-radius: 999px; padding: 1px 8px;
+    }
+    .brain-input { display: flex; gap: 8px; }
+    .brain-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .brain-chip {
+        background: #fff; border: 1px solid var(--border, #e7eaf3);
+        border-radius: 999px; padding: 4px 12px; cursor: pointer;
+        font-size: 13px; color: var(--text, #1B2E4B);
+    }
+    .brain-chip:hover { background: var(--accent-tint, #f0f4fa); }
+    .brain-typing { font-style: italic; color: #6f6a59; }
+    @@keyframes brainPulse { 0%,100%{opacity:.5}50%{opacity:1} }
+    .brain-typing::after { content: '…'; animation: brainPulse 1.2s infinite; }
+</style>
+
+<script>
+(function () {
+    const form = document.getElementById('brainForm');
+    const input = document.getElementById('brainQ');
+    const messages = document.getElementById('brainMessages');
+    const send = document.getElementById('brainSend');
+    const history = [];
+
+    function bubble(role, text, tools) {
+        const wrap = document.createElement('div');
+        wrap.className = 'brain-msg brain-' + (role === 'user' ? 'user' : 'bot');
+        const b = document.createElement('div');
+        b.className = 'brain-bubble';
+        b.textContent = text;
+        wrap.appendChild(b);
+        if (tools && tools.length) {
+            const t = document.createElement('div');
+            t.className = 'brain-tools';
+            t.innerHTML = tools.map(x => `<span>🔧 ${x}</span>`).join('');
+            b.appendChild(t);
+        }
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+        return b;
+    }
+
+    async function ask(q) {
+        bubble('user', q);
+        input.value = '';
+        send.disabled = true;
+        const thinking = bubble('bot', '@T("Thinking", "أفكّر")');
+        thinking.classList.add('brain-typing');
+
+        try {
+            const r = await fetch('/Brain/Ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: q, history })
+            });
+            const j = await r.json();
+            thinking.classList.remove('brain-typing');
+            thinking.textContent = j.text || '@T("(no answer)", "(لا توجد إجابة)")';
+            if (j.tools && j.tools.length) {
+                const t = document.createElement('div');
+                t.className = 'brain-tools';
+                t.innerHTML = j.tools.map(x => `<span>🔧 ${x}</span>`).join('');
+                thinking.appendChild(t);
+            }
+            history.push({ role: 'user', content: q });
+            history.push({ role: 'assistant', content: j.text });
+        } catch (err) {
+            thinking.classList.remove('brain-typing');
+            thinking.textContent = '⚠️ ' + (err.message || err);
+        } finally {
+            send.disabled = false;
+            input.focus();
+        }
+    }
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const q = input.value.trim();
+        if (q) ask(q);
+    });
+    document.querySelectorAll('.brain-chip').forEach(b =>
+        b.addEventListener('click', () => ask(b.dataset.q)));
+})();
+</script>

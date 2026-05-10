@@ -35,6 +35,13 @@ public class SalesInvoiceFormViewModel
     [StringLength(600)]
     public string? Notes { get; set; }
 
+    [Display(Name = "Currency")]
+    public string CurrencyCode { get; set; } = "SAR";
+
+    [Display(Name = "Exchange rate")]
+    [Range(0.0001, 100000)]
+    public decimal ExchangeRate { get; set; } = 1m;
+
     public decimal Subtotal { get; set; }
     public decimal DiscountTotal { get; set; }
     public decimal VatTotal { get; set; }

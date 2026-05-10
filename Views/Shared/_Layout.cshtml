@@ -296,6 +296,9 @@
                     </div>
                 </details>
 
+                <a asp-controller="Brain" asp-action="Index" class="nav-link nav-item @(IsActive("Brain") ? "active" : "")" title="@T("Bestgen Brain", "دماغ بستجين")">
+                    <i class="bi bi-stars"></i><span>🧠 @T("Brain", "الدماغ")</span>
+                </a>
                 <a asp-controller="Reports" asp-action="Index" class="nav-link nav-item @(IsActive("Reports") ? "active" : "")" title="@T("Reports", "التقارير")">
                     <i class="bi bi-bar-chart-line"></i><span>@T("Reports", "التقارير")</span>
                 </a>
@@ -307,6 +310,12 @@
                 </a>
                 <a asp-controller="Onboarding" asp-action="Index" class="nav-link nav-item @(IsActive("Onboarding") ? "active" : "")" title="@T("Industry Templates", "قوالب الصناعات")">
                     <i class="bi bi-stars"></i><span>@T("Industry Templates", "قوالب الصناعات")</span>
+                </a>
+                <a asp-controller="ApiKeys" asp-action="Index" class="nav-link nav-item @(IsActive("ApiKeys") ? "active" : "")" title="@T("API Keys", "مفاتيح API")">
+                    <i class="bi bi-key"></i><span>@T("API Keys", "مفاتيح API")</span>
+                </a>
+                <a asp-controller="Webhooks" asp-action="Index" class="nav-link nav-item @(IsActive("Webhooks") ? "active" : "")" title="@T("Webhooks", "خطافات الويب")">
+                    <i class="bi bi-broadcast"></i><span>@T("Webhooks", "خطافات الويب")</span>
                 </a>
                 <a asp-controller="POS" asp-action="Index" class="nav-link nav-item @(IsActive("POS") ? "active" : "")" title="@T("POS / Cashier", "نقطة البيع")">
                     <i class="bi bi-cash-coin"></i><span>@T("POS / Cashier", "نقطة البيع")</span>
