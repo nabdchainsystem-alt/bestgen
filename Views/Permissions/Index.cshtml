@@ -1,0 +1,93 @@
+@using System.Globalization
+@using bestgen.Models
+@using Microsoft.AspNetCore.Identity
+@model IReadOnlyList<Permission>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Permissions", "الصلاحيات");
+    var roles = (List<IdentityRole>)ViewBag.Roles;
+    var grants = (Dictionary<string, HashSet<string>>)ViewBag.Grants;
+
+    string RoleLabel(string r) => r switch
+    {
+        "Admin"      => T("Admin", "مدير"),
+        "Accountant" => T("Accountant", "محاسب"),
+        "Sales"      => T("Sales", "مبيعات"),
+        "Purchases"  => T("Purchases", "مشتريات"),
+        "Warehouse"  => T("Warehouse", "مستودع"),
+        "HR"         => T("HR", "موارد بشرية"),
+        "Cashier"    => T("Cashier", "كاشير"),
+        "Viewer"     => T("Viewer", "مراقب"),
+        _ => r
+    };
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Permissions", "الصلاحيات"),
+    T("Per-role action permissions. Owners always have everything. Tick a box to grant; untick to revoke. Saving a role applies its column.",
+      "صلاحيات مفصّلة لكل دور. أصحاب الحساب لديهم جميع الصلاحيات تلقائياً. علِّم لإمنح الصلاحية، أزل العلامة لتلغيها. الحفظ يطبّق التغيير لذلك العمود."),
+    null, null, null))" />
+
+@if (TempData["PermMessage"] is string m) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @m</div> }
+
+<section class="data-panel">
+    <div class="alert alert-info small">
+        <i class="bi bi-info-circle"></i>
+        @T("Each role manages its own column — saving a role updates only that role's grants. Use [RequirePermission(\"code\")] in code to gate actions.",
+           "كل دور يدير عموده الخاص — حفظ الدور يُحدّث صلاحياته فقط. استخدم [RequirePermission(\"code\")] في الكود للتحقق.")
+    </div>
+
+    @{
+        var byModule = Model.GroupBy(p => p.Module).OrderBy(g => g.Key);
+    }
+
+    <div class="row g-3">
+        @foreach (var role in roles)
+        {
+            var granted = grants.TryGetValue(role.Id, out var s) ? s : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="h6 m-0"><i class="bi bi-person-badge"></i> @RoleLabel(role.Name!)</h3>
+                        <span class="badge bg-secondary">@granted.Count / @Model.Count</span>
+                    </div>
+                    <form asp-action="Save" method="post" class="card-body">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="roleId" value="@role.Id" />
+                        @foreach (var grp in byModule)
+                        {
+                            <h4 class="text-uppercase text-muted small mt-3 mb-2">@grp.Key</h4>
+                            <div class="row g-2">
+                                @foreach (var p in grp)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="codes" value="@p.Code"
+                                                   class="form-check-input" id="@(role.Id)-@p.Code"
+                                                   @(granted.Contains(p.Code) ? "checked" : "") />
+                                            <label class="form-check-label small" for="@(role.Id)-@p.Code">
+                                                @(isArabic ? p.DisplayNameAr : (p.DisplayNameEn ?? p.DisplayNameAr))
+                                                <code class="text-muted ms-1" style="font-size:11px;">@p.Code</code>
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <hr/>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> @T("Save", "حفظ")</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="alert alert-light mt-3 small text-muted">
+        <i class="bi bi-shield-check"></i>
+        @T("Hidden roles: Owner (auto-grants every permission), Customer (uses /portal — workspace permissions don't apply).",
+           "أدوار مخفية: Owner (يحصل تلقائياً على جميع الصلاحيات)، Customer (يستخدم /portal — صلاحيات المساحة لا تنطبق).")
+    </div>
+</section>

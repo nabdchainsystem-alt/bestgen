@@ -101,6 +101,7 @@ public class SalesInvoicesController : Controller
     [ValidateAntiForgeryToken]
     [bestgen.Services.Idempotency.Idempotent]
     [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("zatca")]
+    [bestgen.Services.Authorization.RequirePermission("invoices.zatca")]
     public async Task<IActionResult> SubmitZatca(int id, [FromServices] bestgen.Services.Zatca.ZatcaService zatca)
     {
         var ei = await _context.EInvoices.FirstOrDefaultAsync(x => x.SalesInvoiceId == id);
@@ -255,6 +256,7 @@ public class SalesInvoicesController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("invoices.delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var invoice = await _context.SalesInvoices.FindAsync(id);

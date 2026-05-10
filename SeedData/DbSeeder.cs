@@ -75,6 +75,8 @@ public static class DbSeeder
         await EnsureAdminAsync(userManager, "badwy@bestgen.com", "123", "بدوي");
         await EnsureAdminAsync(userManager, "admin@ledgerflow.local", "Admin@12345", "مدير النظام");
 
+        await PermissionSeed.SeedAsync(context, roleManager);
+
         await SeedCompanySettingsAsync(context);
         await SeedAccountsAsync(context);
         await SeedReportingDimensionsAsync(context);

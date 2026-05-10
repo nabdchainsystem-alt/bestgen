@@ -387,6 +387,7 @@ public class PurchaseInvoicesController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Authorization.RequirePermission("purchases.delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var invoice = await _context.PurchaseInvoices.FindAsync(id);
