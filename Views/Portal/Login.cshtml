@@ -1,0 +1,34 @@
+@using System.Globalization
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Sign in", "تسجيل الدخول");
+    Layout = "_Layout";
+}
+
+<section class="portal-card" style="max-width:440px;margin:60px auto;">
+    <div class="text-center mb-4">
+        <img src="~/img/logo.png" alt="Bestgen" style="height:54px;" />
+        <h1 class="h4 mt-3 mb-1">@T("Customer Portal", "بوابة العملاء")</h1>
+        <p class="text-muted small">@T("Sign in to view your invoices and quotations.", "سجل دخولك لعرض الفواتير وعروض الأسعار.")</p>
+    </div>
+
+    <div asp-validation-summary="All" class="alert alert-danger" style="display:@(ViewData.ModelState.IsValid ? "none" : "block")"></div>
+
+    <form method="post" asp-action="Login">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+        <div class="mb-3">
+            <label class="form-label">@T("Email", "البريد الإلكتروني")</label>
+            <input type="email" name="email" class="form-control form-control-lg" required autofocus />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@T("Password", "كلمة المرور")</label>
+            <input type="password" name="password" class="form-control form-control-lg" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100" style="background:var(--navy);border-color:var(--navy);">@T("Sign in", "تسجيل الدخول")</button>
+    </form>
+    <p class="text-muted small mt-4 mb-0 text-center">
+        @T("Don't have an account?", "ليس لديك حساب؟") @T("Ask the company to send you an invitation link.", "اطلب من الشركة إرسال رابط دعوة.")
+    </p>
+</section>

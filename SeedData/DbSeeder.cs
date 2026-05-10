@@ -10,7 +10,7 @@ public static class DbSeeder
 {
     private static readonly string[] Roles =
     {
-        "Owner", "Admin", "Accountant", "Sales", "Purchases", "Warehouse", "HR", "Cashier", "Viewer"
+        "Owner", "Admin", "Accountant", "Sales", "Purchases", "Warehouse", "HR", "Cashier", "Viewer", "Customer"
     };
 
     public static async Task SeedAsync(IServiceProvider services)

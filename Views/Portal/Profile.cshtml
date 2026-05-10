@@ -1,0 +1,29 @@
+@using System.Globalization
+@model bestgen.Models.ApplicationUser
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Profile", "الملف الشخصي");
+    Layout = "_Layout";
+}
+
+<h1 class="h3 mb-3">@T("Your profile", "ملفك الشخصي")</h1>
+
+<section class="portal-card" style="max-width:560px;">
+    <form asp-action="Profile" method="post">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label">@T("Email", "البريد الإلكتروني")</label>
+            <input type="email" class="form-control" value="@Model.Email" disabled />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@T("Full name", "الاسم الكامل")</label>
+            <input type="text" name="fullName" value="@Model.FullName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@T("Phone", "الهاتف")</label>
+            <input type="text" name="phoneNumber" value="@Model.PhoneNumber" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="background:var(--navy);border-color:var(--navy);">@T("Save changes", "حفظ التعديلات")</button>
+    </form>
+</section>

@@ -1,0 +1,79 @@
+@using System.Globalization
+@using bestgen.Models
+@model SalesQuotation
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = Model.QuotationNumber;
+    var canRespond = Model.Status != QuotationStatus.Accepted && Model.Status != QuotationStatus.Rejected;
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
+    <div>
+        <h1 class="h3 m-0">@Model.QuotationNumber</h1>
+        <p class="text-muted m-0">@Model.QuotationDate.ToString("yyyy-MM-dd") · @T("Status", "الحالة"): <strong>@Model.Status</strong></p>
+    </div>
+    <div>
+        <a asp-action="Quotations" class="btn btn-outline-secondary">@T("Back to quotations", "العودة لعروض الأسعار")</a>
+    </div>
+</div>
+
+<section class="portal-card">
+    <div class="row mb-3">
+        <div class="col-md-4"><strong>@T("Subtotal", "قبل الضريبة"):</strong> @Model.Subtotal.ToString("N2")</div>
+        <div class="col-md-4"><strong>@T("VAT", "الضريبة"):</strong> @Model.VatTotal.ToString("N2")</div>
+        <div class="col-md-4"><strong>@T("Total", "الإجمالي"):</strong> <span class="text-primary">@Model.GrandTotal.ToString("N2")</span></div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>@T("Item", "الصنف")</th>
+                    <th class="text-end">@T("Qty", "الكمية")</th>
+                    <th class="text-end">@T("Price", "السعر")</th>
+                    <th class="text-end">@T("VAT", "الضريبة")</th>
+                    <th class="text-end">@T("Total", "الإجمالي")</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@(item.Product == null ? "-" : pickName(item.Product.NameAr, item.Product.NameEn))</td>
+                    <td class="text-end">@item.Quantity.ToString("N2")</td>
+                    <td class="text-end">@item.UnitPrice.ToString("N2")</td>
+                    <td class="text-end">@item.VatRate.ToString("N2")%</td>
+                    <td class="text-end fw-semibold">@item.LineTotal.ToString("N2")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Terms))
+    {
+        <div class="text-muted small mt-3"><strong>@T("Terms:", "الشروط:")</strong> @Model.Terms</div>
+    }
+
+    @if (canRespond)
+    {
+        <hr/>
+        <div class="d-flex gap-2 justify-content-end">
+            <form asp-action="RespondQuotation" method="post" class="m-0" onsubmit="return confirm('@T("Reject this quotation?", "رفض عرض السعر؟")');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="action" value="reject" />
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-x"></i> @T("Reject", "رفض")</button>
+            </form>
+            <form asp-action="RespondQuotation" method="post" class="m-0" onsubmit="return confirm('@T("Accept this quotation?", "قبول عرض السعر؟")');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="action" value="accept" />
+                <button type="submit" class="btn btn-success"><i class="bi bi-check2"></i> @T("Accept", "قبول")</button>
+            </form>
+        </div>
+    }
+</section>

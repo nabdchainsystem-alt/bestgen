@@ -1,0 +1,61 @@
+@using System.Globalization
+@using bestgen.Models
+@model SalesInvoice
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = Model.InvoiceNumber;
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
+    <div>
+        <h1 class="h3 m-0">@Model.InvoiceNumber</h1>
+        <p class="text-muted m-0">@Model.InvoiceDate.ToString("yyyy-MM-dd") · @T("Status", "الحالة"): <strong>@Model.Status</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="InvoicePdf" asp-route-id="@Model.Id" class="btn btn-success" target="_blank"><i class="bi bi-file-earmark-pdf"></i> @T("Download PDF", "تحميل PDF")</a>
+        <a asp-action="Invoices" class="btn btn-outline-secondary">@T("Back to invoices", "العودة للفواتير")</a>
+    </div>
+</div>
+
+<section class="portal-card">
+    <div class="row mb-3">
+        <div class="col-md-3"><strong>@T("Subtotal", "قبل الضريبة"):</strong> @Model.Subtotal.ToString("N2")</div>
+        <div class="col-md-3"><strong>@T("VAT", "الضريبة"):</strong> @Model.VatTotal.ToString("N2")</div>
+        <div class="col-md-3"><strong>@T("Total", "الإجمالي"):</strong> <span class="text-primary">@Model.GrandTotal.ToString("N2")</span></div>
+        <div class="col-md-3"><strong>@T("Outstanding", "المتبقي"):</strong> <span class="@(Model.RemainingAmount > 0 ? "text-danger fw-bold" : "text-success")">@Model.RemainingAmount.ToString("N2")</span></div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>@T("Item", "الصنف")</th>
+                    <th class="text-end">@T("Qty", "الكمية")</th>
+                    <th class="text-end">@T("Price", "السعر")</th>
+                    <th class="text-end">@T("VAT", "الضريبة")</th>
+                    <th class="text-end">@T("Total", "الإجمالي")</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@(item.Product == null ? "-" : pickName(item.Product.NameAr, item.Product.NameEn))</td>
+                    <td class="text-end">@item.Quantity.ToString("N2")</td>
+                    <td class="text-end">@item.UnitPrice.ToString("N2")</td>
+                    <td class="text-end">@item.VatRate.ToString("N2")%</td>
+                    <td class="text-end fw-semibold">@item.LineTotal.ToString("N2")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <div class="text-muted small mt-3"><strong>@T("Notes:", "ملاحظات:")</strong> @Model.Notes</div>
+    }
+</section>

@@ -1,0 +1,36 @@
+@using System.Globalization
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Activate portal", "تفعيل البوابة");
+    Layout = "_Layout";
+}
+
+<section class="portal-card" style="max-width:480px;margin:60px auto;">
+    <div class="text-center mb-3">
+        <img src="~/img/logo.png" alt="Bestgen" style="height:54px;" />
+        <h1 class="h4 mt-3 mb-1">@T("Welcome", "أهلاً بك")</h1>
+        <p class="text-muted small">@T($"Set your password to access your portal as {ViewBag.CustomerName}.",
+                                       $"اضبط كلمة المرور للوصول إلى بوابتك بصفة {ViewBag.CustomerName}.")</p>
+    </div>
+
+    <div asp-validation-summary="All" class="alert alert-danger" style="display:@(ViewData.ModelState.IsValid ? "none" : "block")"></div>
+
+    <form method="post" asp-action="Register">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="token" value="@ViewBag.Token" />
+        <div class="mb-3">
+            <label class="form-label">@T("Email", "البريد الإلكتروني")</label>
+            <input type="email" class="form-control" value="@ViewBag.Email" disabled />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@T("Full name", "الاسم الكامل")</label>
+            <input type="text" name="fullName" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@T("Set a password", "كلمة المرور")</label>
+            <input type="password" name="password" class="form-control" required minlength="6" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100" style="background:var(--navy);border-color:var(--navy);">@T("Create account", "إنشاء الحساب")</button>
+    </form>
+</section>

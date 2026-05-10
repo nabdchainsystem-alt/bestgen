@@ -1,0 +1,86 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<Customer>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Portal Invitations", "دعوات البوابة");
+    var invs = (Dictionary<int, CustomerInvitation>)ViewBag.Invitations;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Customer Portal Invitations", "دعوات بوابة العملاء"),
+    T("Send a one-time link so a customer can sign in to their portal and view their invoices and quotations.",
+      "أرسل رابطاً لمرة واحدة ليتمكن العميل من تسجيل الدخول إلى بوابته والاطلاع على فواتيره وعروض الأسعار."),
+    null, null, null))" />
+
+@if (TempData["InvitationLink"] is string link)
+{
+    <div class="alert alert-success">
+        <strong>@T("Invitation generated", "تم إنشاء الدعوة")</strong>
+        @T($" for {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}). Copy this link and share it with the customer:",
+           $" لـ {TempData["InvitationCustomer"]} ({TempData["InvitationEmail"]}). انسخ هذا الرابط وأرسله للعميل:")
+        <code class="user-select-all d-block mt-2 p-2" style="background:#fff;border-radius:6px;font-size:13px;word-break:break-all;">@link</code>
+        <small class="text-muted">@T("The link expires in 14 days and can be used once.", "ينتهي الرابط بعد 14 يوماً ويصلح للاستخدام مرة واحدة.")</small>
+    </div>
+}
+@if (TempData["InvitationError"] is string err) { <div class="alert alert-danger">@err</div> }
+
+<section class="data-panel">
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No customers in this workspace.", "لا يوجد عملاء في هذا الفضاء.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("Customer", "العميل")</th>
+                        <th>@T("Email", "البريد الإلكتروني")</th>
+                        <th>@T("Last invitation", "آخر دعوة")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th>@T("Action", "الإجراء")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var c in Model)
+                {
+                    invs.TryGetValue(c.Id, out var inv);
+                    var status = inv switch
+                    {
+                        null => ("—", "bg-light text-dark"),
+                        { UsedAt: not null } => (T("Activated", "مُفعّل"), "bg-success"),
+                        { ExpiresAt: var e } when e < DateTime.UtcNow => (T("Expired", "منتهي"), "bg-secondary"),
+                        _ => (T("Pending", "بانتظار التفعيل"), "bg-warning text-dark")
+                    };
+                    <tr>
+                        <td>@c.CustomerCode — @pickName(c.NameAr, c.NameEn)</td>
+                        <td>@(c.Email ?? "-")</td>
+                        <td>@(inv?.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                        <td><span class="badge @status.Item2">@status.Item1</span></td>
+                        <td>
+                            <form asp-action="Generate" method="post" class="d-inline-flex gap-2 m-0" onsubmit="return confirm('@T($"Generate invitation for {c.NameAr}?", $"إنشاء دعوة لـ {c.NameAr}؟")');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="customerId" value="@c.Id" />
+                                <input type="email" name="email" value="@(c.Email ?? "")" placeholder="@T("Email", "البريد")" class="form-control form-control-sm" style="width:220px;" />
+                                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-envelope-plus"></i> @T("Invite", "دعوة")</button>
+                            </form>
+                            @if (inv is not null && inv.UsedAt is null && inv.ExpiresAt > DateTime.UtcNow)
+                            {
+                                <form asp-action="Revoke" method="post" class="d-inline m-0" onsubmit="return confirm('@T("Revoke pending invitation?", "إلغاء الدعوة المعلقة؟")');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@inv.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i></button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

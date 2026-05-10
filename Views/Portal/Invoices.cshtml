@@ -1,0 +1,62 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<SalesInvoice>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Invoices", "الفواتير");
+    Layout = "_Layout";
+}
+
+<h1 class="h3 mb-3">@T("Your invoices", "فواتيرك")</h1>
+
+<section class="portal-card">
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No invoices yet.", "لا توجد فواتير بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("Number", "الرقم")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th class="text-end">@T("Total", "الإجمالي")</th>
+                        <th class="text-end">@T("Paid", "المدفوع")</th>
+                        <th class="text-end">@T("Outstanding", "المتبقي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var inv in Model)
+                {
+                    <tr>
+                        <td><strong>@inv.InvoiceNumber</strong></td>
+                        <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">@inv.GrandTotal.ToString("N2")</td>
+                        <td class="text-end">@inv.PaidAmount.ToString("N2")</td>
+                        <td class="text-end @(inv.RemainingAmount > 0 ? "text-danger fw-bold" : "")">@inv.RemainingAmount.ToString("N2")</td>
+                        <td>
+                            @switch (inv.Status)
+                            {
+                                case InvoiceStatus.Paid:          <span class="badge status-paid">@T("Paid", "مدفوعة")</span>     break;
+                                case InvoiceStatus.PartiallyPaid: <span class="badge status-issued">@T("Partial", "جزئية")</span> break;
+                                case InvoiceStatus.Issued:        <span class="badge status-issued">@T("Issued", "صادرة")</span>  break;
+                                case InvoiceStatus.Draft:         <span class="badge status-draft">@T("Draft", "مسودة")</span>     break;
+                                default: <span class="badge bg-secondary">@inv.Status</span> break;
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="InvoiceDetail" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                            <a asp-action="InvoicePdf" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-success" target="_blank"><i class="bi bi-file-earmark-pdf"></i></a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

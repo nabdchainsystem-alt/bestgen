@@ -1,0 +1,80 @@
+@using System.Globalization
+@using bestgen.Models
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Home", "الرئيسية");
+    var outstanding = (decimal)ViewBag.Outstanding;
+    var openQuotes = (int)ViewBag.OpenQuotations;
+    var recent = (List<SalesInvoice>)ViewBag.RecentInvoices;
+    var customer = (Customer?)ViewBag.Customer;
+    Layout = "_Layout";
+}
+
+<h1 class="h3 mb-3">@T($"Hello, {customer?.NameAr ?? customer?.NameEn}", $"مرحباً، {customer?.NameAr ?? customer?.NameEn}")</h1>
+
+<div class="stat-grid">
+    <div class="portal-stat">
+        <div class="label">@T("Outstanding balance", "الرصيد المستحق")</div>
+        <div class="value">@outstanding.ToString("N2") <small class="text-muted" style="font-size:14px;">SAR</small></div>
+    </div>
+    <div class="portal-stat">
+        <div class="label">@T("Open quotations", "عروض أسعار مفتوحة")</div>
+        <div class="value">@openQuotes</div>
+    </div>
+    <div class="portal-stat">
+        <div class="label">@T("Recent invoices", "آخر الفواتير")</div>
+        <div class="value">@recent.Count</div>
+    </div>
+</div>
+
+<section class="portal-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 m-0">@T("Recent invoices", "آخر الفواتير")</h2>
+        <a asp-action="Invoices" class="btn btn-sm btn-outline-secondary">@T("View all", "عرض الكل")</a>
+    </div>
+    @if (recent.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No invoices yet.", "لا توجد فواتير بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("Number", "الرقم")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th class="text-end">@T("Total", "الإجمالي")</th>
+                        <th class="text-end">@T("Outstanding", "المتبقي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var inv in recent)
+                {
+                    <tr>
+                        <td><strong>@inv.InvoiceNumber</strong></td>
+                        <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">@inv.GrandTotal.ToString("N2")</td>
+                        <td class="text-end @(inv.RemainingAmount > 0 ? "text-danger fw-bold" : "")">@inv.RemainingAmount.ToString("N2")</td>
+                        <td>
+                            @switch (inv.Status)
+                            {
+                                case InvoiceStatus.Paid:          <span class="badge status-paid">@T("Paid", "مدفوعة")</span>          break;
+                                case InvoiceStatus.PartiallyPaid: <span class="badge status-issued">@T("Partial", "جزئية")</span>      break;
+                                case InvoiceStatus.Issued:        <span class="badge status-issued">@T("Issued", "صادرة")</span>       break;
+                                case InvoiceStatus.Draft:         <span class="badge status-draft">@T("Draft", "مسودة")</span>          break;
+                                default: <span class="badge bg-secondary">@inv.Status</span> break;
+                            }
+                        </td>
+                        <td><a asp-action="InvoiceDetail" asp-route-id="@inv.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

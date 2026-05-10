@@ -13,4 +13,11 @@ public class ApplicationUser : IdentityUser
     /// by ITenantContext to scope every query/save.
     /// </summary>
     public int CurrentTenantId { get; set; } = 1;
+
+    /// <summary>
+    /// When set, this user is a portal-only customer (role = "Customer") tied
+    /// to a specific Customer record. Workspace routes are blocked; the user
+    /// only sees their own invoices/quotations at /portal.
+    /// </summary>
+    public int? CustomerId { get; set; }
 }

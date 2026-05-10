@@ -1,0 +1,58 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<SalesQuotation>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Quotations", "عروض الأسعار");
+    Layout = "_Layout";
+}
+
+<h1 class="h3 mb-3">@T("Your quotations", "عروض الأسعار الخاصة بك")</h1>
+
+<section class="portal-card">
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No quotations yet.", "لا توجد عروض أسعار بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("Number", "الرقم")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th>@T("Valid until", "ساري حتى")</th>
+                        <th class="text-end">@T("Total", "الإجمالي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var q in Model)
+                {
+                    <tr>
+                        <td><strong>@q.QuotationNumber</strong></td>
+                        <td>@q.QuotationDate.ToString("yyyy-MM-dd")</td>
+                        <td>@(q.ValidUntil?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td class="text-end">@q.GrandTotal.ToString("N2")</td>
+                        <td>
+                            @switch (q.Status)
+                            {
+                                case QuotationStatus.Accepted: <span class="badge status-paid">@T("Accepted", "مقبول")</span>     break;
+                                case QuotationStatus.Rejected: <span class="badge bg-danger">@T("Rejected", "مرفوض")</span>      break;
+                                case QuotationStatus.Sent:     <span class="badge status-issued">@T("Sent", "مرسل")</span>       break;
+                                case QuotationStatus.Draft:    <span class="badge status-draft">@T("Draft", "مسودة")</span>      break;
+                                case QuotationStatus.Expired:  <span class="badge bg-secondary">@T("Expired", "منتهي")</span>    break;
+                                default: <span class="badge bg-secondary">@q.Status</span> break;
+                            }
+                        </td>
+                        <td><a asp-action="QuotationDetail" asp-route-id="@q.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
