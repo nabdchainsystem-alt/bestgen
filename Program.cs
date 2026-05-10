@@ -170,8 +170,12 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-var strictPasswords = builder.Configuration.GetValue("Identity:StrictPasswords",
-    !builder.Environment.IsDevelopment());
+// Strict-password mode is opt-in. Default is OFF so the seeded "123" demo
+// accounts work everywhere — see ADR-0008. Toggle via env var:
+//   Identity__StrictPasswords=true
+// Once you have real customer accounts, set the flag and rotate the demo
+// passwords to strong ones in the same deploy.
+var strictPasswords = builder.Configuration.GetValue("Identity:StrictPasswords", false);
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
