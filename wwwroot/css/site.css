@@ -89,7 +89,7 @@ body {
     font-family: var(--font-app);
     background: var(--bg-app);
     color: var(--text-base);
-    font-size: 12.5px;
+    font-size: 13.12px;
     line-height: 1.6;
     letter-spacing: -0.005em;
     -webkit-font-smoothing: antialiased;
@@ -209,7 +209,7 @@ html { background: var(--bg-app); }
 }
 .app-shell.sidebar-collapsed .sidebar-nav .nav-link > i,
 .app-shell.sidebar-collapsed .sidebar-nav details > summary > i:first-child {
-    font-size: 16px;
+    font-size: 16.80px;
 }
 /* Active marker stays glued to the inline-start edge of the rail */
 .app-shell.sidebar-collapsed .sidebar-nav .nav-link.active::before {
@@ -278,7 +278,7 @@ html { background: var(--bg-app); }
         color 140ms ease;
 }
 .app-shell.sidebar-collapsed .sidebar-nav .nav-sublink > i {
-    font-size: 13px;
+    font-size: 13.65px;
     color: var(--accent-strong);
     opacity: 0.55;
     width: auto;
@@ -401,7 +401,7 @@ html { background: var(--bg-app); }
 .brand-meta { flex: 1; min-width: 0; }
 
 .brand-label {
-    font-size: 9.2px;
+    font-size: 9.66px;
     color: var(--text-faint);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -411,7 +411,7 @@ html { background: var(--bg-app); }
 
 .brand-title {
     font-weight: 700;
-    font-size: 11.5px;
+    font-size: 12.08px;
     color: var(--text-strong);
     line-height: 1.3;
     white-space: nowrap;
@@ -421,7 +421,7 @@ html { background: var(--bg-app); }
 
 .brand-subtitle {
     color: var(--text-muted);
-    font-size: 10px;
+    font-size: 10.50px;
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
@@ -453,7 +453,7 @@ html { background: var(--bg-app); }
     padding: 7px 9px;
     border-radius: var(--radius-sm);
     color: var(--text-base);
-    font-size: 11.5px;
+    font-size: 12.08px;
     font-weight: 500;
     cursor: pointer;
     width: 100%;
@@ -469,7 +469,7 @@ html { background: var(--bg-app); }
 .sidebar-nav .nav-link i,
 .sidebar-nav details > summary > i:first-child {
     width: 16px;
-    font-size: 13px;
+    font-size: 13.65px;
     color: var(--text-muted);
     flex-shrink: 0;
     text-align: center;
@@ -477,7 +477,7 @@ html { background: var(--bg-app); }
 
 .sidebar-nav .nav-sublink > i {
     width: 14px;
-    font-size: 11px;
+    font-size: 11.55px;
     color: var(--text-faint);
     flex-shrink: 0;
     text-align: center;
@@ -536,7 +536,7 @@ html { background: var(--bg-app); }
 
 .nav-group > summary .chev {
     margin-inline-start: auto;
-    font-size: 10px;
+    font-size: 10.50px;
     transition: transform 0.2s ease;
     color: var(--text-faint);
 }
@@ -562,7 +562,7 @@ html { background: var(--bg-app); }
 
 .nav-sublink {
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 11.55px;
     padding: 5px 9px;
     position: relative;
     border-radius: var(--radius-sm);
@@ -600,7 +600,7 @@ html { background: var(--bg-app); }
     color: var(--text-muted);
     border-radius: 999px;
     padding: 1px 7px;
-    font-size: 9.2px;
+    font-size: 9.66px;
     font-weight: 600;
 }
 
@@ -628,7 +628,7 @@ html { background: var(--bg-app); }
     background: linear-gradient(135deg, #8B8BE5, var(--accent));
     color: #fff;
     font-weight: 600;
-    font-size: 10.5px;
+    font-size: 11.03px;
 }
 
 .sidebar-profile-meta {
@@ -637,7 +637,7 @@ html { background: var(--bg-app); }
 }
 
 .sidebar-profile-name {
-    font-size: 11.5px;
+    font-size: 12.08px;
     color: var(--text-strong);
     font-weight: 600;
     line-height: 1.3;
@@ -647,7 +647,7 @@ html { background: var(--bg-app); }
 }
 
 .sidebar-profile-role {
-    font-size: 10px;
+    font-size: 10.50px;
     color: var(--text-muted);
     line-height: 1.3;
     white-space: nowrap;
@@ -683,7 +683,7 @@ html { background: var(--bg-app); }
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 11.5px;
+    font-size: 12.08px;
     min-width: 0;
 }
 
@@ -699,7 +699,7 @@ html { background: var(--bg-app); }
 
 .topbar .breadcrumb-sep {
     color: var(--text-faint);
-    font-size: 10px;
+    font-size: 10.50px;
 }
 
 .icon-button,
@@ -715,7 +715,7 @@ html { background: var(--bg-app); }
     justify-content: center;
     gap: 7px;
     font-weight: 500;
-    font-size: 11.5px;
+    font-size: 12.08px;
     transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
@@ -741,7 +741,7 @@ html { background: var(--bg-app); }
 .chip-button.lang-chip span {
     font-weight: 700;
     letter-spacing: 0.04em;
-    font-size: 11px;
+    font-size: 11.55px;
     min-width: 18px;
     text-align: center;
 }
@@ -772,7 +772,7 @@ html { background: var(--bg-app); }
     border: 0;
     outline: 0;
     background: transparent;
-    font-size: 11.5px;
+    font-size: 12.08px;
     color: var(--text-strong);
 }
 
@@ -803,7 +803,7 @@ html { background: var(--bg-app); }
     color: #fff;
     background: linear-gradient(135deg, #8B8BE5, var(--accent));
     font-weight: 600;
-    font-size: 10.5px;
+    font-size: 11.03px;
     flex-shrink: 0;
 }
 
@@ -830,7 +830,7 @@ html { background: var(--bg-app); }
 }
 
 .page-header h1 {
-    font-size: 20px;
+    font-size: 21.00px;
     font-weight: 800;
     margin: 0 0 5px;
     color: var(--text-strong);
@@ -841,7 +841,7 @@ html { background: var(--bg-app); }
     margin: 0;
     color: var(--text-muted);
     max-width: 760px;
-    font-size: 11.5px;
+    font-size: 12.08px;
 }
 
 /* =====================================================
@@ -851,12 +851,12 @@ html { background: var(--bg-app); }
 .btn {
     border-radius: var(--radius-md);
     font-weight: 600;
-    font-size: 11.5px;
+    font-size: 12.08px;
     padding: 0.36rem 0.7rem;
 }
 
 .btn-sm {
-    font-size: 11px;
+    font-size: 11.55px;
     padding: 0.28rem 0.55rem;
 }
 
@@ -910,12 +910,12 @@ html { background: var(--bg-app); }
 
 .table {
     vertical-align: middle;
-    font-size: 11.5px;
+    font-size: 12.08px;
 }
 
 .table th {
     color: var(--text-muted);
-    font-size: 10.5px;
+    font-size: 11.03px;
     font-weight: 700;
     background: var(--bg-canvas);
     border-bottom-color: var(--border-soft);
@@ -946,7 +946,7 @@ html { background: var(--bg-app); }
     border-radius: 999px;
     padding: 3px 9px;
     font-weight: 600;
-    font-size: 10px;
+    font-size: 10.50px;
 }
 
 .bg-emerald-soft { background: var(--accent-soft); }
@@ -964,14 +964,14 @@ html { background: var(--bg-app); }
 
 .empty-state i {
     display: block;
-    font-size: 36px;
+    font-size: 37.80px;
     color: var(--text-faint);
     margin-bottom: 9px;
 }
 
 .empty-state h3 {
     color: var(--text-strong);
-    font-size: 15px;
+    font-size: 15.75px;
     font-weight: 800;
 }
 
@@ -1018,7 +1018,7 @@ html { background: var(--bg-app); }
 }
 
 .metric-label {
-    font-size: 10.5px;
+    font-size: 11.03px;
     color: var(--text-muted);
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -1030,7 +1030,7 @@ html { background: var(--bg-app); }
 }
 
 .metric-sublabel {
-    font-size: 10px;
+    font-size: 10.50px;
     color: var(--text-faint);
     font-weight: 500;
     line-height: 1.3;
@@ -1047,7 +1047,7 @@ html { background: var(--bg-app); }
     border-radius: var(--radius-md);
     display: grid;
     place-items: center;
-    font-size: 15px;
+    font-size: 15.75px;
     flex-shrink: 0;
     align-self: start;
 }
@@ -1062,7 +1062,7 @@ html { background: var(--bg-app); }
 .metric-value {
     grid-column: 1 / 3;
     grid-row: 2 / 3;
-    font-size: 22px;
+    font-size: 23.10px;
     font-weight: 800;
     color: var(--text-strong);
     line-height: 1.15;
@@ -1090,13 +1090,13 @@ html { background: var(--bg-app); }
     gap: 4px;
     padding: 3px 8px;
     border-radius: 999px;
-    font-size: 10.5px;
+    font-size: 11.03px;
     font-weight: 700;
     line-height: 1;
     white-space: nowrap;
 }
 
-.metric-delta i { font-size: 10px; }
+.metric-delta i { font-size: 10.50px; }
 
 .metric-delta.up    { background: var(--positive-soft); color: var(--positive); }
 .metric-delta.down  { background: var(--negative-soft); color: var(--negative); }
@@ -1104,7 +1104,7 @@ html { background: var(--bg-app); }
 
 .metric-delta-context {
     color: var(--text-muted);
-    font-size: 10.5px;
+    font-size: 11.03px;
     font-weight: 500;
 }
 
@@ -1128,7 +1128,7 @@ html { background: var(--bg-app); }
 .metric-body span,
 .report-card span {
     color: var(--text-muted);
-    font-size: 10.5px;
+    font-size: 11.03px;
     font-weight: 600;
     display: block;
     white-space: nowrap;
@@ -1137,7 +1137,7 @@ html { background: var(--bg-app); }
 }
 .metric-body strong {
     display: block;
-    font-size: 18px;
+    font-size: 18.90px;
     font-weight: 800;
     margin: 3px 0;
     color: var(--text-strong);
@@ -1147,7 +1147,7 @@ html { background: var(--bg-app); }
 }
 .metric-body small {
     color: var(--text-muted);
-    font-size: 10px;
+    font-size: 10.50px;
 }
 
 .dashboard-grid {
@@ -1170,14 +1170,14 @@ html { background: var(--bg-app); }
 }
 
 .panel-title h2 {
-    font-size: 13.5px;
+    font-size: 14.18px;
     font-weight: 700;
     margin: 0;
     color: var(--text-strong);
 }
 
 .panel-title a {
-    font-size: 11px;
+    font-size: 11.55px;
     color: var(--accent-strong);
     font-weight: 600;
 }
@@ -1207,7 +1207,7 @@ html { background: var(--bg-app); }
     border-radius: var(--radius-md);
     display: grid;
     place-items: center;
-    font-size: 14px;
+    font-size: 14.70px;
     flex-shrink: 0;
 }
 
@@ -1217,14 +1217,14 @@ html { background: var(--bg-app); }
 .alert-item.success .alert-dot { background: var(--accent-soft); color: var(--accent-strong); }
 
 .alert-item h4 {
-    font-size: 11.5px;
+    font-size: 12.08px;
     font-weight: 700;
     margin: 0 0 2px;
     color: var(--text-strong);
 }
 
 .alert-item p {
-    font-size: 10.5px;
+    font-size: 11.03px;
     color: var(--text-muted);
     margin: 0;
 }
@@ -1234,7 +1234,7 @@ html { background: var(--bg-app); }
    ===================================================== */
 
 .form-section-title {
-    font-size: 13.5px;
+    font-size: 14.18px;
     font-weight: 700;
     margin: 5px 0 14px;
     color: var(--text-strong);
@@ -1260,7 +1260,7 @@ html { background: var(--bg-app); }
     padding: 10px 14px;
     margin-bottom: 14px;
     color: var(--negative);
-    font-size: 11.5px;
+    font-size: 12.08px;
 }
 .form-validation-summary ul {
     margin: 0;
@@ -1274,7 +1274,7 @@ html { background: var(--bg-app); }
     border-radius: var(--radius-md);
     background: var(--bg-surface);
     color: var(--text-strong);
-    font-size: 11.5px;
+    font-size: 12.08px;
     padding: 0.36rem 0.6rem;
     min-height: 31px;
 }
@@ -1288,7 +1288,7 @@ html { background: var(--bg-app); }
 .form-label {
     font-weight: 600;
     margin-bottom: 5px;
-    font-size: 11px;
+    font-size: 11.55px;
     color: var(--text-base);
 }
 
@@ -1308,12 +1308,12 @@ html { background: var(--bg-app); }
 
 .summary-card span {
     color: var(--text-muted);
-    font-size: 10.5px;
+    font-size: 11.03px;
 }
 
 .summary-card strong {
     display: block;
-    font-size: 15.5px;
+    font-size: 16.28px;
     font-weight: 800;
     margin-top: 4px;
     color: var(--text-strong);
@@ -1342,7 +1342,7 @@ html { background: var(--bg-app); }
 }
 
 .total-row.grand {
-    font-size: 16px;
+    font-size: 16.80px;
     font-weight: 800;
     color: var(--accent-strong);
 }
@@ -1385,11 +1385,11 @@ html { background: var(--bg-app); }
     border-radius: var(--radius-md);
     background: #e6efff;
     color: var(--blue);
-    font-size: 17px;
+    font-size: 17.85px;
 }
 
 .report-card h3 {
-    font-size: 13px;
+    font-size: 13.65px;
     font-weight: 800;
     margin: 3px 0 7px;
     color: var(--text-strong);
@@ -1398,7 +1398,7 @@ html { background: var(--bg-app); }
 .report-card p {
     color: var(--text-muted);
     margin: 0;
-    font-size: 11px;
+    font-size: 11.55px;
 }
 
 .report-group-title {
@@ -1409,7 +1409,7 @@ html { background: var(--bg-app); }
 }
 
 .report-group-title h2 {
-    font-size: 14.5px;
+    font-size: 15.23px;
     font-weight: 800;
     margin: 0;
     color: var(--text-strong);
@@ -1421,7 +1421,7 @@ html { background: var(--bg-app); }
     color: var(--text-muted);
     padding: 2px 9px;
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 10.50px;
     font-weight: 600;
 }
 
@@ -1437,7 +1437,7 @@ html { background: var(--bg-app); }
     padding: 5px 9px;
     background: var(--bg-canvas);
     color: var(--text-muted);
-    font-size: 10.5px;
+    font-size: 11.03px;
 }
 
 /* =====================================================
@@ -1478,12 +1478,12 @@ html { background: var(--bg-app); }
     place-items: center;
     background: var(--accent-soft);
     color: var(--accent-strong);
-    font-size: 17px;
+    font-size: 17.85px;
     margin-bottom: 3px;
 }
 
 .settings-card h3 {
-    font-size: 13px;
+    font-size: 13.65px;
     font-weight: 800;
     margin: 0;
     color: var(--text-strong);
@@ -1492,7 +1492,7 @@ html { background: var(--bg-app); }
 .settings-card p {
     color: var(--text-muted);
     margin: 0;
-    font-size: 11px;
+    font-size: 11.55px;
 }
 
 /* =====================================================
@@ -1518,14 +1518,14 @@ html { background: var(--bg-app); }
 }
 
 /* Bootstrap small overrides for compact density */
-.dropdown-menu { font-size: 11.5px; }
+.dropdown-menu { font-size: 12.08px; }
 .dropdown-item { padding: 0.36rem 0.85rem; }
-h1 { font-size: 22px; }
-h2 { font-size: 18px; }
-h3 { font-size: 15px; }
-h4 { font-size: 13px; }
-h5 { font-size: 12px; }
-h6 { font-size: 11px; }
+h1 { font-size: 23.10px; }
+h2 { font-size: 18.90px; }
+h3 { font-size: 15.75px; }
+h4 { font-size: 13.65px; }
+h5 { font-size: 12.60px; }
+h6 { font-size: 11.55px; }
 
 /* =====================================================
    Responsive
