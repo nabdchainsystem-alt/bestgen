@@ -320,6 +320,9 @@
                 <a asp-controller="Onboarding" asp-action="Index" class="nav-link nav-item @(IsActive("Onboarding") ? "active" : "")" title="@T("Industry Templates", "قوالب الصناعات")">
                     <i class="bi bi-stars"></i><span>@T("Industry Templates", "قوالب الصناعات")</span>
                 </a>
+                <a asp-controller="Import" asp-action="Index" class="nav-link nav-item @(IsActive("Import") ? "active" : "")" title="@T("CSV Import", "استيراد CSV")">
+                    <i class="bi bi-upload"></i><span>@T("CSV Import", "استيراد CSV")</span>
+                </a>
                 <a asp-controller="PortalInvitations" asp-action="Index" class="nav-link nav-item @(IsActive("PortalInvitations") ? "active" : "")" title="@T("Customer Portal", "بوابة العملاء")">
                     <i class="bi bi-people"></i><span>@T("Customer Portal", "بوابة العملاء")</span>
                 </a>

@@ -1,0 +1,96 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<ImportJob>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("CSV Import", "استيراد CSV");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("CSV Import", "استيراد CSV"),
+    T("Import customers, suppliers, and products from any CSV (QuickBooks, Zoho, Excel, ...). Columns auto-map by header name; you can override before commit. Re-running is safe — duplicates by code/SKU are skipped.",
+      "استورد العملاء والموردين والمنتجات من أي ملف CSV (QuickBooks، Zoho، Excel، ...). يتم تخمين تطابق الأعمدة تلقائياً وتقدر تعدّله قبل الحفظ. إعادة التشغيل آمنة — التكرارات تُتجاهل."),
+    null, null, null))" />
+
+@if (TempData["ImportMessage"] is string m) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @m</div> }
+@if (TempData["ImportError"] is string e)   { <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @e</div> }
+
+<section class="form-panel mb-3">
+    <h3 class="h6">@T("Upload a CSV", "ارفع ملف CSV")</h3>
+    <form asp-action="Preview" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+        @Html.AntiForgeryToken()
+        <div class="col-md-3">
+            <label class="form-label">@T("Type", "النوع")</label>
+            <select name="entity" class="form-select" required>
+                <option value="@ImportEntity.Customer">@T("Customers", "العملاء")</option>
+                <option value="@ImportEntity.Supplier">@T("Suppliers", "الموردين")</option>
+                <option value="@ImportEntity.Product">@T("Products", "المنتجات")</option>
+            </select>
+        </div>
+        <div class="col-md-7">
+            <label class="form-label">@T("CSV file", "ملف CSV")</label>
+            <input type="file" name="file" accept=".csv,text/csv" class="form-control" required />
+        </div>
+        <div class="col-md-2 text-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-upload"></i> @T("Preview", "معاينة")</button>
+        </div>
+    </form>
+    <small class="text-muted d-block mt-2">
+        @T("Headers match by name in EN or AR (e.g. \"Name\" / \"اسم\", \"VAT\" / \"رقم ضريبي\"). Empty cells are stored as null. First row must be the header.",
+           "ترويسات الأعمدة يتم تخمينها بالعربي والإنجليزي. الخلايا الفارغة تُخزّن null. الصف الأول يجب أن يكون ترويسات.")
+    </small>
+</section>
+
+<section class="data-panel">
+    <h3 class="h6">@T("Recent imports", "الاستيرادات الأخيرة")</h3>
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No imports yet.", "لا توجد عمليات استيراد بعد.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("When", "متى")</th>
+                        <th>@T("Type", "النوع")</th>
+                        <th>@T("File", "الملف")</th>
+                        <th class="text-center">@T("Total", "الإجمالي")</th>
+                        <th class="text-center">@T("Imported", "تم استيراده")</th>
+                        <th class="text-center">@T("Skipped", "تجاهل")</th>
+                        <th class="text-center">@T("Failed", "فشل")</th>
+                        <th>@T("Status", "الحالة")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var j in Model)
+                {
+                    <tr>
+                        <td>@j.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@j.Entity</td>
+                        <td><code class="small">@j.FileName</code></td>
+                        <td class="text-center">@j.TotalRows</td>
+                        <td class="text-center text-success">@j.ImportedRows</td>
+                        <td class="text-center text-muted">@j.SkippedRows</td>
+                        <td class="text-center @(j.FailedRows > 0 ? "text-danger" : "")">@j.FailedRows</td>
+                        <td>
+                            @switch (j.Status)
+                            {
+                                case ImportStatus.Completed: <span class="badge bg-success">@T("Completed", "مكتمل")</span> break;
+                                case ImportStatus.Failed:    <span class="badge bg-danger">@T("Failed", "فشل")</span>      break;
+                                default:                     <span class="badge bg-warning text-dark">@T("Pending", "قيد المعالجة")</span> break;
+                            }
+                            @if (!string.IsNullOrEmpty(j.ErrorSummary))
+                            {
+                                <div class="small text-muted" style="white-space:pre-line;max-width:400px;max-height:80px;overflow:auto;">@j.ErrorSummary</div>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

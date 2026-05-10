@@ -336,6 +336,9 @@ builder.Services.AddScoped<bestgen.Services.Consolidation.ConsolidationService>(
 // SQLite + Postgres; swap by binding ISearchService to a different impl.
 builder.Services.AddScoped<bestgen.Services.Search.ISearchService, bestgen.Services.Search.LikeSearchService>();
 
+// CSV importer (Customers / Suppliers / Products).
+builder.Services.AddScoped<bestgen.Services.Import.CsvImportService>();
+
 // Onboarding industry templates (Restaurant / Trading / Services / Contractor).
 builder.Services.AddScoped<bestgen.Services.Onboarding.IndustryTemplateService>();
 

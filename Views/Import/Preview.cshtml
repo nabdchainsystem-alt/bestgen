@@ -1,0 +1,97 @@
+@using System.Globalization
+@using bestgen.Services.Import
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    var preview = (ImportPreview)ViewBag.Preview;
+    var fields = (IReadOnlyList<string>)ViewBag.Fields;
+    ViewData["Title"] = T($"Preview {preview.Entity} import", $"معاينة استيراد {preview.Entity}");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T($"Preview · {preview.Entity}", $"معاينة · {preview.Entity}"),
+    T($"{preview.TotalDataRows} data rows in {preview.FileName}. Confirm column mapping below — anything left blank is skipped.",
+      $"{preview.TotalDataRows} صف بيانات في {preview.FileName}. تأكد من ربط الأعمدة بالأسفل — أي عمود بدون ربط سيتم تجاهله."),
+    null, null, null))" />
+
+<form asp-action="Commit" method="post" onsubmit="return confirm('@T("Import these rows now? Duplicates by code/SKU are skipped automatically.", "بدء الاستيراد الآن؟ التكرارات بحسب الرمز/SKU سيتم تجاهلها تلقائياً.")');">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="entity" value="@preview.Entity" />
+    <input type="hidden" name="fileName" value="@preview.FileName" />
+
+    <section class="data-panel mb-3">
+        <h3 class="h6 mb-3">@T("Column mapping", "ربط الأعمدة")</h3>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>@T("CSV column", "عمود CSV")</th>
+                        <th>@T("Maps to", "يُربط بـ")</th>
+                        <th>@T("Sample values", "أمثلة")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < preview.Headers.Count; i++)
+                {
+                    var samples = preview.SampleRows
+                        .Where(r => i < r.Count)
+                        .Select(r => r[i])
+                        .Where(v => !string.IsNullOrWhiteSpace(v))
+                        .Take(3)
+                        .ToList();
+                    <tr>
+                        <td><code>@preview.Headers[i]</code></td>
+                        <td>
+                            <select name="mapping" class="form-select form-select-sm" style="width:240px;">
+                                <option value="">— @T("Skip", "تجاهل") —</option>
+                                @foreach (var f in fields)
+                                {
+                                    var sel = string.Equals(preview.Mapping[i], f, StringComparison.OrdinalIgnoreCase);
+                                    if (sel)
+                                    {
+                                        <option value="@f" selected>@f</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@f">@f</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td><small class="text-muted">@string.Join(" · ", samples)</small></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="data-panel mb-3">
+        <h3 class="h6 mb-3">@T("First 10 rows", "أول 10 صفوف")</h3>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        @foreach (var h in preview.Headers) { <th>@h</th> }
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in preview.SampleRows)
+                {
+                    <tr>
+                        @for (var i = 0; i < preview.Headers.Count; i++)
+                        {
+                            <td><small>@(i < r.Count ? r[i] : "")</small></td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="d-flex justify-content-end gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up"></i> @T($"Import {preview.TotalDataRows} rows", $"استيراد {preview.TotalDataRows} صف")</button>
+    </div>
+</form>
