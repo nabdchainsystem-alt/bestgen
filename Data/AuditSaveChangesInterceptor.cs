@@ -1,4 +1,5 @@
 using bestgen.Models;
+using bestgen.Services.Audit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -10,10 +11,16 @@ namespace bestgen.Data;
 /// Captures Create/Update/Delete events on tracked entities and writes a row
 /// to AuditEntries inside the same SaveChanges call. Skips Identity tables
 /// (AspNet*) and the AuditEntries table itself to avoid recursion.
+///
+/// After the DB save succeeds, the same rows are mirrored to the
+/// append-only file sink (<see cref="AuditSink"/>) for tamper-evidence.
 /// </summary>
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
+    private static readonly AsyncLocal<List<AuditEntry>?> _pendingRows = new();
+
     private readonly IHttpContextAccessor _http;
+    private readonly AuditSink _sink;
 
     private static readonly HashSet<string> IgnoredEntities = new(StringComparer.Ordinal)
     {
@@ -23,9 +30,10 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         "ApplicationUser"
     };
 
-    public AuditSaveChangesInterceptor(IHttpContextAccessor http)
+    public AuditSaveChangesInterceptor(IHttpContextAccessor http, AuditSink sink)
     {
         _http = http;
+        _sink = sink;
     }
 
     public override InterceptionResult<int> SavingChanges(
@@ -43,6 +51,32 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     {
         AppendAuditEntries(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override async ValueTask<int> SavedChangesAsync(
+        SaveChangesCompletedEventData eventData,
+        int result,
+        CancellationToken cancellationToken = default)
+    {
+        var rows = _pendingRows.Value;
+        _pendingRows.Value = null;
+        if (rows is { Count: > 0 })
+        {
+            await _sink.WriteAsync(rows, cancellationToken);
+        }
+        return await base.SavedChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
+    {
+        var rows = _pendingRows.Value;
+        _pendingRows.Value = null;
+        if (rows is { Count: > 0 })
+        {
+            // Sync caller — fire-and-forget the async sink write so we don't block.
+            _ = _sink.WriteAsync(rows);
+        }
+        return base.SavedChanges(eventData, result);
     }
 
     private void AppendAuditEntries(DbContext? context)
@@ -95,6 +129,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         }
 
         context.Set<AuditEntry>().AddRange(auditRows);
+        _pendingRows.Value = auditRows;
     }
 
     private static string? BuildSummary(EntityEntry entry)

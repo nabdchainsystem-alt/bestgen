@@ -1,5 +1,6 @@
 using bestgen.Data;
 using bestgen.Models;
+using bestgen.Services.Audit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,38 @@ public class AuditController : Controller
     private const int PageSize = 50;
 
     private readonly ApplicationDbContext _db;
+    private readonly AuditSink _sink;
 
-    public AuditController(ApplicationDbContext db) { _db = db; }
+    public AuditController(ApplicationDbContext db, AuditSink sink) { _db = db; _sink = sink; }
+
+    [Authorize(Roles = "Owner,Admin")]
+    public IActionResult Files()
+    {
+        ViewBag.SinkEnabled = _sink.Enabled;
+        ViewBag.Directory = _sink.Directory;
+        return View(_sink.ListFiles());
+    }
+
+    [Authorize(Roles = "Owner,Admin")]
+    public async Task<IActionResult> Download(string name)
+    {
+        try
+        {
+            var bytes = await _sink.ReadFileAsync(name);
+            return File(bytes, "application/x-ndjson", name);
+        }
+        catch (FileNotFoundException) { return NotFound(); }
+    }
+
+    [Authorize(Roles = "Owner,Admin")]
+    public async Task<IActionResult> Verify(string name)
+    {
+        var result = await _sink.VerifyAsync(name);
+        TempData["AuditVerifyResult"] = result.Ok
+            ? $"✅ {name} — chain intact across {result.Lines} lines."
+            : $"❌ {name} — {result.Message}";
+        return RedirectToAction(nameof(Files));
+    }
 
     public async Task<IActionResult> Index(
         string? q,

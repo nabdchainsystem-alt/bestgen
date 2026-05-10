@@ -1,0 +1,91 @@
+@using System.Globalization
+@using bestgen.Services.Audit
+@model IReadOnlyList<AuditFileInfo>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Audit Files", "ملفات التدقيق");
+    var enabled = (bool)ViewBag.SinkEnabled;
+    var dir = (string)ViewBag.Directory;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Immutable Audit Files", "ملفات التدقيق الدائمة"),
+    T("Append-only JSONL files at App_Data/audit/. Each line is SHA-256 chained to the previous so any tampering breaks the chain — verifiable here.",
+      "ملفات JSONL تُضاف فقط دون تعديل. كل سطر مرتبط بدوال SHA-256 بالسطر السابق — أي تعديل يكسر السلسلة ويظهر هنا."),
+    null, null, null))" />
+
+@if (TempData["AuditVerifyResult"] is string vr)
+{
+    <div class="alert @(vr.StartsWith("✅") ? "alert-success" : "alert-danger")">@vr</div>
+}
+
+<section class="data-panel mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h3 class="h6 m-0">
+                <i class="bi bi-shield-check"></i>
+                @T("Sink status:", "حالة المخزن:")
+                @(enabled ? $"<span class='badge bg-success'>{T("Enabled", "مفعل")}</span>" : $"<span class='badge bg-secondary'>{T("Disabled", "معطل")}</span>")
+            </h3>
+            <small class="text-muted"><code>@dir</code></small>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-table"></i> @T("View searchable log", "عرض السجل القابل للبحث")</a>
+    </div>
+</section>
+
+<section class="data-panel">
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">
+            @T("No audit files yet — they appear after the first write event today.",
+               "لا توجد ملفات تدقيق بعد — ستظهر بعد أول حدث كتابة اليوم.")
+        </p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("File", "الملف")</th>
+                        <th class="text-end">@T("Size", "الحجم")</th>
+                        <th class="text-end">@T("Lines", "الأسطر")</th>
+                        <th>@T("Last write", "آخر كتابة")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var f in Model)
+                {
+                    <tr>
+                        <td><code>@f.Name</code></td>
+                        <td class="text-end">
+                            @if (f.Size < 1024) { @($"{f.Size} B") }
+                            else if (f.Size < 1024*1024) { @($"{f.Size / 1024d:N1} KB") }
+                            else { @($"{f.Size / (1024d*1024):N1} MB") }
+                        </td>
+                        <td class="text-end">@f.LineCount</td>
+                        <td>@f.LastWriteUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>
+                            <a asp-action="Download" asp-route-name="@f.Name" class="btn btn-sm btn-outline-secondary" title="@T("Download", "تحميل")"><i class="bi bi-download"></i></a>
+                            <a asp-action="Verify" asp-route-name="@f.Name" class="btn btn-sm btn-outline-primary" title="@T("Verify chain", "التحقق من السلسلة")"><i class="bi bi-shield-check"></i></a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="details-panel mt-4">
+    <h3 class="h6">@T("Compliance handover", "تسليم للامتثال")</h3>
+    <p class="small text-muted mb-2">@T("To meet retention requirements, ship these files to immutable storage on a schedule.",
+                                          "لاستيفاء متطلبات الحفظ، انقل هذه الملفات إلى تخزين دائم بشكل دوري.")</p>
+    <ul class="small text-muted mb-0">
+        <li>@T("AWS S3 with Object Lock (governance / compliance mode)", "S3 مع قفل الكائنات (compliance mode)")</li>
+        <li>@T("Cloudflare R2 with versioning + IAM-based delete restriction", "R2 مع التحكم بالنسخ ومنع الحذف")</li>
+        <li>@T("On-prem: append to a write-only NFS share", "على المخدم: مشاركة NFS تسمح بالإضافة فقط")</li>
+    </ul>
+</section>
