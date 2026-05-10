@@ -32,23 +32,34 @@ public static class DbSeeder
                 .GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>(context.Database);
             var dbExists = await creator.ExistsAsync();
             var hasTables = dbExists && await creator.HasTablesAsync();
-            var applied = dbExists ? (await context.Database.GetAppliedMigrationsAsync()).ToList() : new List<string>();
+            var allMigrations = context.Database.GetMigrations().ToList();
+            var firstMigration = allMigrations.First();
 
-            // Legacy DB built by EnsureCreated has tables but no __EFMigrationsHistory.
-            // Mark InitialCreate as applied without running its SQL — Migrate then no-ops it
-            // and applies anything newer.
-            if (hasTables && applied.Count == 0)
+            // Bootstrap path. Triggers when tables already exist (legacy
+            // EnsureCreated builds, or partially-applied prior deploys whose
+            // __EFMigrationsHistory has stale rows from a previous migration
+            // ID that's no longer in the project).
+            //
+            // We mark the CURRENT InitialCreate as applied without running its
+            // CREATE TABLE statements — they'd error on "relation already
+            // exists". MigrateAsync then no-ops InitialCreate and applies any
+            // newer migrations cleanly.
+            if (hasTables)
             {
-                var firstMigration = context.Database.GetMigrations().First();
                 await context.Database.ExecuteSqlRawAsync(@"
                     CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
                         ""MigrationId"" character varying(150) PRIMARY KEY,
                         ""ProductVersion"" character varying(32) NOT NULL
                     );");
-                await context.Database.ExecuteSqlRawAsync(
-                    $@"INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
-                       VALUES ('{firstMigration}', '8.0.5')
-                       ON CONFLICT DO NOTHING;");
+
+                var applied = (await context.Database.GetAppliedMigrationsAsync()).ToList();
+                if (!applied.Contains(firstMigration))
+                {
+                    await context.Database.ExecuteSqlRawAsync(
+                        $@"INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                           VALUES ('{firstMigration}', '8.0.5')
+                           ON CONFLICT DO NOTHING;");
+                }
             }
 
             await context.Database.MigrateAsync();
