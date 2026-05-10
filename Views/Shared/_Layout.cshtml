@@ -399,7 +399,9 @@
                             title="@T("Enable notifications", "تفعيل الإشعارات")">
                         <i class="bi bi-bell"></i>
                     </button>
-                    <span id="outboxOnlineDot" class="chip-button outbox-dot" title="@T("Connection", "الاتصال")"></span>
+                    <span id="outboxOnlineDot" class="chip-button outbox-dot"
+                          title="@T("Online — your work syncs in real time. Turns red when offline.", "متصل — تُحفظ تعديلاتك مباشرة. يتحول أحمر عند انقطاع الاتصال.")"
+                          aria-label="@T("Connection status", "حالة الاتصال")"></span>
                     <a href="/Outbox" id="outboxPill" class="chip-button" style="display:none;cursor:pointer;"
                        title="@T("Pending offline submissions", "إرساليات معلقة أوفلاين")">
                         <i class="bi bi-cloud-arrow-up"></i>
@@ -450,7 +452,24 @@
             return navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready);
         }
 
+        let pushConfigured = null;
+        async function checkConfigured() {
+            if (pushConfigured !== null) return pushConfigured;
+            try {
+                const r = await fetch('/Push/PublicKey');
+                const j = await r.json();
+                pushConfigured = !!j.configured;
+            } catch (e) { pushConfigured = false; }
+            return pushConfigured;
+        }
+
         async function refresh() {
+            // Hide the bell entirely when VAPID keys aren't configured —
+            // a button that always errors is worse than no button.
+            if (!await checkConfigured()) {
+                bell.style.display = 'none';
+                return;
+            }
             const reg = await getReg();
             const sub = await reg.pushManager.getSubscription();
             const granted = Notification.permission === 'granted';
