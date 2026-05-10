@@ -61,6 +61,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
     public DbSet<CustomerInvitation> CustomerInvitations => Set<CustomerInvitation>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 
     public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 

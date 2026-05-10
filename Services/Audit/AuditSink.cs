@@ -17,17 +17,15 @@ namespace bestgen.Services.Audit;
 public class AuditSink
 {
     private readonly IConfiguration _config;
-    private readonly IWebHostEnvironment _env;
     private readonly ILogger<AuditSink> _logger;
     private readonly SemaphoreSlim _sema = new(1, 1);
 
     private string _currentDate = string.Empty;
     private string? _lastHash;
 
-    public AuditSink(IConfiguration config, IWebHostEnvironment env, ILogger<AuditSink> logger)
+    public AuditSink(IConfiguration config, ILogger<AuditSink> logger)
     {
         _config = config;
-        _env = env;
         _logger = logger;
     }
 
@@ -35,7 +33,7 @@ public class AuditSink
 
     public string Directory =>
         _config.GetValue<string>("Audit:Sink:Directory")
-        ?? Path.Combine(_env.ContentRootPath, "App_Data", "audit");
+        ?? Path.Combine(Environment.CurrentDirectory, "App_Data", "audit");
 
     public string FilePathFor(DateTime utcDate) =>
         Path.Combine(Directory, $"{utcDate:yyyy-MM-dd}.jsonl");

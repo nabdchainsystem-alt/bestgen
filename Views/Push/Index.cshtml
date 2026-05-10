@@ -1,0 +1,100 @@
+@using System.Globalization
+@model object
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Web Push", "إشعارات الويب");
+    var configured = (bool)ViewBag.Configured;
+    var publicKey = (string)ViewBag.PublicKey;
+    var subject = (string)ViewBag.Subject;
+    var subs = (List<bestgen.Models.PushSubscription>)ViewBag.Subscriptions;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Web Push notifications", "إشعارات الدفع"),
+    T("VAPID-signed browser push. Generate keys once, paste into env vars, then subscribers receive native notifications even when the tab is closed.",
+      "إشعارات دفع ممضاة بـ VAPID. أنشئ المفاتيح مرة واحدة، انسخها في متغيرات البيئة، ثم يتلقى المشتركون إشعارات أصلية حتى مع إغلاق التبويب."),
+    null, null, null))" />
+
+<section class="details-panel mb-3">
+    <h3 class="h6">@T("VAPID configuration", "إعدادات VAPID")</h3>
+    @if (configured)
+    {
+        <div class="alert alert-success py-2 mb-2">
+            <i class="bi bi-check2-circle"></i> @T("Configured", "مكوّن")
+            <code class="ms-2 small">@subject</code>
+        </div>
+        <p class="text-muted small">@T("Public key is exposed at /Push/PublicKey for the frontend to subscribe.",
+                                       "المفتاح العام متاح على /Push/PublicKey للواجهة الأمامية.")</p>
+    }
+    else
+    {
+        <div class="alert alert-warning py-2">
+            <i class="bi bi-exclamation-triangle"></i>
+            @T("Not configured. Generate a key pair below, then set:", "غير مكوّن. أنشئ المفاتيح أدناه ثم اضبط:")
+            <code class="d-block mt-1 small">WebPush__VapidPublicKey</code>
+            <code class="d-block small">WebPush__VapidPrivateKey</code>
+            <code class="d-block small">WebPush__VapidSubject (mailto: or https://… URL)</code>
+            @T("…and restart.", "ثم أعد تشغيل التطبيق.")
+        </div>
+    }
+
+    <form asp-action="GenerateKeys" method="post" class="m-0">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-outline-primary"><i class="bi bi-key"></i> @T("Generate new VAPID key pair", "إنشاء زوج مفاتيح VAPID")</button>
+    </form>
+
+    @if (TempData["GeneratedPublicKey"] is string pub && TempData["GeneratedPrivateKey"] is string priv)
+    {
+        <div class="alert alert-info mt-3">
+            <strong>@T("Save these now — they're not stored:", "احفظها الآن — لا يتم تخزينها:")</strong>
+            <div class="mt-2">
+                <small>WebPush__VapidPublicKey</small>
+                <code class="d-block user-select-all p-2" style="background:#fff;border-radius:6px;font-size:13px;word-break:break-all;">@pub</code>
+            </div>
+            <div class="mt-2">
+                <small>WebPush__VapidPrivateKey</small>
+                <code class="d-block user-select-all p-2" style="background:#fff;border-radius:6px;font-size:13px;word-break:break-all;">@priv</code>
+            </div>
+            <small class="text-muted d-block mt-2">@T("Set these as env vars (or in appsettings.Development.json) and restart.",
+                                                      "اضبطهما كمتغيرات بيئة (أو في appsettings.Development.json) ثم أعد تشغيل التطبيق.")</small>
+        </div>
+    }
+</section>
+
+<section class="data-panel">
+    <h3 class="h6">@T("Active subscriptions", "الاشتراكات النشطة") <span class="badge bg-secondary">@subs.Count</span></h3>
+    @if (subs.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No subscriptions yet. Have users grant permission via the bell button in the topbar.",
+                                     "لا توجد اشتراكات بعد. اطلب من المستخدمين منح الإذن عبر زر الجرس في الشريط العلوي.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("User", "المستخدم")</th>
+                        <th>@T("Endpoint", "العنوان")</th>
+                        <th>@T("Browser", "المتصفح")</th>
+                        <th>@T("Created", "تاريخ الإنشاء")</th>
+                        <th>@T("Active", "نشط")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var s in subs)
+                {
+                    <tr>
+                        <td><small><code>@s.UserId</code></small></td>
+                        <td><small class="text-muted">@(s.Endpoint.Length > 60 ? s.Endpoint[..60] + "…" : s.Endpoint)</small></td>
+                        <td><small>@(s.UserAgent?.Length > 40 ? s.UserAgent[..40] + "…" : s.UserAgent)</small></td>
+                        <td>@s.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@(s.IsActive ? T("Yes", "نعم") : T("No", "لا"))</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

@@ -20,7 +20,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private static readonly AsyncLocal<List<AuditEntry>?> _pendingRows = new();
 
     private readonly IHttpContextAccessor _http;
-    private readonly AuditSink _sink;
+    private readonly IServiceProvider _services;
 
     private static readonly HashSet<string> IgnoredEntities = new(StringComparer.Ordinal)
     {
@@ -30,10 +30,10 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         "ApplicationUser"
     };
 
-    public AuditSaveChangesInterceptor(IHttpContextAccessor http, AuditSink sink)
+    public AuditSaveChangesInterceptor(IHttpContextAccessor http, IServiceProvider services)
     {
         _http = http;
-        _sink = sink;
+        _services = services;
     }
 
     public override InterceptionResult<int> SavingChanges(
@@ -62,7 +62,8 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         _pendingRows.Value = null;
         if (rows is { Count: > 0 })
         {
-            await _sink.WriteAsync(rows, cancellationToken);
+            var sink = _services.GetService(typeof(AuditSink)) as AuditSink;
+            if (sink is not null) await sink.WriteAsync(rows, cancellationToken);
         }
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
@@ -73,8 +74,9 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         _pendingRows.Value = null;
         if (rows is { Count: > 0 })
         {
+            var sink = _services.GetService(typeof(AuditSink)) as AuditSink;
             // Sync caller — fire-and-forget the async sink write so we don't block.
-            _ = _sink.WriteAsync(rows);
+            if (sink is not null) _ = sink.WriteAsync(rows);
         }
         return base.SavedChanges(eventData, result);
     }

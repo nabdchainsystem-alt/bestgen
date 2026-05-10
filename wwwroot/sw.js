@@ -10,7 +10,7 @@
 //
 // Bump VERSION whenever you change cached assets to invalidate old caches.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = `bestgen-static-${VERSION}`;
 const PAGE_CACHE = `bestgen-pages-${VERSION}`;
 const OFFLINE_URL = '/offline.html';
@@ -96,4 +96,36 @@ self.addEventListener('fetch', event => {
             }
         })());
     }
+});
+
+// Web Push: receive a payload from the server and show a system notification.
+self.addEventListener('push', event => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch (e) { data = { title: 'Bestgen', body: event.data?.text() }; }
+    const title = data.title || 'Bestgen';
+    const options = {
+        body: data.body || '',
+        icon: data.icon || '/img/logo.png',
+        badge: '/img/logo.png',
+        tag: data.tag || undefined,
+        renotify: !!data.tag,
+        data: { url: data.url || '/' }
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Tap on a notification → focus an existing tab on the URL or open a new one.
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    const target = event.notification.data?.url || '/';
+    event.waitUntil((async () => {
+        const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of all) {
+            if ('focus' in client) {
+                try { await client.navigate(target); } catch (e) { /* cross-origin nav blocked */ }
+                return client.focus();
+            }
+        }
+        if (self.clients.openWindow) await self.clients.openWindow(target);
+    })());
 });

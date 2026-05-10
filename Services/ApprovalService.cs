@@ -13,10 +13,12 @@ namespace bestgen.Services;
 public class ApprovalService
 {
     private readonly ApplicationDbContext _db;
+    private readonly IServiceProvider? _serviceProvider;
 
-    public ApprovalService(ApplicationDbContext db)
+    public ApprovalService(ApplicationDbContext db, IServiceProvider serviceProvider)
     {
         _db = db;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<bool> RequiresApprovalAsync(ApprovalDocumentType type, decimal amount)
@@ -82,6 +84,27 @@ public class ApprovalService
         };
         _db.ApprovalRequests.Add(req);
         await _db.SaveChangesAsync(ct);
+
+        // Best-effort web-push notification to anyone with permission to act.
+        try
+        {
+            var dispatcher = _serviceProvider?.GetService<bestgen.Services.Notifications.NotificationDispatcher>();
+            if (dispatcher is not null)
+            {
+                var payload = new bestgen.Services.Notifications.NotificationPayload
+                {
+                    Title = $"Approval needed · {docNumber}",
+                    Body = $"{userName ?? "Someone"} submitted {docNumber} ({amount:N2}) for approval.",
+                    Url = "/Approvals",
+                    Tag = $"approval-{req.Id}"
+                };
+                // Notify Owner + Admin by default. RequiredRole on the policy could narrow this.
+                _ = dispatcher.NotifyRoleAsync("Owner", payload, ct);
+                _ = dispatcher.NotifyRoleAsync("Admin", payload, ct);
+            }
+        }
+        catch { /* notifications never break submission */ }
+
         return req;
     }
 

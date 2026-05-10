@@ -308,6 +308,12 @@
                 <a asp-controller="Audit" asp-action="Index" class="nav-link nav-item @(IsActive("Audit") ? "active" : "")" title="@T("Audit Log", "سجل التدقيق")">
                     <i class="bi bi-shield-lock"></i><span>@T("Audit Log", "سجل التدقيق")</span>
                 </a>
+                <a asp-controller="Permissions" asp-action="Index" class="nav-link nav-item @(IsActive("Permissions") ? "active" : "")" title="@T("Permissions", "الصلاحيات")">
+                    <i class="bi bi-shield-check"></i><span>@T("Permissions", "الصلاحيات")</span>
+                </a>
+                <a asp-controller="Push" asp-action="Index" class="nav-link nav-item @(IsActive("Push") ? "active" : "")" title="@T("Web Push", "إشعارات الدفع")">
+                    <i class="bi bi-bell"></i><span>@T("Web Push", "إشعارات الدفع")</span>
+                </a>
                 <a asp-controller="Onboarding" asp-action="Index" class="nav-link nav-item @(IsActive("Onboarding") ? "active" : "")" title="@T("Industry Templates", "قوالب الصناعات")">
                     <i class="bi bi-stars"></i><span>@T("Industry Templates", "قوالب الصناعات")</span>
                 </a>
@@ -383,6 +389,10 @@
                        class="chip-button lang-chip" title="@T("Switch language", "تبديل اللغة")">
                         <i class="bi bi-translate"></i><span>@nextCultureLabel</span>
                     </a>
+                    <button type="button" id="pushBell" class="chip-button" style="display:none;cursor:pointer;"
+                            title="@T("Enable notifications", "تفعيل الإشعارات")">
+                        <i class="bi bi-bell"></i>
+                    </button>
                     <partial name="_LoginPartial" />
                 </div>
             </header>
@@ -397,6 +407,93 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/echarts/echarts.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Web Push: subscribe / unsubscribe via the bell button -->
+    <script>
+    (function () {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+        const bell = document.getElementById('pushBell');
+        if (!bell) return;
+
+        function urlBase64ToUint8Array(b64) {
+            const padding = '='.repeat((4 - b64.length % 4) % 4);
+            const base64 = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const raw = atob(base64);
+            const out = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+            return out;
+        }
+
+        async function getReg() {
+            if (navigator.serviceWorker.controller) return navigator.serviceWorker.ready;
+            return navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready);
+        }
+
+        async function refresh() {
+            const reg = await getReg();
+            const sub = await reg.pushManager.getSubscription();
+            const granted = Notification.permission === 'granted';
+            bell.style.display = 'inline-flex';
+            bell.classList.toggle('active', granted && !!sub);
+            bell.title = granted && sub
+                ? @Html.Raw($"\"{T("Notifications on (click to disable)", "الإشعارات مفعّلة (اضغط للتعطيل)")}\"")
+                : @Html.Raw($"\"{T("Enable notifications", "تفعيل الإشعارات")}\"");
+            const icon = bell.querySelector('i');
+            if (icon) icon.className = granted && sub ? 'bi bi-bell-fill' : 'bi bi-bell';
+        }
+
+        async function subscribe() {
+            try {
+                const r = await fetch('/Push/PublicKey');
+                const j = await r.json();
+                if (!j.configured || !j.publicKey) {
+                    alert('@T("Push is not configured. Ask an admin to generate VAPID keys.", "إشعارات الدفع غير مكوّنة. اطلب من المدير إنشاء مفاتيح VAPID.")');
+                    return;
+                }
+                const perm = await Notification.requestPermission();
+                if (perm !== 'granted') return;
+                const reg = await getReg();
+                const sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(j.publicKey)
+                });
+                await fetch('/Push/Subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        endpoint: sub.endpoint,
+                        p256dh: btoa(String.fromCharCode(...new Uint8Array(sub.getKey('p256dh')))),
+                        auth:   btoa(String.fromCharCode(...new Uint8Array(sub.getKey('auth'))))
+                    })
+                });
+            } catch (e) { console.warn('push subscribe failed', e); }
+            await refresh();
+        }
+
+        async function unsubscribe() {
+            const reg = await getReg();
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                await fetch('/Push/Unsubscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint: sub.endpoint })
+                });
+                await sub.unsubscribe();
+            }
+            await refresh();
+        }
+
+        bell.addEventListener('click', async () => {
+            const reg = await getReg();
+            const sub = await reg.pushManager.getSubscription();
+            if (sub && Notification.permission === 'granted') await unsubscribe();
+            else await subscribe();
+        });
+
+        refresh();
+    })();
+    </script>
 
     <!-- PWA: register service worker + show install button when supported -->
     <button id="bestgenInstallBtn" type="button"
