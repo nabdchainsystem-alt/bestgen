@@ -422,6 +422,27 @@
     <script src="~/lib/echarts/echarts.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/offline-outbox.js" asp-append-version="true"></script>
+    <script>
+    // Persist sidebar scroll position across full page reloads. Without this,
+    // every nav click resets the sidebar to the top and you have to re-scroll
+    // to the section you were in.
+    (function () {
+        var nav = document.querySelector('.sidebar-nav');
+        if (!nav) return;
+        var KEY = 'bestgen-sidebar-scroll';
+        try {
+            var saved = sessionStorage.getItem(KEY);
+            if (saved !== null) nav.scrollTop = parseInt(saved, 10) || 0;
+        } catch (e) { /* private mode etc. — silently ignore */ }
+        var t;
+        nav.addEventListener('scroll', function () {
+            clearTimeout(t);
+            t = setTimeout(function () {
+                try { sessionStorage.setItem(KEY, String(nav.scrollTop)); } catch (e) {}
+            }, 80);
+        }, { passive: true });
+    })();
+    </script>
     <style>
         .outbox-dot { width: 22px; height: 22px; padding: 0; display:inline-flex; align-items:center; justify-content:center; }
         .outbox-dot::before { content:''; width:8px; height:8px; border-radius:50%; background:#94A3B8; }
