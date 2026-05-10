@@ -2,6 +2,7 @@ using bestgen.Data;
 using bestgen.Helpers;
 using bestgen.Models;
 using bestgen.Services;
+using bestgen.Services.InvoicePdf;
 using bestgen.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +17,115 @@ public class SalesInvoicesController : Controller
     private readonly ApplicationDbContext _context;
     private readonly SalesInvoiceService _salesInvoiceService;
     private readonly InvoiceCalculationService _calculationService;
+    private readonly InvoicePdfService _pdfService;
 
     public SalesInvoicesController(
         ApplicationDbContext context,
         SalesInvoiceService salesInvoiceService,
-        InvoiceCalculationService calculationService)
+        InvoiceCalculationService calculationService,
+        InvoicePdfService pdfService)
     {
         _context = context;
         _salesInvoiceService = salesInvoiceService;
         _calculationService = calculationService;
+        _pdfService = pdfService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Pdf(int id)
+    {
+        var result = await _pdfService.RenderSalesInvoiceAsync(id);
+        if (result is null) return NotFound();
+        return File(result.Value.Bytes, "application/pdf", result.Value.FileName);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [bestgen.Services.Idempotency.Idempotent]
+    public async Task<IActionResult> SubmitForApproval(int id, [FromServices] ApprovalService approvals)
+    {
+        var invoice = await _context.SalesInvoices.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (invoice is null) return NotFound();
+        var name = User.Identity?.IsAuthenticated == true ? User.Identity!.Name : null;
+        var uid = User.FindFirst("sub")?.Value;
+        await approvals.SubmitAsync(bestgen.Models.ApprovalDocumentType.SalesInvoice,
+            invoice.Id, invoice.InvoiceNumber, invoice.GrandTotal, uid, name);
+        TempData["ApprovalMessage"] = $"Submitted {invoice.InvoiceNumber} for approval.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [bestgen.Services.Idempotency.Idempotent]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("delivery")]
+    public async Task<IActionResult> Send(
+        int id,
+        bestgen.Models.DeliveryChannel channel,
+        string recipient,
+        bool useTemplate,
+        [FromServices] bestgen.Services.Delivery.InvoiceDeliveryService delivery)
+    {
+        if (string.IsNullOrWhiteSpace(recipient))
+        {
+            TempData["DeliveryError"] = "Please provide a recipient.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var userId = User.Identity?.IsAuthenticated == true ? User.FindFirst("sub")?.Value ?? User.Identity!.Name : null;
+        var result = await delivery.SendSalesInvoiceAsync(id, channel, recipient.Trim(), userId, useTemplate);
+
+        if (result.Success)
+        {
+            TempData["DeliveryMessage"] = channel == bestgen.Models.DeliveryChannel.Email
+                ? $"Invoice emailed to {recipient}."
+                : $"Invoice sent on WhatsApp to {recipient}.";
+        }
+        else
+        {
+            TempData["DeliveryError"] = result.Error;
+        }
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [bestgen.Services.Idempotency.Idempotent]
+    public async Task<IActionResult> GenerateZatca(int id, [FromServices] bestgen.Services.Zatca.ZatcaService zatca)
+    {
+        await zatca.GenerateAsync(id);
+        TempData["ZatcaMessage"] = "ZATCA Phase 2 e-invoice generated successfully.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [bestgen.Services.Idempotency.Idempotent]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("zatca")]
+    public async Task<IActionResult> SubmitZatca(int id, [FromServices] bestgen.Services.Zatca.ZatcaService zatca)
+    {
+        var ei = await _context.EInvoices.FirstOrDefaultAsync(x => x.SalesInvoiceId == id);
+        if (ei is null) return NotFound();
+        await zatca.SubmitAsync(ei.Id);
+        TempData["ZatcaMessage"] = "Submitted to FATOORA (stub — wire real HTTP integration in ZatcaService).";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ZatcaXml(int id)
+    {
+        var ei = await _context.EInvoices.AsNoTracking().FirstOrDefaultAsync(x => x.SalesInvoiceId == id);
+        if (ei?.Xml is null) return NotFound();
+        return File(System.Text.Encoding.UTF8.GetBytes(ei.Xml), "application/xml", $"{ei.Uuid}.xml");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ZatcaQr(int id, [FromServices] bestgen.Services.Zatca.ZatcaService zatca)
+    {
+        var ei = await _context.EInvoices.AsNoTracking().FirstOrDefaultAsync(x => x.SalesInvoiceId == id);
+        if (ei is null) return NotFound();
+        var png = zatca.GetQrPng(ei);
+        if (png is null) return NotFound();
+        return File(png, "image/png");
     }
 
     public async Task<IActionResult> Index(string? q, string? status)
@@ -84,6 +185,7 @@ public class SalesInvoicesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [bestgen.Services.Idempotency.Idempotent]
     public async Task<IActionResult> Create(SalesInvoiceFormViewModel model)
     {
         _calculationService.CalculateSales(model);

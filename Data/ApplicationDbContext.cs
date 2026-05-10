@@ -1,4 +1,6 @@
+using System.Linq.Expressions;
 using bestgen.Models;
+using bestgen.Services.Tenancy;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +9,52 @@ namespace bestgen.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
 {
+    private readonly ITenantContext? _tenantContext;
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext)
+        : base(options)
+    {
+        _tenantContext = tenantContext;
+    }
+
+    /// <summary>
+    /// The current tenant id used by query filters. Evaluated per-query at
+    /// runtime so the filter follows whoever's signed in. Falls back to the
+    /// default tenant when no context is wired up (e.g. design-time tools).
+    /// </summary>
+    public int TenantId => _tenantContext?.TenantId ?? TenantContext.DefaultTenantId;
+
+    /// <summary>
+    /// Decides which entity types get the shadow TenantId column + query
+    /// filter. Includes every business entity in <c>bestgen.Models</c>;
+    /// excludes Identity tables (managed by AspNet), the Tenant entity itself,
+    /// and the Data Protection key store.
+    /// </summary>
+    public static bool IsTenantScoped(Type clrType)
+    {
+        if (clrType == typeof(Tenant)) return false;
+        if (clrType == typeof(ApplicationUser)) return false;
+        if (clrType.Namespace != "bestgen.Models") return false;
+        return true;
+    }
+
+    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<EInvoice> EInvoices => Set<EInvoice>();
+    public DbSet<InvoiceDeliveryLog> InvoiceDeliveryLogs => Set<InvoiceDeliveryLog>();
+    public DbSet<ApprovalPolicy> ApprovalPolicies => Set<ApprovalPolicy>();
+    public DbSet<ApprovalRequest> ApprovalRequests => Set<ApprovalRequest>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<Currency> Currencies => Set<Currency>();
+    public DbSet<FxRate> FxRates => Set<FxRate>();
+    public DbSet<RecurringInvoice> RecurringInvoices => Set<RecurringInvoice>();
+    public DbSet<BankStatement> BankStatements => Set<BankStatement>();
+    public DbSet<BankStatementLine> BankStatementLines => Set<BankStatementLine>();
+    public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
 
     public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 
@@ -461,5 +505,51 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
         modelBuilder.Entity<EmployeeLoan>().Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
         modelBuilder.Entity<EmployeeReceipt>().Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
         modelBuilder.Entity<EmployeeRequest>().Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
+
+        ApplyTenantScoping(modelBuilder);
+    }
+
+    /// <summary>
+    /// Adds a shadow <c>TenantId</c> column to every business entity and a
+    /// query filter that scopes reads to the current tenant. Done via
+    /// reflection so individual entity classes don't need to be edited.
+    /// </summary>
+    private void ApplyTenantScoping(ModelBuilder modelBuilder)
+    {
+        var efPropertyMethod = typeof(EF).GetMethods()
+            .First(m => m.Name == nameof(EF.Property) && m.IsGenericMethodDefinition)
+            .MakeGenericMethod(typeof(int));
+
+        var tenantIdProperty = typeof(ApplicationDbContext).GetProperty(nameof(TenantId))!;
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (!IsTenantScoped(entityType.ClrType)) continue;
+
+            // Add the shadow property with a sane default so EnsureCreated picks it up
+            // and existing seeded rows fall under tenant 1 unless explicitly stamped.
+            modelBuilder.Entity(entityType.ClrType)
+                .Property<int>("TenantId")
+                .HasDefaultValue(TenantContext.DefaultTenantId);
+
+            // Build:  e => EF.Property<int>(e, "TenantId") == this.TenantId
+            // EF re-evaluates the DbContext property reference per query, so this
+            // tracks the active tenant correctly even with a cached model.
+            var entityParam = Expression.Parameter(entityType.ClrType, "e");
+            var efPropertyCall = Expression.Call(
+                efPropertyMethod,
+                entityParam,
+                Expression.Constant("TenantId"));
+            var contextTenantIdAccess = Expression.Property(
+                Expression.Constant(this),
+                tenantIdProperty);
+            var equality = Expression.Equal(efPropertyCall, contextTenantIdAccess);
+            var lambda = Expression.Lambda(equality, entityParam);
+
+            modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+
+            // Index TenantId for query performance.
+            modelBuilder.Entity(entityType.ClrType).HasIndex("TenantId");
+        }
     }
 }

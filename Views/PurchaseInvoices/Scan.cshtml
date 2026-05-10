@@ -1,0 +1,193 @@
+@using System.Globalization
+@model bestgen.Services.Ai.ExtractedInvoice
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Scan Invoice with AI", "مسح الفاتورة بالذكاء الاصطناعي");
+    var hasResult = ViewBag.Extracted == true;
+    var extractedJson = hasResult
+        ? System.Text.Json.JsonSerializer.Serialize(Model)
+        : null;
+}
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-magic"></i> @T("Scan Supplier Invoice (AI)", "مسح فاتورة المورد بالذكاء الاصطناعي")</h1>
+        <p class="text-muted">@T("Drop a PDF or photo. Claude reads it, extracts the supplier, lines, and totals. We create the draft for you.",
+                              "ارفع ملف PDF أو صورة. كلود يقرأ الفاتورة ويستخرج المورد والبنود والإجماليات، ويُنشئ المسودة لك.")</p>
+    </div>
+    <div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i>
+            @T("Back to invoices", "العودة إلى الفواتير")
+        </a>
+    </div>
+</div>
+
+@if (TempData["ScanError"] is string err)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @err</div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="asp-validation-summary alert alert-danger">
+        <ul class="mb-0">
+            @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@e.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (!hasResult)
+{
+    <section class="form-panel">
+        <form asp-action="Scan" method="post" enctype="multipart/form-data" id="scanForm">
+            @Html.AntiForgeryToken()
+            <label for="scanFile" class="ai-dropzone" id="dropzone">
+                <i class="bi bi-cloud-arrow-up-fill"></i>
+                <strong>@T("Drop your invoice here or click to browse", "أفلت الفاتورة هنا أو اضغط للاختيار")</strong>
+                <small>@T("PDF, JPG, PNG, or WEBP — up to 32 MB", "PDF أو JPG أو PNG أو WEBP — حتى 32 ميجابايت")</small>
+                <input type="file" name="file" id="scanFile" accept="application/pdf,image/*" hidden required />
+                <span class="file-pick" id="filePick"></span>
+            </label>
+            <div class="d-flex justify-content-end mt-3 gap-2">
+                <button type="submit" class="btn btn-primary btn-lg" id="extractBtn">
+                    <i class="bi bi-magic"></i> @T("Extract with Claude", "استخراج بكلود")
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <style>
+        .ai-dropzone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 60px 24px;
+            border: 2px dashed var(--border, #e7eaf3);
+            border-radius: 16px;
+            background: var(--surface, #fff);
+            cursor: pointer;
+            transition: border-color .2s, background .2s, transform .2s;
+            text-align: center;
+        }
+        .ai-dropzone:hover, .ai-dropzone.drag {
+            border-color: var(--accent, #5B5BD6);
+            background: var(--accent-tint, #F5F5FE);
+            transform: translateY(-2px);
+        }
+        .ai-dropzone i { font-size: 44px; color: var(--accent, #5B5BD6); }
+        .ai-dropzone strong { font-size: 18px; color: var(--text-strong, #1f1d18); }
+        .ai-dropzone small  { color: var(--muted, #6f6a59); }
+        .file-pick { font-size: 14px; color: var(--accent, #5B5BD6); font-weight: 600; min-height: 18px; }
+        .ai-loading { opacity: .55; pointer-events: none; }
+    </style>
+
+    <script>
+        (function () {
+            const dz = document.getElementById('dropzone');
+            const input = document.getElementById('scanFile');
+            const pick = document.getElementById('filePick');
+            const form = document.getElementById('scanForm');
+            const btn = document.getElementById('extractBtn');
+
+            ['dragenter','dragover'].forEach(e => dz.addEventListener(e, ev => {
+                ev.preventDefault(); dz.classList.add('drag');
+            }));
+            ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => {
+                ev.preventDefault(); dz.classList.remove('drag');
+            }));
+            dz.addEventListener('drop', ev => {
+                if (ev.dataTransfer.files.length) {
+                    input.files = ev.dataTransfer.files;
+                    pick.textContent = input.files[0].name;
+                }
+            });
+            input.addEventListener('change', () => {
+                if (input.files.length) pick.textContent = input.files[0].name;
+            });
+            form.addEventListener('submit', () => {
+                form.classList.add('ai-loading');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> @T("Analysing... this takes 5-10 seconds", "جاري التحليل... يستغرق 5-10 ثوانٍ")';
+            });
+        })();
+    </script>
+}
+else
+{
+    <section class="details-panel">
+        <h2 class="h5 mb-3"><i class="bi bi-check2-circle text-success"></i> @T("Extraction complete", "اكتمل الاستخراج")</h2>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <strong>@T("Supplier", "المورد")</strong><br/>
+                <span>@(Model.SupplierName ?? T("(missing)", "(غير موجود)"))</span>
+                @if (!string.IsNullOrWhiteSpace(Model.SupplierVatNumber))
+                {
+                    <small class="text-muted d-block">@T("VAT", "الرقم الضريبي"): @Model.SupplierVatNumber</small>
+                }
+            </div>
+            <div class="col-md-3">
+                <strong>@T("Invoice #", "رقم الفاتورة")</strong><br/>
+                <span>@(Model.InvoiceNumber ?? "—")</span>
+            </div>
+            <div class="col-md-3">
+                <strong>@T("Date", "التاريخ")</strong><br/>
+                <span>@(Model.InvoiceDate ?? "—")</span>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>@T("Description", "الوصف")</th>
+                    <th class="text-end">@T("Qty", "الكمية")</th>
+                    <th class="text-end">@T("Unit Price", "سعر الوحدة")</th>
+                    <th class="text-end">@T("VAT %", "الضريبة %")</th>
+                    <th class="text-end">@T("Line Total", "إجمالي البند")</th>
+                </tr>
+            </thead>
+            <tbody>
+            @{ var idx = 1; }
+            @foreach (var line in Model.Lines)
+            {
+                <tr>
+                    <td>@(idx++)</td>
+                    <td>@line.Description</td>
+                    <td class="text-end">@line.Quantity?.ToString("N2")</td>
+                    <td class="text-end">@line.UnitPrice?.ToString("N2")</td>
+                    <td class="text-end">@line.VatRate?.ToString("N2")</td>
+                    <td class="text-end"><strong>@line.LineTotal?.ToString("N2")</strong></td>
+                </tr>
+            }
+            </tbody>
+            <tfoot class="table-light">
+                <tr><td colspan="5" class="text-end">@T("Subtotal", "المجموع الفرعي")</td><td class="text-end">@Model.Subtotal?.ToString("N2")</td></tr>
+                <tr><td colspan="5" class="text-end">@T("VAT", "الضريبة")</td><td class="text-end">@Model.VatAmount?.ToString("N2")</td></tr>
+                <tr><td colspan="5" class="text-end fw-bold">@T("Grand Total", "الإجمالي")</td><td class="text-end fw-bold">@Model.GrandTotal?.ToString("N2")</td></tr>
+            </tfoot>
+        </table>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <a asp-action="Scan" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> @T("Try another", "جرّب أخرى")</a>
+            <form asp-action="CreateFromScan" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="extractedJson" value="@extractedJson" />
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-square"></i> @T("Create draft invoice", "إنشاء مسودة فاتورة")
+                </button>
+            </form>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <p class="text-muted mt-3"><strong>@T("Notes", "ملاحظات"):</strong> @Model.Notes</p>
+        }
+    </section>
+}

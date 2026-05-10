@@ -1,0 +1,63 @@
+@using System.Globalization
+@model SalesQuotation
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = Model.QuotationNumber;
+}
+
+@if (TempData["QuotationMessage"] is string msg) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @msg</div> }
+
+<div class="page-header">
+    <div>
+        <h1>@Model.QuotationNumber</h1>
+        <p>@(Model.Customer == null ? "-" : pickName(Model.Customer.NameAr, Model.Customer.NameEn)) — @Model.QuotationDate.ToString("yyyy/MM/dd")</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(Model.Status))" />
+        <a asp-action="Pdf" asp-route-id="@Model.Id" class="btn btn-success" target="_blank"><i class="bi bi-file-earmark-pdf"></i> @T("Download PDF", "تحميل PDF")</a>
+        <form asp-action="ConvertToInvoice" asp-route-id="@Model.Id" method="post" class="m-0">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-warning"><i class="bi bi-arrow-right-square"></i> @T("Convert to invoice", "تحويل إلى فاتورة")</button>
+        </form>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="bi bi-pencil"></i> @T("Edit", "تعديل")</a>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back", "رجوع")</a>
+    </div>
+</div>
+
+<section class="details-panel">
+    <div class="summary-grid">
+        <div class="summary-card"><span>@T("Subtotal (before VAT)", "قبل الضريبة")</span><strong>@EntityDisplayHelper.FormatValue(Model.Subtotal, nameof(Model.Subtotal))</strong></div>
+        <div class="summary-card"><span>@T("VAT", "الضريبة")</span><strong>@EntityDisplayHelper.FormatValue(Model.VatTotal, nameof(Model.VatTotal))</strong></div>
+        <div class="summary-card"><span>@T("Grand total", "الإجمالي")</span><strong>@EntityDisplayHelper.FormatValue(Model.GrandTotal, nameof(Model.GrandTotal))</strong></div>
+        <div class="summary-card"><span>@T("Valid until", "ساري حتى")</span><strong>@(Model.ValidUntil?.ToString("yyyy-MM-dd") ?? "-")</strong></div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes) || !string.IsNullOrWhiteSpace(Model.Terms))
+    {
+        <div class="row g-3 mb-3">
+            @if (!string.IsNullOrWhiteSpace(Model.Notes)) { <div class="col-md-6"><strong>@T("Notes:", "ملاحظات:")</strong> @Model.Notes</div> }
+            @if (!string.IsNullOrWhiteSpace(Model.Terms)) { <div class="col-md-6"><strong>@T("Terms:", "الشروط:")</strong> @Model.Terms</div> }
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>@T("Item", "الصنف")</th><th>@T("Qty", "الكمية")</th><th>@T("Price", "السعر")</th><th>@T("Discount", "الخصم")</th><th>@T("VAT", "الضريبة")</th><th>@T("Total", "الإجمالي")</th></tr></thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@(item.Product == null ? "-" : pickName(item.Product.NameAr, item.Product.NameEn))</td>
+                    <td>@item.Quantity.ToString("N2")</td>
+                    <td>@EntityDisplayHelper.FormatValue(item.UnitPrice, nameof(item.UnitPrice))</td>
+                    <td>@EntityDisplayHelper.FormatValue(item.Discount, nameof(item.Discount))</td>
+                    <td>@item.VatRate.ToString("N2")%</td>
+                    <td>@EntityDisplayHelper.FormatValue(item.LineTotal, nameof(item.LineTotal))</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>

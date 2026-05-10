@@ -1,0 +1,26 @@
+@using System.Globalization
+@model SalesQuotationFormViewModel
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T($"Edit {Model.QuotationNumber}", $"تعديل {Model.QuotationNumber}");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T($"Edit quotation {Model.QuotationNumber}", $"تعديل عرض السعر {Model.QuotationNumber}"),
+    T("Update items, totals, or status.", "حدّث الأصناف أو الإجماليات أو الحالة.")))" />
+
+<section class="form-panel">
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" data-invoice-form data-mode="sales">
+        <partial name="_Form" model="@Model" />
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> @T("Save changes", "حفظ التعديلات")</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">@T("Cancel", "إلغاء")</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/invoice.js" asp-append-version="true"></script>
+}

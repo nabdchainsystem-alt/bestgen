@@ -67,6 +67,66 @@ public class SalesInvoiceItemFormViewModel
     public decimal LineTotal { get; set; }
 }
 
+public class SalesQuotationFormViewModel
+{
+    public int? Id { get; set; }
+
+    [Display(Name = "Quotation number")]
+    public string? QuotationNumber { get; set; }
+
+    [Required]
+    [Display(Name = "Quotation date")]
+    public DateTime QuotationDate { get; set; } = DateTime.Today;
+
+    [Display(Name = "Valid until")]
+    public DateTime? ValidUntil { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a customer")]
+    [Display(Name = "Customer")]
+    public int CustomerId { get; set; }
+
+    [Display(Name = "Status")]
+    public QuotationStatus Status { get; set; } = QuotationStatus.Draft;
+
+    [Display(Name = "Notes")]
+    [StringLength(600)]
+    public string? Notes { get; set; }
+
+    [Display(Name = "Terms & conditions")]
+    [StringLength(600)]
+    public string? Terms { get; set; }
+
+    public decimal Subtotal { get; set; }
+    public decimal DiscountTotal { get; set; }
+    public decimal VatTotal { get; set; }
+    public decimal GrandTotal { get; set; }
+
+    public List<SalesQuotationItemFormViewModel> Items { get; set; } = new()
+    {
+        new SalesQuotationItemFormViewModel()
+    };
+}
+
+public class SalesQuotationItemFormViewModel
+{
+    [Range(1, int.MaxValue, ErrorMessage = "Please select a product")]
+    public int ProductId { get; set; }
+
+    [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than zero")]
+    public decimal Quantity { get; set; } = 1;
+
+    [Range(0, double.MaxValue)]
+    public decimal UnitPrice { get; set; }
+
+    [Range(0, double.MaxValue)]
+    public decimal Discount { get; set; }
+
+    [Range(0, 100)]
+    public decimal VatRate { get; set; } = 15;
+
+    public decimal LineTotal { get; set; }
+}
+
 public class PurchaseInvoiceFormViewModel
 {
     public int? Id { get; set; }

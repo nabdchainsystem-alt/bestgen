@@ -1,0 +1,291 @@
+@using System.Globalization
+@using bestgen.Models
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Approvals", "الموافقات");
+
+    var pending = (List<ApprovalRequest>)ViewBag.Pending;
+    var recent = (List<ApprovalRequest>)ViewBag.Recent;
+    var policies = (List<ApprovalPolicy>)ViewBag.Policies;
+
+    string DocLink(ApprovalDocumentType type, int id, string number) => type switch
+    {
+        ApprovalDocumentType.SalesInvoice => $"<a href=\"/SalesInvoices/Details/{id}\">{number}</a>",
+        ApprovalDocumentType.PurchaseInvoice => $"<a href=\"/PurchaseInvoices/Details/{id}\">{number}</a>",
+        ApprovalDocumentType.JournalEntry => $"<a href=\"/JournalEntries/Details/{id}\">{number}</a>",
+        _ => number
+    };
+
+    string DocTypeLabel(ApprovalDocumentType t) => t switch
+    {
+        ApprovalDocumentType.SalesInvoice    => T("Sales Invoice", "فاتورة بيع"),
+        ApprovalDocumentType.PurchaseInvoice => T("Purchase Invoice", "فاتورة شراء"),
+        ApprovalDocumentType.JournalEntry    => T("Journal Entry", "قيد يومية"),
+        ApprovalDocumentType.SupplierPayment => T("Supplier Payment", "دفعة لمورد"),
+        ApprovalDocumentType.Expense         => T("Expense", "مصروف"),
+        _ => t.ToString()
+    };
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Approvals", "الموافقات"),
+    T("Review pending approvals and configure thresholds for documents that need a reviewer.",
+      "راجع طلبات الموافقة المعلقة واضبط حدود المبالغ للمستندات التي تحتاج مراجعاً."),
+    null, null, null))" />
+
+@if (TempData["ApprovalMessage"] is string apMsg)
+{
+    <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @apMsg</div>
+}
+@if (TempData["ApprovalError"] is string apErr)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @apErr</div>
+}
+
+<ul class="nav nav-tabs mb-3" id="approvalsTabs">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-pending">
+            <i class="bi bi-hourglass-split"></i> @T("Pending", "قيد الانتظار")
+            @if (pending.Count > 0) { <span class="badge bg-warning text-dark ms-1">@pending.Count</span> }
+        </button>
+    </li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-recent"><i class="bi bi-clock-history"></i> @T("Recent", "الأحدث")</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-policies"><i class="bi bi-sliders"></i> @T("Policies", "السياسات")</button></li>
+</ul>
+
+<div class="tab-content">
+    <!-- Pending -->
+    <div class="tab-pane fade show active" id="tab-pending">
+        <section class="data-panel">
+            @if (pending.Count == 0)
+            {
+                <p class="text-muted m-0">@T("Nothing waiting on approval.", "لا توجد عناصر معلقة للموافقة.")</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>@T("Document", "المستند")</th>
+                                <th>@T("Type", "النوع")</th>
+                                <th class="text-end">@T("Amount", "المبلغ")</th>
+                                <th>@T("Requested by", "بطلب من")</th>
+                                <th>@T("Requested at", "تاريخ الطلب")</th>
+                                <th class="text-end">@T("Action", "الإجراء")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var r in pending)
+                        {
+                            <tr>
+                                <td>@Html.Raw(DocLink(r.DocumentType, r.DocumentId, r.DocumentNumber))
+                                    @if (r.TotalSteps > 1)
+                                    {
+                                        <span class="badge bg-secondary ms-1" title="@T("Step", "الخطوة")">@r.CurrentStep / @r.TotalSteps</span>
+                                    }
+                                </td>
+                                <td>@DocTypeLabel(r.DocumentType)</td>
+                                <td class="text-end">@r.Amount.ToString("N2")</td>
+                                <td>@(r.RequestedByName ?? "-")</td>
+                                <td>@r.RequestedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-success"
+                                            data-bs-toggle="modal" data-bs-target="#resolveModal"
+                                            data-id="@r.Id" data-action="approve" data-doc="@r.DocumentNumber">
+                                        <i class="bi bi-check2"></i> @T("Approve", "موافقة")
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" data-bs-target="#resolveModal"
+                                            data-id="@r.Id" data-action="reject" data-doc="@r.DocumentNumber">
+                                        <i class="bi bi-x"></i> @T("Reject", "رفض")
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+
+    <!-- Recent -->
+    <div class="tab-pane fade" id="tab-recent">
+        <section class="data-panel">
+            @if (recent.Count == 0)
+            {
+                <p class="text-muted m-0">@T("No approvals yet.", "لا توجد موافقات بعد.")</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>@T("When", "متى")</th>
+                                <th>@T("Document", "المستند")</th>
+                                <th>@T("Type", "النوع")</th>
+                                <th class="text-end">@T("Amount", "المبلغ")</th>
+                                <th>@T("Status", "الحالة")</th>
+                                <th>@T("Resolved by", "تم بواسطة")</th>
+                                <th>@T("Comment", "ملاحظة")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var r in recent)
+                        {
+                            <tr>
+                                <td>@(r.ResolvedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? r.RequestedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
+                                <td>@Html.Raw(DocLink(r.DocumentType, r.DocumentId, r.DocumentNumber))</td>
+                                <td>@DocTypeLabel(r.DocumentType)</td>
+                                <td class="text-end">@r.Amount.ToString("N2")</td>
+                                <td>
+                                    @switch (r.Status)
+                                    {
+                                        case ApprovalStatus.Pending: <span class="badge bg-warning text-dark">@T("Pending", "معلق")</span> break;
+                                        case ApprovalStatus.Approved: <span class="badge bg-success">@T("Approved", "موافق عليه")</span> break;
+                                        case ApprovalStatus.Rejected: <span class="badge bg-danger">@T("Rejected", "مرفوض")</span> break;
+                                    }
+                                </td>
+                                <td>@(r.ResolvedByName ?? "-")</td>
+                                <td><small class="text-muted">@(r.Comment ?? "")</small></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+
+    <!-- Policies -->
+    <div class="tab-pane fade" id="tab-policies">
+        <section class="data-panel">
+            <p class="text-muted small">@T("A document needs approval if any active policy matches its type and its amount is at least the threshold below.",
+                                            "يحتاج المستند إلى موافقة إذا كانت إحدى السياسات النشطة تطابق نوعه وكان مبلغه يساوي أو يتجاوز الحد المحدد أدناه.")</p>
+
+            <form asp-action="SavePolicy" method="post" class="row g-2 align-items-end mb-4">
+                @Html.AntiForgeryToken()
+                <div class="col-md-3">
+                    <label class="form-label">@T("Document type", "نوع المستند")</label>
+                    <select name="DocumentType" class="form-select">
+                        @foreach (var t in Enum.GetValues<ApprovalDocumentType>())
+                        {
+                            <option value="@t">@DocTypeLabel(t)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">@T("Min amount", "الحد الأدنى للمبلغ")</label>
+                    <input type="number" step="0.01" min="0" name="MinAmount" class="form-control" value="0" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">@T("Required role", "الدور المطلوب")</label>
+                    <input type="text" name="RequiredRole" class="form-control" placeholder="Owner / Admin / Accountant" />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">@T("Step", "الخطوة")</label>
+                    <input type="number" min="1" name="SequenceOrder" class="form-control" value="1" />
+                </div>
+                <div class="col-md-1">
+                    <div class="form-check mb-2">
+                        <input type="checkbox" name="IsActive" value="true" class="form-check-input" checked id="polActive" />
+                        <label for="polActive" class="form-check-label">@T("Active", "نشط")</label>
+                    </div>
+                </div>
+                <div class="col-md-1 text-end">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-square"></i> @T("Add", "إضافة")</button>
+                </div>
+            </form>
+
+            @if (policies.Count == 0)
+            {
+                <p class="text-muted m-0">@T("No policies configured. Without policies, no document requires approval.", "لا توجد سياسات. بدون سياسات لا يتطلب أي مستند موافقة.")</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>#</th><th>@T("Type", "النوع")</th><th class="text-end">@T("Threshold", "الحد")</th><th>@T("Role", "الدور")</th><th class="text-center">@T("Step", "الخطوة")</th><th>@T("Active", "نشط")</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var p in policies)
+                        {
+                            <tr>
+                                <td>@p.Id</td>
+                                <td>@DocTypeLabel(p.DocumentType)</td>
+                                <td class="text-end">@p.MinAmount.ToString("N2")</td>
+                                <td>@(p.RequiredRole ?? "-")</td>
+                                <td class="text-center">@p.SequenceOrder</td>
+                                <td>@(p.IsActive ? T("Yes", "نعم") : T("No", "لا"))</td>
+                                <td class="text-end">
+                                    <form asp-action="DeletePolicy" method="post" class="d-inline" onsubmit="return confirm('@T("Delete this policy?", "هل تريد حذف هذه السياسة؟")');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+<!-- Resolve modal (approve / reject with optional comment) -->
+<div class="modal fade" id="resolveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="resolveForm" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="resolveId" />
+            <div class="modal-header">
+                <h5 class="modal-title" id="resolveTitle">@T("Resolve approval", "إغلاق طلب الموافقة")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3" id="resolveSubtitle"></p>
+                <label class="form-label">@T("Comment (optional)", "ملاحظة (اختياري)")</label>
+                <textarea name="comment" class="form-control" rows="3" maxlength="1000"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                <button type="submit" class="btn btn-primary" id="resolveSubmit">@T("Confirm", "تأكيد")</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const modal = document.getElementById('resolveModal');
+    const form = document.getElementById('resolveForm');
+    const idIn = document.getElementById('resolveId');
+    const title = document.getElementById('resolveTitle');
+    const subtitle = document.getElementById('resolveSubtitle');
+    const submit = document.getElementById('resolveSubmit');
+    modal.addEventListener('show.bs.modal', e => {
+        const btn = e.relatedTarget;
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        const id = btn.getAttribute('data-id');
+        const doc = btn.getAttribute('data-doc');
+        idIn.value = id;
+        if (action === 'approve') {
+            form.action = '@Url.Action("Approve")';
+            title.textContent = '@T("Approve", "موافقة")';
+            submit.className = 'btn btn-success';
+            submit.textContent = '@T("Approve", "موافقة")';
+        } else {
+            form.action = '@Url.Action("Reject")';
+            title.textContent = '@T("Reject", "رفض")';
+            submit.className = 'btn btn-danger';
+            submit.textContent = '@T("Reject", "رفض")';
+        }
+        subtitle.textContent = (doc || '') + '';
+    });
+})();
+</script>

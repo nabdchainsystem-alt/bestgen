@@ -12,6 +12,13 @@
     T("Record supplier purchases and update inventory and payables.", "تسجيل مشتريات الموردين وتحديث المخزون والذمم."),
     "Create", "PurchaseInvoices", T("New purchase invoice", "فاتورة شراء جديدة")))" />
 
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Scan" class="btn btn-dark">
+        <i class="bi bi-magic"></i>
+        @T("Scan with AI", "مسح بالذكاء الاصطناعي")
+    </a>
+</div>
+
 <section class="data-panel">
     <partial name="_SearchBar" />
 

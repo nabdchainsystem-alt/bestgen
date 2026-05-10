@@ -1480,3 +1480,171 @@ html[dir="rtl"] .cta p { margin-left: auto; margin-right: auto; }
 .lang-toggle { font-weight: 700; letter-spacing: .02em; }
 .lang-toggle .bi-translate { margin-inline-end: 6px; }
 
+
+/* ================================================================
+   Theme toggle button + Navy theme palette
+   Default theme (no [data-theme]) = Indigo (the original).
+   [data-theme="navy"] = Navy palette per the user's spec
+       Primary  #1B2E4B   Secondary #4A6E91
+       Tertiary #94A3B8   Neutral   #F8FAFC
+       Headlines: IBM Plex Sans · Body: Inter
+   ================================================================ */
+
+/* ---- Theme toggle button ---- */
+.theme-toggle { font-weight: 700; letter-spacing: .02em; }
+.theme-swatch {
+    display: inline-flex;
+    width: 22px;
+    height: 14px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(13,18,48,.12);
+    margin-inline-end: 6px;
+    flex: 0 0 auto;
+}
+.theme-swatch .swatch { display: block; flex: 1; height: 100%; }
+.theme-swatch .swatch-a { background: linear-gradient(135deg, #6366f1, #4338ca); }
+.theme-swatch .swatch-b { background: linear-gradient(135deg, #34d399, #059669); }
+
+/* When in navy theme, show the would-be navy preview swatches */
+[data-theme="navy"] .theme-swatch .swatch-a { background: linear-gradient(135deg, #1B2E4B, #0F1F37); }
+[data-theme="navy"] .theme-swatch .swatch-b { background: linear-gradient(135deg, #4A6E91, #355778); }
+
+/* Show only the relevant label */
+.t-navy-label  { display: none; }
+[data-theme="navy"] .t-navy-label  { display: inline; }
+[data-theme="navy"] .t-indigo-label { display: none; }
+
+/* ================================================================
+   Navy theme — token overrides
+   ================================================================ */
+[data-theme="navy"] {
+    /* Surfaces */
+    --bg: #F8FAFC;
+    --bg-soft: #EEF2F7;
+    --bg-tint: #F2F5FA;
+    --surface: #FFFFFF;
+    --line: #DCE3EC;
+    --line-strong: #C5D0DD;
+
+    /* Text */
+    --ink: #0E1E37;
+    --ink-2: #1B2E4B;
+    --muted: #4A6E91;
+    --faint: #94A3B8;
+
+    /* Accents — repurposed onto navy/steel/cool-grey */
+    --indigo:        #1B2E4B;
+    --indigo-2:      #2C4368;
+    --indigo-soft:   #E8EDF4;
+    --emerald:       #4A6E91;
+    --emerald-2:     #4A6E91;
+    --emerald-soft:  #E8EDF4;
+    --blue:          #4A6E91;
+    --blue-soft:     #E8EDF4;
+    --amber:         #94A3B8;
+    --amber-2:       #94A3B8;
+    --amber-soft:    #EEF2F7;
+    --navy:          #0E1E37;
+    --navy-2:        #1B2E4B;
+
+    /* Gradients re-keyed onto the navy palette */
+    --grad-primary: linear-gradient(135deg, #2C4368 0%, #1B2E4B 50%, #0F1F37 100%);
+    --grad-emerald: linear-gradient(135deg, #6688AB 0%, #4A6E91 50%, #355778 100%);
+    --grad-amber:   linear-gradient(135deg, #B8C4D2 0%, #94A3B8 50%, #647184 100%);
+    --grad-blue:    linear-gradient(135deg, #5A82A8 0%, #4A6E91 50%, #355778 100%);
+    --grad-navy:    linear-gradient(135deg, #1B2E4B 0%, #0B1730 100%);
+    --grad-rose:    linear-gradient(135deg, #B97070 0%, #8E4848 100%);
+    --grad-hero:    radial-gradient(ellipse at 70% 0%, #1B2E4B 0%, #0F1F37 35%, #060B1A 75%);
+    --grad-cta:     linear-gradient(135deg, #1B2E4B 0%, #243B5F 60%, #2D4773 100%);
+    --grad-text:    linear-gradient(135deg, #C7D2DE 0%, #94A3B8 60%, #4A6E91 100%);
+
+    /* Shadows tuned to navy */
+    --shadow-sm: 0 2px 6px rgba(15, 31, 55, .06), 0 1px 2px rgba(15, 31, 55, .04);
+    --shadow-md: 0 12px 30px -8px rgba(15, 31, 55, .15), 0 4px 12px -4px rgba(15, 31, 55, .08);
+    --shadow-lg: 0 30px 70px -20px rgba(15, 31, 55, .35), 0 10px 30px -10px rgba(15, 31, 55, .15);
+    --shadow-deep: 0 50px 120px -30px rgba(15, 31, 55, .55), 0 20px 60px -20px rgba(15, 31, 55, .3);
+}
+
+/* ---- Headlines: IBM Plex Sans in navy theme ---- */
+[data-theme="navy"] h1,
+[data-theme="navy"] h2,
+[data-theme="navy"] h3,
+[data-theme="navy"] h4,
+[data-theme="navy"] h5,
+[data-theme="navy"] .stat strong,
+[data-theme="navy"] .donut-center strong,
+[data-theme="navy"] .foot-stat strong,
+[data-theme="navy"] .plan-price .price-num,
+[data-theme="navy"] .plan-price .currency,
+[data-theme="navy"] .float-card strong,
+[data-theme="navy"] .testimonial .avatar,
+[data-theme="navy"] .device-row-item strong,
+[data-theme="navy"] .kpi strong,
+[data-theme="navy"] .donut-legend strong,
+[data-theme="navy"] .integration-card strong,
+[data-theme="navy"] .float-donut-label strong,
+[data-theme="navy"] .device-logo {
+    font-family: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.015em;
+}
+
+/* Section eyebrow uses primary color soft chip */
+[data-theme="navy"] .section-eyebrow {
+    background: var(--indigo-soft);
+    color: var(--indigo);
+}
+
+/* Module card top accent strips become navy gradients */
+[data-theme="navy"] .module-navy::after,
+[data-theme="navy"] .module-emerald::after,
+[data-theme="navy"] .module-blue::after,
+[data-theme="navy"] .module-amber::after { background: var(--grad-primary); }
+
+/* Ribbon, eyebrow dot, etc. stay on-brand */
+[data-theme="navy"] .eyebrow-dot {
+    background: #94A3B8;
+    box-shadow: 0 0 0 4px rgba(148, 163, 184, .25);
+}
+[data-theme="navy"] @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(148, 163, 184, .25); }
+    50%      { box-shadow: 0 0 0 8px rgba(148, 163, 184, .12); }
+}
+
+/* Aurora behind hero — switch the multi-radial to navy tones */
+[data-theme="navy"] .aurora {
+    background:
+        radial-gradient(circle at 20% 30%, rgba(74, 110, 145, .35), transparent 40%),
+        radial-gradient(circle at 80% 60%, rgba(148, 163, 184, .22), transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(27, 46, 75, .25), transparent 40%);
+}
+[data-theme="navy"] .blob-a { background: #4A6E91; }
+[data-theme="navy"] .blob-b { background: #94A3B8; opacity: .28; }
+[data-theme="navy"] .blob-c { background: #1B2E4B; opacity: .35; }
+
+/* CTA glow recolored */
+[data-theme="navy"] .cta-glow {
+    background:
+        radial-gradient(circle at 30% 30%, rgba(74, 110, 145, .55), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(148, 163, 184, .35), transparent 50%);
+}
+
+/* Dot palette in legends/lists */
+[data-theme="navy"] .dot-emerald { background: #4A6E91; }
+[data-theme="navy"] .dot-blue    { background: #2C4368; }
+[data-theme="navy"] .dot-indigo  { background: #1B2E4B; }
+[data-theme="navy"] .dot-amber   { background: #94A3B8; }
+[data-theme="navy"] .dot-navy    { background: #0F1F37; }
+
+/* Module + KPI accent dots inside the dark device mockup */
+[data-theme="navy"] .kpi-emerald em { background: rgba(74, 110, 145, .25); color: #BDD0E2; }
+[data-theme="navy"] .kpi-blue em    { background: rgba(44, 67, 104, .25); color: #B8CADD; }
+[data-theme="navy"] .kpi-amber em   { background: rgba(148, 163, 184, .25); color: #DDE3EC; }
+[data-theme="navy"] .status-paid    { background: rgba(74, 110, 145, .25); color: #BDD0E2; }
+[data-theme="navy"] .status-issued  { background: rgba(44, 67, 104, .3);  color: #B8CADD; }
+[data-theme="navy"] .status-due     { background: rgba(148, 163, 184, .25); color: #DDE3EC; }
+
+/* Star ratings — keep gold on both themes (no override needed) */
+
+/* Selection highlight matches new accent */
+[data-theme="navy"] ::selection { background: rgba(74, 110, 145, .25); color: var(--ink); }

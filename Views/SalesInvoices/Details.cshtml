@@ -1,10 +1,54 @@
 @using System.Globalization
+@using Microsoft.EntityFrameworkCore
+@inject bestgen.Data.ApplicationDbContext DbContext
+@inject bestgen.Services.Delivery.InvoiceDeliveryService Delivery
+@inject bestgen.Services.ApprovalService Approvals
+@inject bestgen.Services.Attachments.AttachmentService Attachments
 @model SalesInvoice
 @{
     var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
     string T(string en, string ar) => isArabic ? ar : en;
     string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
     ViewData["Title"] = T($"Invoice {Model.InvoiceNumber}", $"فاتورة {Model.InvoiceNumber}");
+    var eInvoice = await DbContext.EInvoices.AsNoTracking().FirstOrDefaultAsync(x => x.SalesInvoiceId == Model.Id);
+    var deliveryLogs = await DbContext.InvoiceDeliveryLogs.AsNoTracking()
+        .Where(x => x.DocumentType == bestgen.Models.DeliveryDocumentType.SalesInvoice && x.DocumentId == Model.Id)
+        .OrderByDescending(x => x.SentAt)
+        .Take(20)
+        .ToListAsync();
+    var approvalActive = await Approvals.GetActiveAsync(bestgen.Models.ApprovalDocumentType.SalesInvoice, Model.Id);
+    var approvalLatest = approvalActive ?? await Approvals.GetLatestAsync(bestgen.Models.ApprovalDocumentType.SalesInvoice, Model.Id);
+    var approvalRequired = approvalActive is null && approvalLatest?.Status != bestgen.Models.ApprovalStatus.Approved
+        && await Approvals.RequiresApprovalAsync(bestgen.Models.ApprovalDocumentType.SalesInvoice, Model.GrandTotal);
+    var attachmentList = await Attachments.ListAsync(bestgen.Models.AttachmentDocumentType.SalesInvoice, Model.Id);
+    var attachmentsVm = new bestgen.ViewModels.AttachmentsTabViewModel
+    {
+        DocType = bestgen.Models.AttachmentDocumentType.SalesInvoice,
+        DocId = Model.Id,
+        ReturnUrl = Url.Action("Details", "SalesInvoices", new { id = Model.Id }) ?? "/",
+        Items = attachmentList
+    };
+}
+
+@if (TempData["ZatcaMessage"] is string zatcaMsg)
+{
+    <div class="alert alert-info"><i class="bi bi-info-circle"></i> @zatcaMsg</div>
+}
+@if (TempData["DeliveryMessage"] is string dMsg)
+{
+    <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @dMsg</div>
+}
+@if (TempData["DeliveryError"] is string dErr)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @dErr</div>
+}
+@if (TempData["ApprovalMessage"] is string apMsg)
+{
+    <div class="alert alert-info"><i class="bi bi-check2-square"></i> @apMsg</div>
+}
+@if (TempData["ApprovalError"] is string apErr)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @apErr</div>
 }
 
 <div class="page-header">
@@ -14,10 +58,157 @@
     </div>
     <div class="d-flex gap-2 align-items-center">
         <partial name="_StatusBadge" model="@(new StatusBadgeViewModel(Model.Status))" />
+        <a asp-action="Pdf" asp-route-id="@Model.Id" class="btn btn-success" target="_blank"><i class="bi bi-file-earmark-pdf"></i> @T("Download PDF", "تحميل PDF")</a>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-send"></i> @T("Send", "إرسال")
+            </button>
+            <ul class="dropdown-menu">
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendEmailModal"><i class="bi bi-envelope"></i> @T("By email", "بالبريد الإلكتروني")</button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sendWhatsAppModal"><i class="bi bi-whatsapp"></i> @T("By WhatsApp", "عبر واتساب")</button></li>
+            </ul>
+        </div>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary"><i class="bi bi-pencil"></i> @T("Edit", "تعديل")</a>
         <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back to list", "العودة إلى القائمة")</a>
     </div>
 </div>
+
+@if (approvalActive is not null || approvalLatest is not null || approvalRequired)
+{
+    <section class="details-panel mb-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="h5 mb-1"><i class="bi bi-check2-square"></i> @T("Approval", "الموافقة")</h2>
+                @if (approvalActive is not null)
+                {
+                    <p class="text-muted mb-0 small">
+                        <span class="badge bg-warning text-dark">@T("Pending", "معلق")</span>
+                        @T("Submitted by", "بطلب من") <strong>@(approvalActive.RequestedByName ?? "-")</strong>
+                        — @approvalActive.RequestedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                    </p>
+                }
+                else if (approvalLatest is not null)
+                {
+                    <p class="text-muted mb-0 small">
+                        @if (approvalLatest.Status == bestgen.Models.ApprovalStatus.Approved)
+                        {
+                            <span class="badge bg-success">@T("Approved", "موافق عليه")</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@T("Rejected", "مرفوض")</span>
+                        }
+                        @T("by", "بواسطة") <strong>@(approvalLatest.ResolvedByName ?? "-")</strong>
+                        — @(approvalLatest.ResolvedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+                        @if (!string.IsNullOrWhiteSpace(approvalLatest.Comment))
+                        {
+                            <span class="ms-2 d-block">"@approvalLatest.Comment"</span>
+                        }
+                    </p>
+                }
+                else if (approvalRequired)
+                {
+                    <p class="text-muted mb-0 small">@T("This invoice exceeds the approval threshold and requires a reviewer.",
+                                                       "هذه الفاتورة تتجاوز حد الموافقة وتتطلب مراجعاً.")</p>
+                }
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                @if (approvalActive is not null)
+                {
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#invApproveModal"><i class="bi bi-check2"></i> @T("Approve", "موافقة")</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#invRejectModal"><i class="bi bi-x"></i> @T("Reject", "رفض")</button>
+                }
+                else if (approvalRequired)
+                {
+                    <form asp-action="SubmitForApproval" asp-route-id="@Model.Id" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-send-check"></i> @T("Submit for approval", "إرسال للموافقة")</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </section>
+
+    @if (approvalActive is not null)
+    {
+        <div class="modal fade" id="invApproveModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form asp-controller="Approvals" asp-action="Approve" method="post" class="modal-content">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@approvalActive.Id" />
+                    <div class="modal-header"><h5 class="modal-title">@T("Approve", "موافقة")</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <p class="text-muted small">@T("Optional comment for the audit trail.", "ملاحظة اختيارية تظهر في سجل التدقيق.")</p>
+                        <textarea name="comment" class="form-control" rows="3" maxlength="1000"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check2"></i> @T("Approve", "موافقة")</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="invRejectModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form asp-controller="Approvals" asp-action="Reject" method="post" class="modal-content">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@approvalActive.Id" />
+                    <div class="modal-header"><h5 class="modal-title">@T("Reject", "رفض")</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <p class="text-muted small">@T("Tell the requester why.", "اشرح للمرسل سبب الرفض.")</p>
+                        <textarea name="comment" class="form-control" rows="3" maxlength="1000" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-x"></i> @T("Reject", "رفض")</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+}
+
+<section class="details-panel zatca-panel mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <h2 class="h5 mb-1"><i class="bi bi-shield-check"></i> @T("ZATCA E-Invoice", "الفاتورة الإلكترونية — هيئة الزكاة")</h2>
+            @if (eInvoice is null)
+            {
+                <p class="text-muted mb-0 small">@T("Not yet generated. Generate the UBL 2.1 XML, sign it cryptographically, and produce the Phase 2 QR.", "لم تُنشأ بعد. أنشئ ملف UBL 2.1 ووقّعه رقمياً ثم أنشئ رمز الاستجابة السريعة للمرحلة الثانية.")</p>
+            }
+            else
+            {
+                <p class="text-muted mb-0 small">
+                    <span class="badge bg-success">@eInvoice.Status</span>
+                    <span class="ms-2 me-2">UUID: <code>@eInvoice.Uuid</code></span>
+                    <span class="ms-2 me-2">ICV: <code>@eInvoice.IcvCounter</code></span>
+                    <span class="ms-2 me-2">@T("Subtype", "النوع"): <code>@eInvoice.InvoiceSubtype</code></span>
+                </p>
+            }
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            @if (eInvoice is null)
+            {
+                <form asp-action="GenerateZatca" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-dark"><i class="bi bi-shield-plus"></i> @T("Generate E-Invoice", "إنشاء فاتورة إلكترونية")</button>
+                </form>
+            }
+            else
+            {
+                <img src="@Url.Action("ZatcaQr", new { id = Model.Id })" alt="ZATCA QR" style="height:90px;width:90px;border:1px solid var(--border, #e7eaf3);border-radius:8px;padding:4px;background:#fff;" />
+                <a asp-action="ZatcaXml" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm" target="_blank"><i class="bi bi-filetype-xml"></i> XML</a>
+                @if (eInvoice.Status == bestgen.Models.EInvoiceStatus.Signed || eInvoice.Status == bestgen.Models.EInvoiceStatus.Generated)
+                {
+                    <form asp-action="SubmitZatca" asp-route-id="@Model.Id" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary btn-sm" title="@T("Submit to FATOORA (stub)", "إرسال إلى منصة فاتورة (نموذجي)")"><i class="bi bi-send"></i> @T("Submit", "إرسال")</button>
+                    </form>
+                }
+            }
+        </div>
+    </div>
+</section>
 
 <section class="details-panel">
     <div class="summary-grid">
@@ -55,10 +246,130 @@
 
     <ul class="nav nav-tabs mt-4">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#invoice-related" type="button">@T("Journals & payments", "القيود والمدفوعات")</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoice-files" type="button">@T("Attachments", "المرفقات")</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoice-delivery" type="button"><i class="bi bi-send"></i> @T("Delivery", "الإرسال") @(deliveryLogs.Count > 0 ? $"({deliveryLogs.Count})" : "")</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoice-files" type="button">@T("Attachments", "المرفقات") @(attachmentList.Count > 0 ? $"({attachmentList.Count})" : "")</button></li>
     </ul>
     <div class="tab-content pt-3">
         <div id="invoice-related" class="tab-pane fade show active">@T("Linked journals and receipts will appear here in a later phase.", "سيتم عرض القيود وسندات القبض المرتبطة هنا في مرحلة لاحقة.")</div>
-        <div id="invoice-files" class="tab-pane fade">@T("Invoice attachments placeholder.", "مرفقات الفاتورة placeholder.")</div>
+        <div id="invoice-delivery" class="tab-pane fade">
+            @if (deliveryLogs.Count == 0)
+            {
+                <p class="text-muted">@T("No delivery attempts yet. Use Send → email/WhatsApp above.", "لا توجد محاولات إرسال بعد. استخدم زر الإرسال في الأعلى.")</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>@T("When", "متى")</th>
+                                <th>@T("Channel", "القناة")</th>
+                                <th>@T("Recipient", "المستلم")</th>
+                                <th>@T("Status", "الحالة")</th>
+                                <th>@T("Detail", "التفاصيل")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var log in deliveryLogs)
+                        {
+                            <tr>
+                                <td>@log.SentAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@(log.Channel == bestgen.Models.DeliveryChannel.Email ? T("Email", "بريد") : "WhatsApp")</td>
+                                <td>@log.Recipient</td>
+                                <td>
+                                    @if (log.Status == bestgen.Models.DeliveryStatus.Sent)
+                                    {
+                                        <span class="badge bg-success">@T("Sent", "تم الإرسال")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">@T("Failed", "فشل")</span>
+                                    }
+                                </td>
+                                <td><small class="text-muted">@(log.ErrorMessage ?? log.ProviderMessageId ?? "-")</small></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        <div id="invoice-files" class="tab-pane fade">
+            <partial name="_AttachmentsTab" model="@attachmentsVm" />
+        </div>
     </div>
 </section>
+
+<!-- Send by email modal -->
+<div class="modal fade" id="sendEmailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="Send" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="channel" value="@bestgen.Models.DeliveryChannel.Email" />
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-envelope"></i> @T("Email invoice", "إرسال الفاتورة بالبريد")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (!Delivery.EmailConfigured)
+                {
+                    <div class="alert alert-warning small mb-3"><i class="bi bi-exclamation-triangle"></i>
+                        @T("SMTP not configured. Set Smtp:Host and Smtp:FromEmail (or env vars Smtp__Host / Smtp__FromEmail) and restart.",
+                           "لم يتم تكوين SMTP. اضبط Smtp:Host و Smtp:FromEmail ثم أعد تشغيل التطبيق.")
+                    </div>
+                }
+                <label class="form-label">@T("Recipient email", "البريد الإلكتروني للمستلم")</label>
+                <input type="email" name="recipient" class="form-control" required
+                       value="@(Model.Customer?.Email ?? "")" placeholder="customer@example.com" />
+                <small class="text-muted d-block mt-2">@T("Sends a PDF copy of this invoice with a short note.", "يُرسل نسخة PDF من الفاتورة مع رسالة موجزة.")</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> @T("Send email", "إرسال البريد")</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Send by WhatsApp modal -->
+<div class="modal fade" id="sendWhatsAppModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="Send" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="channel" value="@bestgen.Models.DeliveryChannel.WhatsApp" />
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-whatsapp"></i> @T("WhatsApp invoice", "إرسال الفاتورة عبر واتساب")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (!Delivery.WhatsAppConfigured)
+                {
+                    <div class="alert alert-warning small mb-3"><i class="bi bi-exclamation-triangle"></i>
+                        @T("WhatsApp Cloud API not configured. Set WhatsApp:AccessToken and WhatsApp:PhoneNumberId.",
+                           "لم يتم تكوين واتساب Cloud API. اضبط WhatsApp:AccessToken و WhatsApp:PhoneNumberId.")
+                    </div>
+                }
+                <label class="form-label">@T("Recipient phone (international format)", "رقم الهاتف الدولي للمستلم")</label>
+                <input type="text" name="recipient" class="form-control" required
+                       value="@(Model.Customer?.Phone ?? "")" placeholder="9665XXXXXXXX" inputmode="tel" />
+                <small class="text-muted d-block mt-2 mb-3">@T("Use country code, no '+'. Example: 966555123456.", "أدخل رمز الدولة بدون +. مثال: 966555123456.")</small>
+                <div class="form-check">
+                    <input type="checkbox" id="waUseTpl" name="useTemplate" value="true" class="form-check-input" @(Delivery.WhatsAppTemplateConfigured ? "" : "disabled") />
+                    <label for="waUseTpl" class="form-check-label small">
+                        @T("Use approved template (works outside the 24h window)", "استخدم قالباً معتمداً (يعمل خارج نافذة الـ24 ساعة)")
+                        @if (!Delivery.WhatsAppTemplateConfigured)
+                        {
+                            <span class="text-muted">— @T("set WhatsApp:DefaultTemplateName to enable", "اضبط WhatsApp:DefaultTemplateName لتفعيله")</span>
+                        }
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-whatsapp"></i> @T("Send", "إرسال")</button>
+            </div>
+        </form>
+    </div>
+</div>

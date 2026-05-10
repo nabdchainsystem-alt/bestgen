@@ -2,11 +2,43 @@
 @{
     var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
     string T(string en, string ar) => isArabic ? ar : en;
-    ViewData["Title"] = T("An error occurred", "حدث خطأ");
+    ViewData["Title"] = T("Something went wrong", "حدث خطأ ما");
+    var rid = ViewBag.RequestId as string ?? "";
 }
 
-<section class="details-panel">
-    <h1 class="h4 mb-3">@T("An unexpected error occurred", "حدث خطأ غير متوقع")</h1>
-    <p class="text-muted">@T("Check the application logs or your database connection settings.", "راجع سجلات التطبيق أو إعدادات الاتصال بقاعدة البيانات.")</p>
-    <p class="small text-muted">Request ID: @ViewBag.RequestId</p>
+<section class="details-panel error-card">
+    <div class="error-illu">
+        <i class="bi bi-exclamation-octagon"></i>
+    </div>
+    <h1 class="h3 mb-2">@T("Something went wrong on our side", "حدث خطأ من جانبنا")</h1>
+    <p class="text-muted mb-4">
+        @T("The team has been notified automatically. You can try again, or come back to this page from the dashboard.",
+           "تم إعلام الفريق تلقائياً. يمكنك المحاولة مرة أخرى أو العودة إلى لوحة التحكم.")
+    </p>
+
+    @if (!string.IsNullOrWhiteSpace(rid))
+    {
+        <div class="error-meta mb-4">
+            <small class="text-muted d-block">@T("Reference ID (share this with support):", "معرّف الخطأ (لمشاركته مع الدعم):")</small>
+            <code class="user-select-all">@rid</code>
+        </div>
+    }
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary" href="javascript:history.back()"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Go back", "العودة")</a>
+        <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Index">@T("Open dashboard", "فتح لوحة التحكم")</a>
+        <a class="btn btn-outline-secondary" href="/">@T("Home", "الرئيسية")</a>
+    </div>
 </section>
+
+<style>
+    .error-card { max-width: 640px; margin: 60px auto; text-align: center; padding: 40px 32px; }
+    .error-illu {
+        width: 84px; height: 84px; margin: 0 auto 16px;
+        border-radius: 50%; background: #fff1f0; color: #c92a2a;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 40px;
+    }
+    .error-meta { background: #f8fafc; border: 1px solid var(--border, #e7eaf3); border-radius: 10px; padding: 12px; }
+    .error-meta code { font-size: 13px; color: #1f1d18; }
+</style>

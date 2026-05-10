@@ -26,6 +26,45 @@ services:
         fromDatabase:
           name: bestgen-db
           property: connectionString
+      # Set ANTHROPIC_API_KEY via Render Dashboard → Environment.
+      # Leave value blank in render.yaml so the secret stays out of git.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # SMTP for invoice email delivery (any provider — Sendgrid, Postmark,
+      # AWS SES, Resend, Gmail SMTP). Set via Dashboard.
+      - key: Smtp__Host
+        sync: false
+      - key: Smtp__Port
+        value: "587"
+      - key: Smtp__User
+        sync: false
+      - key: Smtp__Password
+        sync: false
+      - key: Smtp__FromEmail
+        sync: false
+      - key: Smtp__FromName
+        value: "Bestgen"
+      # WhatsApp Cloud API (Meta Business). Set via Dashboard.
+      - key: WhatsApp__AccessToken
+        sync: false
+      - key: WhatsApp__PhoneNumberId
+        sync: false
+      - key: WhatsApp__DefaultTemplateName
+        sync: false
+      - key: WhatsApp__DefaultTemplateLanguage
+        value: "en_US"
+      # ZATCA FATOORA submission. Get BinarySecurityToken + Secret from ZATCA's onboarding flow.
+      - key: Fatoora__Mode
+        value: "Sandbox"
+      - key: Fatoora__BinarySecurityToken
+        sync: false
+      - key: Fatoora__Secret
+        sync: false
+      # Sentry DSN for error monitoring (Sentry → Settings → Client Keys).
+      - key: Sentry__Dsn
+        sync: false
+      - key: Sentry__TracesSampleRate
+        value: "0.1"
 
 databases:
   - name: bestgen-db

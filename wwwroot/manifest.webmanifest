@@ -1,0 +1,25 @@
+{
+  "name": "Bestgen ERP",
+  "short_name": "Bestgen",
+  "description": "Arabic-first accounting and inventory for Saudi Arabia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1B2E4B",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/img/logo-transparent.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/logo-transparent.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "shortcuts": [
+    { "name": "Sales Invoices",   "url": "/SalesInvoices",     "description": "Open the sales invoice list" },
+    { "name": "Purchase Invoices","url": "/PurchaseInvoices",  "description": "Open the purchase invoice list" },
+    { "name": "Reports",          "url": "/Reports",           "description": "Open the reports center" },
+    { "name": "Approvals",        "url": "/Approvals",         "description": "Review pending approvals" }
+  ]
+}

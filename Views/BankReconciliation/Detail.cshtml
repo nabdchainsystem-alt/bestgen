@@ -1,0 +1,149 @@
+@using System.Globalization
+@model bestgen.Models.BankStatement
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Statement", "كشف الحساب") + " · " + Model.FileName;
+    var matched = Model.Lines.Count(l => l.IsMatched);
+    var pct = Model.Lines.Count == 0 ? 0 : (100 * matched / Model.Lines.Count);
+}
+
+<div class="page-header">
+    <div>
+        <h1>@T("Statement", "كشف الحساب") · <code>@Model.FileName</code></h1>
+        <p class="text-muted mb-0">@(Model.BankAccount?.AccountName ?? "-") · @(Model.PeriodStart?.ToString("yyyy-MM-dd"))–@(Model.PeriodEnd?.ToString("yyyy-MM-dd"))</p>
+    </div>
+    <div>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-@(isArabic ? "right" : "left")"></i> @T("Back", "رجوع")</a>
+    </div>
+</div>
+
+@if (TempData["BankMessage"] is string bm) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @bm</div> }
+
+<section class="details-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted small">
+            @matched / @Model.Lines.Count @T("matched", "متطابق") · @T("Closing", "الرصيد الختامي"): <strong>@Model.ClosingBalance.ToString("N2")</strong>
+        </div>
+        <div class="progress" style="width:240px;height:8px;">
+            <div class="progress-bar bg-success" style="width:@(pct)%;"></div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>@T("Date", "التاريخ")</th>
+                    <th>@T("Description", "البيان")</th>
+                    <th>@T("Reference", "المرجع")</th>
+                    <th class="text-end">@T("Amount", "المبلغ")</th>
+                    <th class="text-end">@T("Balance", "الرصيد")</th>
+                    <th class="text-center">@T("Status", "الحالة")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var l in Model.Lines.OrderBy(l => l.Date))
+            {
+                <tr class="@(l.IsMatched ? "table-success" : "")">
+                    <td>@l.Date.ToString("yyyy-MM-dd")</td>
+                    <td><span class="small">@l.Description</span></td>
+                    <td><code class="small">@(l.Reference ?? "-")</code></td>
+                    <td class="text-end @(l.Amount < 0 ? "text-danger" : "text-success")">@l.Amount.ToString("N2")</td>
+                    <td class="text-end">@(l.Balance?.ToString("N2") ?? "-")</td>
+                    <td class="text-center">
+                        @if (l.IsMatched)
+                        {
+                            <span class="badge bg-success">@T("Matched", "مطابق")</span>
+                            @if (l.MatchedJournalEntry is not null)
+                            {
+                                <div class="small text-muted"><a href="/JournalEntries/Details/@l.MatchedJournalEntry.Id">@l.MatchedJournalEntry.EntryNumber</a></div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@T("Unmatched", "غير مطابق")</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        @if (l.IsMatched)
+                        {
+                            <form asp-action="Unmatch" method="post" class="d-inline m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="lineId" value="@l.Id" />
+                                <input type="hidden" name="statementId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> @T("Unmatch", "إلغاء")</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#matchModal"
+                                    data-line-id="@l.Id" data-line-amount="@l.Amount" data-line-date="@l.Date.ToString("yyyy-MM-dd")">
+                                <i class="bi bi-link"></i> @T("Match", "مطابقة")
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Match modal -->
+<div class="modal fade" id="matchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form asp-action="Match" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="lineId" id="matchLineId" />
+            <input type="hidden" name="statementId" value="@Model.Id" />
+            <div class="modal-header">
+                <h5 class="modal-title">@T("Match line to journal entry", "مطابقة البند مع قيد يومية")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-2"><span id="matchLineDate"></span> · @T("Amount:", "المبلغ:") <strong id="matchLineAmount"></strong></p>
+                <label class="form-label">@T("Suggested journal entries", "قيود مقترحة")</label>
+                <div id="matchSuggestions" class="border rounded p-2 mb-2 small bg-light" style="max-height:200px;overflow:auto;">
+                    <em class="text-muted">@T("Loading…", "جارٍ التحميل…")</em>
+                </div>
+                <label class="form-label small">@T("Or enter a journal entry id manually", "أو أدخل رقم القيد يدوياً")</label>
+                <input type="number" name="journalEntryId" class="form-control" min="1" placeholder="123" id="matchJeId" />
+                <label class="form-label small mt-2">@T("Note (optional)", "ملاحظة (اختياري)")</label>
+                <input type="text" name="note" class="form-control" maxlength="400" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@T("Cancel", "إلغاء")</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-link"></i> @T("Match", "مطابقة")</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal = document.getElementById('matchModal');
+    const idEl = document.getElementById('matchLineId');
+    const dateEl = document.getElementById('matchLineDate');
+    const amtEl = document.getElementById('matchLineAmount');
+    const sugEl = document.getElementById('matchSuggestions');
+    const jeEl = document.getElementById('matchJeId');
+    modal.addEventListener('show.bs.modal', async function (e) {
+        const btn = e.relatedTarget; if (!btn) return;
+        const lineId = btn.getAttribute('data-line-id');
+        idEl.value = lineId;
+        dateEl.textContent = btn.getAttribute('data-line-date');
+        amtEl.textContent = parseFloat(btn.getAttribute('data-line-amount')).toFixed(2);
+        sugEl.innerHTML = '<em class="text-muted">@T("Loading…", "جارٍ التحميل…")</em>';
+        jeEl.value = '';
+        try {
+            const r = await fetch(`/BankReconciliation/Suggest?lineId=${lineId}`);
+            const list = await r.json();
+            if (!list.length) { sugEl.innerHTML = '<em class="text-muted">@T("No suggestions found.", "لا توجد مقترحات.")</em>'; return; }
+            sugEl.innerHTML = list.map(j =>
+                `<div class="d-flex justify-content-between border-bottom py-1"><div><strong>${j.number}</strong> · ${j.date}<div class="text-muted">${j.description ?? ''}</div></div><div class="text-end"><div>${(+j.total).toFixed(2)}</div><button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="document.getElementById('matchJeId').value=${j.id};">@T("Pick", "اختيار")</button></div></div>`).join('');
+        } catch (err) { sugEl.innerHTML = '<em class="text-danger">' + err + '</em>'; }
+    });
+})();
+</script>

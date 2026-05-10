@@ -5,8 +5,13 @@ obj/
 *.user
 *.suo
 *.db
+*.db.backup-*
 *.sqlite
 appsettings.Local.json
+appsettings.Development.json
 wwwroot/uploads/
+App_Data/
 .DS_Store
 **/.DS_Store
+TestResults/
+**/test-results.trx

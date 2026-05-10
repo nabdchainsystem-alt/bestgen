@@ -2,6 +2,29 @@
 (function () {
     'use strict';
 
+    // ---------- Theme toggle (Indigo / Navy) ----------
+    // Apply persisted theme as early as possible to avoid a flash.
+    const THEME_KEY = 'bestgen-theme';
+    const root = document.documentElement;
+    const savedTheme = (function () {
+        try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+    })();
+    if (savedTheme === 'navy') root.setAttribute('data-theme', 'navy');
+
+    function setTheme(name) {
+        if (name === 'navy') root.setAttribute('data-theme', 'navy');
+        else root.removeAttribute('data-theme');
+        try { localStorage.setItem(THEME_KEY, name); } catch { /* ignore */ }
+    }
+    function currentTheme() {
+        return root.getAttribute('data-theme') === 'navy' ? 'navy' : 'indigo';
+    }
+    document.querySelectorAll('#theme-toggle, #theme-toggle-mobile').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            setTheme(currentTheme() === 'navy' ? 'indigo' : 'navy');
+        });
+    });
+
     // ---------- Sticky topbar shadow on scroll ----------
     const topbar = document.getElementById('topbar');
     function onScroll() {

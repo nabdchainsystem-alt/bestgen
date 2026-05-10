@@ -1,0 +1,81 @@
+@using System.Globalization
+@using Microsoft.EntityFrameworkCore
+@inject bestgen.Data.ApplicationDbContext DbContext
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("End of Service Benefit", "مكافأة نهاية الخدمة");
+    var employees = await DbContext.Employees.AsNoTracking().OrderBy(e => e.FullNameAr).ToListAsync();
+    string empName(bestgen.Models.Employee e) => isArabic ? e.FullNameAr : (string.IsNullOrWhiteSpace(e.FullNameEn) ? e.FullNameAr : e.FullNameEn!);
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("End of Service Benefit (EOSB)", "مكافأة نهاية الخدمة"),
+    T("Per Saudi labor law: < 5 years → ½ month/year; ≥ 5 years → full month/year. Calculated on Basic + Housing.",
+      "وفقاً لنظام العمل السعودي: أقل من 5 سنوات → نصف شهر/سنة؛ 5 سنوات فأكثر → شهر كامل/سنة. تُحتسب على الأجر الأساسي + بدل السكن."),
+    null, null, null))" />
+
+<section class="data-panel">
+    <div class="row g-3 align-items-end mb-3">
+        <div class="col-md-4">
+            <label class="form-label">@T("Employee", "الموظف")</label>
+            <select id="empSel" class="form-select">
+                @foreach (var e in employees)
+                {
+                    <option value="@e.Id" data-hire="@e.HireDate.ToString("yyyy-MM-dd")" data-salary="@e.Salary" data-housing="@e.HousingAllowance">
+                        @empName(e) (@e.EmployeeCode)
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("End date", "تاريخ الانتهاء")</label>
+            <input type="date" id="endDate" class="form-control" value="@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("Resignation factor", "نسبة الاستحقاق")</label>
+            <select id="factor" class="form-select">
+                <option value="1">1 (@T("Termination", "إنهاء"))</option>
+                <option value="0.6667">⅔ (@T("Resign 5–10y", "استقالة 5–10 سنوات"))</option>
+                <option value="0.3333">⅓ (@T("Resign &lt;5y", "استقالة <5 سنوات"))</option>
+            </select>
+        </div>
+        <div class="col-md-4 text-end">
+            <button id="calcBtn" type="button" class="btn btn-primary"><i class="bi bi-calculator"></i> @T("Calculate", "احسب")</button>
+        </div>
+    </div>
+
+    <div id="result" class="alert alert-info d-none">
+        <h5 class="mb-2">@T("Result", "النتيجة")</h5>
+        <div class="row small">
+            <div class="col-md-3"><strong>@T("Hire date:", "تاريخ التعيين:")</strong> <span id="rHire">-</span></div>
+            <div class="col-md-3"><strong>@T("End date:", "تاريخ الانتهاء:")</strong> <span id="rEnd">-</span></div>
+            <div class="col-md-3"><strong>@T("Basic salary:", "الراتب الأساسي:")</strong> <span id="rSalary">-</span></div>
+            <div class="col-md-3"><strong>@T("Housing:", "بدل السكن:")</strong> <span id="rHousing">-</span></div>
+        </div>
+        <hr/>
+        <div class="fs-4 fw-bold">@T("EOSB:", "المكافأة:") <span id="rAmount">-</span> SAR</div>
+    </div>
+</section>
+
+<script>
+(function () {
+    document.getElementById('calcBtn').addEventListener('click', async function () {
+        const sel = document.getElementById('empSel');
+        const opt = sel.options[sel.selectedIndex];
+        if (!opt) return;
+        const empId = opt.value;
+        const end = document.getElementById('endDate').value;
+        const factor = document.getElementById('factor').value;
+        const r = await fetch(`/SaudiPayroll/EosbCalc?employeeId=${empId}&endDate=${end}&resignationFactor=${factor}`);
+        if (!r.ok) return;
+        const j = await r.json();
+        document.getElementById('rHire').textContent = j.hireDate?.substring(0,10);
+        document.getElementById('rEnd').textContent = j.endDate?.substring(0,10);
+        document.getElementById('rSalary').textContent = (+j.salary).toFixed(2);
+        document.getElementById('rHousing').textContent = (+j.housing).toFixed(2);
+        document.getElementById('rAmount').textContent = (+j.amount).toFixed(2);
+        document.getElementById('result').classList.remove('d-none');
+    });
+})();
+</script>

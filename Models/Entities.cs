@@ -176,6 +176,13 @@ public class SalesInvoice
     [StringLength(600)]
     public string? Notes { get; set; }
 
+    /// <summary>ISO 4217 currency code the invoice is denominated in. Defaults to SAR.</summary>
+    [StringLength(3)]
+    public string CurrencyCode { get; set; } = "SAR";
+
+    /// <summary>Multiplier from CurrencyCode to the company's base currency. SAR→SAR is 1.</summary>
+    public decimal ExchangeRate { get; set; } = 1m;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
@@ -223,6 +230,11 @@ public class PurchaseInvoice
 
     [StringLength(600)]
     public string? Notes { get; set; }
+
+    [StringLength(3)]
+    public string CurrencyCode { get; set; } = "SAR";
+
+    public decimal ExchangeRate { get; set; } = 1m;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

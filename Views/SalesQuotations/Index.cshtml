@@ -1,0 +1,61 @@
+@using System.Globalization
+@model IReadOnlyList<SalesQuotation>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    string pickName(string ar, string? en) => isArabic ? ar : (string.IsNullOrWhiteSpace(en) ? ar : en!);
+    ViewData["Title"] = T("Quotations", "عروض الأسعار");
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Quotations", "عروض الأسعار"),
+    T("Build customer quotations and convert accepted ones to invoices in one click.", "أنشئ عروض الأسعار للعملاء وحوّل المقبول منها إلى فواتير بنقرة واحدة."),
+    "Create", "SalesQuotations", T("New quotation", "عرض سعر جديد")))" />
+
+@if (TempData["QuotationMessage"] is string msg) { <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @msg</div> }
+@if (TempData["QuotationError"] is string err) { <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> @err</div> }
+
+<section class="data-panel">
+    <partial name="_SearchBar" />
+
+    @if (!Model.Any())
+    {
+        <partial name="_EmptyState" model="@(T("No quotations yet — start by creating one.", "لا توجد عروض أسعار بعد — ابدأ بإنشاء واحد."))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>@T("Number", "الرقم")</th>
+                        <th>@T("Date", "التاريخ")</th>
+                        <th>@T("Valid until", "ساري حتى")</th>
+                        <th>@T("Customer", "العميل")</th>
+                        <th>@T("Total", "الإجمالي")</th>
+                        <th>@T("Status", "الحالة")</th>
+                        <th>@T("Actions", "الإجراءات")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var q in Model)
+                {
+                    <tr>
+                        <td>@q.QuotationNumber</td>
+                        <td>@q.QuotationDate.ToString("yyyy/MM/dd")</td>
+                        <td>@(q.ValidUntil?.ToString("yyyy/MM/dd") ?? "-")</td>
+                        <td>@(q.Customer == null ? "-" : pickName(q.Customer.NameAr, q.Customer.NameEn))</td>
+                        <td>@EntityDisplayHelper.FormatValue(q.GrandTotal, nameof(q.GrandTotal))</td>
+                        <td><partial name="_StatusBadge" model="@(new StatusBadgeViewModel(q.Status))" /></td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@q.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                            <a asp-action="Pdf" asp-route-id="@q.Id" class="btn btn-sm btn-outline-success" target="_blank" title="@T("PDF", "PDF")"><i class="bi bi-file-earmark-pdf"></i></a>
+                            <a asp-action="Edit" asp-route-id="@q.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

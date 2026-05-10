@@ -695,8 +695,15 @@ public class Employee
     public string? Department { get; set; }
 
     public decimal Salary { get; set; }
+    /// <summary>Optional housing allowance. Counted toward EOSB if BasicWage isn't set separately.</summary>
+    public decimal HousingAllowance { get; set; }
+    /// <summary>Optional transportation allowance.</summary>
+    public decimal TransportAllowance { get; set; }
     public DateTime HireDate { get; set; } = DateTime.Today;
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
+
+    /// <summary>Saudi nationals are covered by full GOSI (21.75%); non-Saudi only by occupational hazards (2%).</summary>
+    public bool IsSaudi { get; set; } = true;
 
     public decimal CurrentBalance { get; set; }
 

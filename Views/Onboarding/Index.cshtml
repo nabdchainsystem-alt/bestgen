@@ -1,0 +1,66 @@
+@using System.Globalization
+@using bestgen.Services.Onboarding
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Industry Templates", "قوالب الصناعات");
+    var catalog = (IReadOnlyList<bestgen.Services.Onboarding.TemplateInfo>)ViewBag.Catalog;
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Industry Templates", "قوالب الصناعات"),
+    T("Pick a starter pack to seed categories, sample products, and industry-specific cost accounts. Re-running is safe — existing rows are skipped.",
+      "اختر قالباً لإضافة تصنيفات وأصناف نموذجية وحسابات تكلفة خاصة بصناعتك. يمكن إعادة التطبيق بأمان — يتم تجاهل العناصر الموجودة مسبقاً."),
+    null, null, null))" />
+
+@if (TempData["TemplateMessage"] is string msg)
+{
+    <div class="alert alert-success"><i class="bi bi-check2-circle"></i> @msg</div>
+}
+
+<div class="row g-3">
+@foreach (var t in catalog)
+{
+    var title = isArabic ? t.TitleAr : t.TitleEn;
+    var summary = isArabic ? t.SummaryAr : t.SummaryEn;
+    var bullets = isArabic ? t.BulletsAr : t.BulletsEn;
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="industry-icon"><i class="bi @t.Icon"></i></span>
+                    <h5 class="card-title m-0">@title</h5>
+                </div>
+                <p class="text-muted small">@summary</p>
+                <ul class="small text-muted ps-3 mb-3 flex-grow-1">
+                    @foreach (var b in bullets)
+                    {
+                        <li>@b</li>
+                    }
+                </ul>
+                <form asp-action="Apply" method="post" class="m-0"
+                      onsubmit="return confirm('@T($"Apply the {title} template?", $"تطبيق قالب {title}؟")');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="template" value="@t.Template" />
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-magic"></i> @T("Apply", "تطبيق")
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+<style>
+    .industry-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: var(--accent-tint, #F5F5FE);
+        color: var(--accent, #1B2E4B);
+        font-size: 22px;
+    }
+</style>

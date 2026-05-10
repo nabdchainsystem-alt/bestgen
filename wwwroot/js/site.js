@@ -1,4 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // ---- Theme toggle (Default / Navy) ----
+    const THEME_KEY = "bestgen-app-theme";
+    const themeBtn = document.getElementById("themeToggle");
+    if (themeBtn) {
+        themeBtn.addEventListener("click", () => {
+            const current = document.documentElement.getAttribute("data-theme") === "navy" ? "navy" : "default";
+            const next = current === "navy" ? "default" : "navy";
+            if (next === "navy") document.documentElement.setAttribute("data-theme", "navy");
+            else document.documentElement.removeAttribute("data-theme");
+            try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
+        });
+    }
+
     const shell = document.querySelector(".app-shell");
     const sidebar = document.getElementById("appSidebar");
     const toggle = document.getElementById("sidebarToggle");

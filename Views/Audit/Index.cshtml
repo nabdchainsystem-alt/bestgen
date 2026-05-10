@@ -1,0 +1,152 @@
+@using System.Globalization
+@using bestgen.Models
+@model IReadOnlyList<AuditEntry>
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("Audit Log", "سجل التدقيق");
+
+    var entityNames = (List<string>)ViewBag.EntityNames;
+    var userNames = (List<string>)ViewBag.UserNames;
+    var total = (int)ViewBag.Total;
+    var page = (int)ViewBag.Page;
+    var pageCount = (int)ViewBag.PageCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var f = ViewBag.Filters;
+    string? q = f?.q;
+    string? entity = f?.entity;
+    string? user = f?.user;
+    AuditAction? action = f?.action;
+    DateTime? from = f?.from;
+    DateTime? to = f?.to;
+
+    string ActionLabel(AuditAction a) => a switch
+    {
+        AuditAction.Create => T("Create", "إنشاء"),
+        AuditAction.Update => T("Update", "تعديل"),
+        AuditAction.Delete => T("Delete", "حذف"),
+        _ => a.ToString()
+    };
+    string ActionBadge(AuditAction a) => a switch
+    {
+        AuditAction.Create => "bg-success",
+        AuditAction.Update => "bg-info text-dark",
+        AuditAction.Delete => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<partial name="_PageHeader" model="@(new PageHeaderViewModel(
+    T("Audit Log", "سجل التدقيق"),
+    T("Every create, update, and delete recorded by the application — searchable by entity, user, and date.",
+      "كل عمليات الإنشاء والتعديل والحذف التي قام بها التطبيق — قابلة للبحث حسب الكيان والمستخدم والتاريخ."),
+    null, null, null))" />
+
+<section class="data-panel">
+    <form method="get" class="row g-2 align-items-end mb-3">
+        <div class="col-md-3">
+            <label class="form-label">@T("Search", "بحث")</label>
+            <input type="text" name="q" value="@q" class="form-control" placeholder="@T("Entity / key / fields", "اسم الكيان / المفتاح / الحقول")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("Entity", "الكيان")</label>
+            <select name="entity" class="form-select">
+                <option value="">@T("All", "الكل")</option>
+                @foreach (var name in entityNames)
+                {
+                    <option value="@name" selected="@(name == entity)">@name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("User", "المستخدم")</label>
+            <select name="user" class="form-select">
+                <option value="">@T("All", "الكل")</option>
+                @foreach (var name in userNames)
+                {
+                    <option value="@name" selected="@(name == user)">@name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">@T("Action", "الإجراء")</label>
+            <select name="action" class="form-select">
+                <option value="">@T("All", "الكل")</option>
+                @foreach (var a in Enum.GetValues<AuditAction>())
+                {
+                    <option value="@a" selected="@(a == action)">@ActionLabel(a)</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label">@T("From", "من")</label>
+            <input type="date" name="from" value="@(from?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label">@T("To", "إلى")</label>
+            <input type="date" name="to" value="@(to?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-1 text-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+
+    <div class="text-muted small mb-2">
+        @T($"{total} entr{(total == 1 ? "y" : "ies")} — page {page} of {Math.Max(pageCount, 1)}",
+           $"{total} سجل — صفحة {page} من {Math.Max(pageCount, 1)}")
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted m-0">@T("Nothing matches the current filters.", "لا توجد سجلات مطابقة للفلاتر الحالية.")</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("When", "متى")</th>
+                        <th>@T("User", "المستخدم")</th>
+                        <th>@T("Entity", "الكيان")</th>
+                        <th>@T("Key", "المفتاح")</th>
+                        <th>@T("Action", "الإجراء")</th>
+                        <th>@T("Changed fields / detail", "الحقول المتغيرة / التفاصيل")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td>@row.At.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@(row.UserName ?? "-")</td>
+                        <td>@row.EntityName</td>
+                        <td><code>@(row.EntityKey ?? "-")</code></td>
+                        <td><span class="badge @ActionBadge(row.Action)">@ActionLabel(row.Action)</span></td>
+                        <td><small class="text-muted">@(row.Summary ?? "")</small></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (pageCount > 1)
+        {
+            <nav class="mt-3">
+                <ul class="pagination pagination-sm">
+                    @{
+                        var prev = Math.Max(1, page - 1);
+                        var next = Math.Min(pageCount, page + 1);
+                    }
+                    <li class="page-item @(page == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { q, entity, user, action, from = from?.ToString("yyyy-MM-dd"), to = to?.ToString("yyyy-MM-dd"), page = prev })">«</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">@(page) / @pageCount</span></li>
+                    <li class="page-item @(page == pageCount ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { q, entity, user, action, from = from?.ToString("yyyy-MM-dd"), to = to?.ToString("yyyy-MM-dd"), page = next })">»</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+</section>

@@ -1,0 +1,85 @@
+@model bestgen.ViewModels.AttachmentsTabViewModel
+@using System.Globalization
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+
+    string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024d:N1} KB";
+        return $"{bytes / (1024d * 1024):N1} MB";
+    }
+
+    string IconFor(string? contentType, string fileName)
+    {
+        var ext = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+        if (ext is ".pdf") return "bi-file-earmark-pdf";
+        if (ext is ".png" or ".jpg" or ".jpeg" or ".webp" or ".gif" or ".bmp" or ".heic") return "bi-file-earmark-image";
+        if (ext is ".xls" or ".xlsx" or ".csv") return "bi-file-earmark-spreadsheet";
+        if (ext is ".doc" or ".docx") return "bi-file-earmark-word";
+        if (ext is ".zip") return "bi-file-earmark-zip";
+        return "bi-file-earmark";
+    }
+}
+
+<div>
+    @if (TempData["AttachmentMessage"] is string atMsg)
+    {
+        <div class="alert alert-success py-2"><i class="bi bi-check2-circle"></i> @atMsg</div>
+    }
+    @if (TempData["AttachmentError"] is string atErr)
+    {
+        <div class="alert alert-danger py-2"><i class="bi bi-exclamation-triangle"></i> @atErr</div>
+    }
+
+    <form asp-controller="Attachments" asp-action="Upload" method="post" enctype="multipart/form-data" class="row g-2 align-items-end mb-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="docType" value="@Model.DocType" />
+        <input type="hidden" name="docId"   value="@Model.DocId" />
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div class="col-md-5">
+            <label class="form-label small">@T("File", "الملف")</label>
+            <input type="file" name="file" class="form-control" required accept=".pdf,image/*,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip" />
+        </div>
+        <div class="col-md-5">
+            <label class="form-label small">@T("Description (optional)", "الوصف (اختياري)")</label>
+            <input type="text" name="description" maxlength="500" class="form-control" placeholder="@T("e.g. Customer PO, signed delivery, ...", "مثال: أمر شراء العميل، إيصال التسليم...")" />
+        </div>
+        <div class="col-md-2 text-end">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-upload"></i> @T("Upload", "رفع")</button>
+        </div>
+    </form>
+
+    @if (Model.Items.Count == 0)
+    {
+        <p class="text-muted m-0">@T("No attachments yet.", "لا توجد مرفقات بعد.")</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var a in Model.Items)
+            {
+                <li class="list-group-item d-flex align-items-center gap-3">
+                    <i class="bi @IconFor(a.ContentType, a.FileName)" style="font-size:24px;"></i>
+                    <div class="flex-grow-1">
+                        <a asp-controller="Attachments" asp-action="Download" asp-route-id="@a.Id" target="_blank">@a.FileName</a>
+                        <div class="text-muted small">
+                            @FormatSize(a.SizeBytes)
+                            · @a.UploadedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                            @if (!string.IsNullOrEmpty(a.UploadedByName)) { <span>· @a.UploadedByName</span> }
+                            @if (!string.IsNullOrEmpty(a.Description)) { <div>@a.Description</div> }
+                        </div>
+                    </div>
+                    <form asp-controller="Attachments" asp-action="Delete" method="post" class="m-0"
+                          onsubmit="return confirm('@T("Delete this attachment?", "حذف هذا المرفق؟")');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@a.Id" />
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="@T("Delete", "حذف")"><i class="bi bi-trash"></i></button>
+                    </form>
+                </li>
+            }
+        </ul>
+    }
+</div>

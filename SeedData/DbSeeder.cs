@@ -29,6 +29,10 @@ public static class DbSeeder
             await context.Database.EnsureCreatedAsync();
         }
 
+        // Default tenant must exist before any tenant-scoped row is inserted
+        // (otherwise the FK-less shadow column has nothing to point at).
+        await EnsureDefaultTenantAsync(context);
+
         foreach (var role in Roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
@@ -91,6 +95,31 @@ public static class DbSeeder
         await context.SaveChangesAsync();
     }
 
+    private static async Task EnsureDefaultTenantAsync(ApplicationDbContext context)
+    {
+        if (await context.Tenants.AnyAsync(t => t.Id == 1))
+        {
+            return;
+        }
+
+        // Force Id=1 so all existing seeded rows (which default TenantId to 1)
+        // resolve to a real tenant record. Inserting with explicit Id requires
+        // toggling identity insert on Postgres; SQLite is fine with explicit Id.
+        var sql = context.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true
+            ? "INSERT INTO \"Tenants\" (\"Id\", \"Name\", \"Slug\", \"Plan\", \"IsActive\", \"OwnerEmail\", \"CreatedAt\") VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})"
+            : "INSERT INTO \"Tenants\" (\"Id\", \"Name\", \"Slug\", \"Plan\", \"IsActive\", \"OwnerEmail\", \"CreatedAt\") OVERRIDING SYSTEM VALUE VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})";
+
+        await context.Database.ExecuteSqlRawAsync(
+            sql,
+            1,
+            "Default Workspace",
+            "default",
+            "Starter",
+            true,
+            "max@bestgen.com",
+            DateTime.UtcNow);
+    }
+
     private static async Task EnsureAdminAsync(
         UserManager<ApplicationUser> userManager,
         string email,
@@ -106,7 +135,8 @@ public static class DbSeeder
                 Email = email,
                 EmailConfirmed = true,
                 FullName = fullName,
-                PreferredLanguage = "ar-SA"
+                PreferredLanguage = "ar-SA",
+                CurrentTenantId = 1
             };
 
             var create = await userManager.CreateAsync(user, password);
@@ -120,6 +150,12 @@ public static class DbSeeder
             // Reset password so the seeded admin always works on existing DBs.
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             await userManager.ResetPasswordAsync(user, token, password);
+            // Re-assert tenant membership in case schema was just upgraded.
+            if (user.CurrentTenantId == 0)
+            {
+                user.CurrentTenantId = 1;
+                await userManager.UpdateAsync(user);
+            }
         }
 
         foreach (var role in new[] { "Owner", "Admin" })
@@ -864,6 +900,28 @@ public static class DbSeeder
                 new AssetTag { TagCode = "TAG-001", TagName = "ضمان ساري", Description = "أصل مشمول بضمان نشط", IsActive = true },
                 new AssetTag { TagCode = "TAG-002", TagName = "صيانة دورية", Description = "يحتاج لصيانة دورية كل 3 أشهر", IsActive = true },
                 new AssetTag { TagCode = "TAG-003", TagName = "أصل عالي القيمة", Description = "أصل يجب جرده شهريا", IsActive = true });
+        }
+
+        if (!await context.Currencies.AnyAsync())
+        {
+            context.Currencies.AddRange(
+                new Currency { Code = "SAR", NameAr = "ريال سعودي",   NameEn = "Saudi Riyal",     Symbol = "ر.س", IsBase = true,  IsActive = true },
+                new Currency { Code = "USD", NameAr = "دولار أمريكي", NameEn = "US Dollar",       Symbol = "$",   IsBase = false, IsActive = true },
+                new Currency { Code = "EUR", NameAr = "يورو",         NameEn = "Euro",            Symbol = "€",   IsBase = false, IsActive = true },
+                new Currency { Code = "AED", NameAr = "درهم إماراتي", NameEn = "UAE Dirham",      Symbol = "د.إ", IsBase = false, IsActive = true },
+                new Currency { Code = "EGP", NameAr = "جنيه مصري",    NameEn = "Egyptian Pound",  Symbol = "£",   IsBase = false, IsActive = true },
+                new Currency { Code = "GBP", NameAr = "جنيه إسترليني", NameEn = "British Pound",   Symbol = "£",   IsBase = false, IsActive = true });
+        }
+
+        if (!await context.FxRates.AnyAsync())
+        {
+            var today = DateTime.UtcNow.Date;
+            context.FxRates.AddRange(
+                new FxRate { Date = today, FromCurrencyCode = "USD", ToCurrencyCode = "SAR", Rate = 3.75m, Note = "Pegged" },
+                new FxRate { Date = today, FromCurrencyCode = "EUR", ToCurrencyCode = "SAR", Rate = 4.10m },
+                new FxRate { Date = today, FromCurrencyCode = "AED", ToCurrencyCode = "SAR", Rate = 1.02m },
+                new FxRate { Date = today, FromCurrencyCode = "GBP", ToCurrencyCode = "SAR", Rate = 4.75m },
+                new FxRate { Date = today, FromCurrencyCode = "EGP", ToCurrencyCode = "SAR", Rate = 0.08m });
         }
 
         await context.SaveChangesAsync();

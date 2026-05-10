@@ -360,17 +360,19 @@ html { background: var(--bg-app); }
 }
 
 .brand-mark {
-    width: 36px;
-    height: 36px;
+    width: 64px;
+    height: 64px;
     display: grid;
     place-items: center;
     flex-shrink: 0;
+    overflow: hidden;
 }
 .brand-mark img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
+    transform: scale(1.9);
 }
 
 /* Topbar logo lockup — shown alongside the breadcrumb */
@@ -378,10 +380,11 @@ html { background: var(--bg-app); }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 31px;
-    height: 31px;
+    width: 50px;
+    height: 50px;
     margin-inline-end: 4px;
     flex-shrink: 0;
+    overflow: hidden;
     transition: transform 120ms ease;
 }
 .topbar-brand:hover {
@@ -392,6 +395,7 @@ html { background: var(--bg-app); }
     height: 100%;
     object-fit: contain;
     display: block;
+    transform: scale(1.9);
 }
 
 .brand-meta { flex: 1; min-width: 0; }
@@ -1588,4 +1592,104 @@ h6 { font-size: 11px; }
     .summary-grid { grid-template-columns: 1fr; }
 
     .list-toolbar { grid-template-columns: 1fr; }
+}
+
+/* ================================================================
+   Theme: Navy (toggleable via the topbar theme button)
+   Primary  #1B2E4B   Secondary #4A6E91
+   Tertiary #94A3B8   Neutral   #F8FAFC
+   Headlines: IBM Plex Sans · Body: Inter (existing)
+   Default theme = no [data-theme] attribute (the warm-neutral palette).
+   ================================================================ */
+
+/* ---- Theme chip button ---- */
+.theme-chip { gap: 6px; }
+.theme-chip .theme-swatch {
+    display: inline-flex;
+    width: 22px;
+    height: 14px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(31, 29, 24, 0.12);
+}
+.theme-chip .theme-swatch .swatch { display: block; flex: 1; height: 100%; }
+.theme-chip .theme-swatch .swatch-a { background: linear-gradient(135deg, #f4f1e9, #e8e1cf); }
+.theme-chip .theme-swatch .swatch-b { background: linear-gradient(135deg, #5B5BD6, #4845C9); }
+.theme-chip .t-navy-label { display: none; }
+[data-theme="navy"] .theme-chip .theme-swatch .swatch-a { background: linear-gradient(135deg, #1B2E4B, #0F1F37); }
+[data-theme="navy"] .theme-chip .theme-swatch .swatch-b { background: linear-gradient(135deg, #4A6E91, #94A3B8); }
+[data-theme="navy"] .theme-chip .t-default-label { display: none; }
+[data-theme="navy"] .theme-chip .t-navy-label { display: inline; }
+
+/* ================================================================
+   Navy theme — token overrides on :root variables
+   ================================================================ */
+:root[data-theme="navy"] {
+    /* Surfaces (cool, near-white instead of warm) */
+    --bg-app: #F8FAFC;
+    --bg-sidebar: #FFFFFF;
+    --bg-surface: #FFFFFF;
+    --bg-hover: #EEF2F7;
+    --bg-active: #DCE3EC;
+    --bg-canvas: #EFF3F8;
+
+    /* Borders */
+    --border-soft: #DCE3EC;
+    --border-strong: #C5D0DD;
+
+    /* Text — navy-leaning */
+    --text-strong: #0E1E37;
+    --text-base: #1B2E4B;
+    --text-muted: #4A6E91;
+    --text-faint: #94A3B8;
+
+    /* Accent re-keyed onto Primary navy */
+    --accent: #1B2E4B;
+    --accent-soft: #E8EDF4;
+    --accent-strong: #0F1F37;
+    --accent-tint: #EEF2F7;
+
+    /* Semantic — keep positive/negative recognizable but desaturate
+       within the navy palette family for non-status accents. */
+    --neutral: #4A6E91;
+    --neutral-soft: #E8EDF4;
+
+    /* Aliases referenced elsewhere */
+    --canvas: #EFF3F8;
+    --surface: #FFFFFF;
+    --surface-muted: #EEF2F7;
+    --border: #DCE3EC;
+    --text: #0E1E37;
+    --muted: #4A6E91;
+    --navy: #0E1E37;
+    --navy-soft: #1B2E4B;
+    --indigo: #1B2E4B;
+    --indigo-deep: #0F1F37;
+
+    /* Soft shadows tuned to navy ink */
+    --shadow-sm: 0 1px 2px 0 rgba(15, 31, 55, 0.05);
+    --shadow-md: 0 1px 3px 0 rgba(15, 31, 55, 0.08), 0 1px 2px 0 rgba(15, 31, 55, 0.04);
+    --shadow-lg: 0 8px 24px rgba(15, 31, 55, 0.12);
+}
+
+/* ---- Headlines: IBM Plex Sans in navy theme ---- */
+:root[data-theme="navy"] body,
+:root[data-theme="navy"] h1,
+:root[data-theme="navy"] h2,
+:root[data-theme="navy"] h3,
+:root[data-theme="navy"] h4,
+:root[data-theme="navy"] h5,
+:root[data-theme="navy"] h6,
+:root[data-theme="navy"] .page-title,
+:root[data-theme="navy"] .breadcrumb-item-text,
+:root[data-theme="navy"] .topbar-brand {
+    font-family: 'IBM Plex Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Keep Arabic UI on Droid Arabic Kufi for native feel */
+:root[dir="rtl"][data-theme="navy"] body,
+:root[dir="rtl"][data-theme="navy"] h1,
+:root[dir="rtl"][data-theme="navy"] h2,
+:root[dir="rtl"][data-theme="navy"] h3 {
+    font-family: 'Droid Arabic Kufi', 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
 }

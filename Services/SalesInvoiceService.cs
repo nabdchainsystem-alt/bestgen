@@ -69,6 +69,7 @@ public class SalesInvoiceService
 
         await _partyBalanceService.RecalculateCustomerAsync(invoice.CustomerId);
         await _context.SaveChangesAsync();
+        bestgen.Services.Observability.BestgenMetrics.InvoicesCreated.WithLabels("sales").Inc();
         return invoice;
     }
 

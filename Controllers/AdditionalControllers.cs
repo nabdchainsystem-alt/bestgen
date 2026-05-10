@@ -7,16 +7,7 @@ namespace bestgen.Controllers;
 
 // Sales auxiliaries
 
-public class SalesQuotationsController : CrudController<SalesQuotation>
-{
-    public SalesQuotationsController(ApplicationDbContext context) : base(context)
-    {
-    }
-
-    protected override IQueryable<SalesQuotation> Query() => Context.SalesQuotations
-        .AsNoTracking()
-        .Include(x => x.Customer);
-}
+// Hand-rolled SalesQuotationsController lives in Controllers/SalesQuotationsController.cs.
 
 public class SalesReceiptsController : CrudController<SalesReceipt>
 {
@@ -551,4 +542,14 @@ public class TaxRatesController : CrudController<TaxRate>
     public TaxRatesController(ApplicationDbContext context) : base(context)
     {
     }
+}
+
+public class CurrenciesController : CrudController<Currency>
+{
+    public CurrenciesController(ApplicationDbContext context) : base(context) { }
+}
+
+public class FxRatesController : CrudController<FxRate>
+{
+    public FxRatesController(ApplicationDbContext context) : base(context) { }
 }

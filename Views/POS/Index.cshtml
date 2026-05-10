@@ -1,0 +1,291 @@
+@using System.Globalization
+@using bestgen.Models
+@{
+    var isArabic = CultureInfo.CurrentUICulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+    string T(string en, string ar) => isArabic ? ar : en;
+    ViewData["Title"] = T("POS — Cashier", "نقطة البيع — الكاشير");
+    var products = (List<bestgen.Controllers.POSController.POSProductDto>)ViewBag.Products;
+    var categories = (List<ProductCategory>)ViewBag.Categories;
+    var customers = (List<Customer>)ViewBag.Customers;
+    var warehouses = (List<Warehouse>)ViewBag.Warehouses;
+}
+
+<div class="pos-shell">
+    <div class="pos-grid">
+        <!-- Product browser -->
+        <div class="pos-products">
+            <div class="pos-toolbar">
+                <input id="posSearch" type="search" class="form-control form-control-lg" placeholder="@T("Search SKU, name, barcode...", "ابحث برقم الصنف، الاسم، أو الباركود...")" autofocus />
+                <select id="posCategory" class="form-select form-select-lg" style="max-width:220px;">
+                    <option value="">@T("All categories", "كل التصنيفات")</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.Id">@(isArabic ? c.NameAr : (c.NameEn ?? c.NameAr))</option>
+                    }
+                </select>
+            </div>
+
+            <div id="posProductGrid" class="pos-product-grid">
+                @foreach (var p in products)
+                {
+                    <button type="button" class="pos-tile"
+                            data-id="@p.Id" data-sku="@p.Sku" data-name="@(isArabic ? p.NameAr : (p.NameEn ?? p.NameAr))"
+                            data-price="@p.SellingPrice" data-vat="@p.VatRate">
+                        <div class="pos-tile-name">@(isArabic ? p.NameAr : (p.NameEn ?? p.NameAr))</div>
+                        <div class="pos-tile-price">@p.SellingPrice.ToString("N2") <small>@T("SAR", "ر.س")</small></div>
+                        <div class="pos-tile-sku"><code>@p.Sku</code></div>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Cart -->
+        <aside class="pos-cart">
+            <div class="pos-cart-header">
+                <h2 class="h6 m-0"><i class="bi bi-cart"></i> @T("Cart", "السلة")</h2>
+                <button id="posClearBtn" type="button" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> @T("Clear", "تفريغ")</button>
+            </div>
+
+            <div class="pos-cart-meta">
+                <select id="posCustomer" class="form-select form-select-sm">
+                    <option value="0">@T("Walk-in customer", "عميل عابر")</option>
+                    @foreach (var c in customers)
+                    {
+                        <option value="@c.Id">@(isArabic ? c.NameAr : (c.NameEn ?? c.NameAr))</option>
+                    }
+                </select>
+                <select id="posWarehouse" class="form-select form-select-sm">
+                    @foreach (var w in warehouses)
+                    {
+                        <option value="@w.Id">@w.Name</option>
+                    }
+                </select>
+            </div>
+
+            <ul id="posCartItems" class="pos-cart-items"></ul>
+
+            <div class="pos-cart-totals">
+                <div class="row"><span>@T("Subtotal", "الإجمالي قبل الضريبة")</span><strong id="posSubtotal">0.00</strong></div>
+                <div class="row"><span>@T("VAT", "الضريبة")</span><strong id="posVat">0.00</strong></div>
+                <div class="row total"><span>@T("Total", "الإجمالي")</span><strong id="posGrand">0.00</strong></div>
+            </div>
+
+            <div class="pos-payment">
+                <label class="form-label small">@T("Payment", "الدفع")</label>
+                <div class="btn-group w-100 mb-2" role="group">
+                    <input type="radio" class="btn-check" name="payMethod" id="payCash" value="Cash" checked>
+                    <label class="btn btn-outline-primary" for="payCash"><i class="bi bi-cash"></i> @T("Cash", "نقدي")</label>
+                    <input type="radio" class="btn-check" name="payMethod" id="payBank" value="Bank">
+                    <label class="btn btn-outline-primary" for="payBank"><i class="bi bi-credit-card"></i> @T("Card", "بطاقة")</label>
+                    <input type="radio" class="btn-check" name="payMethod" id="payCredit" value="Credit">
+                    <label class="btn btn-outline-primary" for="payCredit"><i class="bi bi-clock-history"></i> @T("Credit", "آجل")</label>
+                </div>
+                <div id="cashRow">
+                    <label class="form-label small">@T("Amount tendered", "المبلغ المستلم")</label>
+                    <input id="posAmountTendered" type="number" step="0.01" class="form-control form-control-lg" placeholder="0.00" />
+                    <div class="text-end small mt-1">@T("Change:", "الباقي:") <strong id="posChange">0.00</strong></div>
+                </div>
+            </div>
+
+            <button id="posCheckoutBtn" type="button" class="btn btn-success btn-lg w-100 mt-2">
+                <i class="bi bi-check2-circle"></i> @T("Charge", "إتمام البيع") <span id="posCheckoutTotal"></span>
+            </button>
+
+            <div id="posMessage" class="alert mt-3 d-none"></div>
+        </aside>
+    </div>
+</div>
+
+<style>
+    body { background: #f3f5fa; }
+    .pos-shell { padding: 16px; }
+    .pos-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 16px;
+        @(isArabic ? "direction: rtl;" : "")
+    }
+    .pos-products { background: #fff; border:1px solid var(--border, #e7eaf3); border-radius: 14px; padding: 12px; }
+    .pos-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+    .pos-product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .pos-tile {
+        background: #fff; border: 1px solid var(--border, #e7eaf3); border-radius: 12px;
+        padding: 12px; text-align: start; cursor: pointer; transition: all .15s;
+        display: flex; flex-direction: column; gap: 4px; min-height: 100px;
+    }
+    .pos-tile:hover { border-color: var(--navy, #1B2E4B); background: #f0f4fa; transform: translateY(-1px); }
+    .pos-tile:active { transform: translateY(0); }
+    .pos-tile-name { font-weight: 600; font-size: 14px; color: var(--text, #1B2E4B); line-height:1.2; }
+    .pos-tile-price { color: var(--navy, #1B2E4B); font-weight: 700; font-size: 16px; margin-top: auto; }
+    .pos-tile-sku { color: #888; font-size: 11px; }
+
+    .pos-cart {
+        background: #fff; border: 1px solid var(--border, #e7eaf3); border-radius: 14px; padding: 14px;
+        display: flex; flex-direction: column; gap: 10px;
+        max-height: calc(100vh - 100px); position: sticky; top: 80px;
+    }
+    .pos-cart-header { display: flex; justify-content: space-between; align-items: center; }
+    .pos-cart-meta { display: flex; gap: 6px; }
+    .pos-cart-items { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; min-height: 200px; max-height: 340px; }
+    .pos-cart-items li {
+        display: grid;
+        grid-template-columns: 1fr 90px 26px;
+        gap: 6px; align-items: center;
+        padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 14px;
+    }
+    .pos-cart-items .name { font-weight: 600; }
+    .pos-cart-items .price { color: #888; font-size: 12px; }
+    .pos-cart-items .qty { display: flex; align-items: center; gap: 4px; }
+    .pos-cart-items .qty input { width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 6px; padding: 2px 4px; }
+    .pos-cart-items .rm { background: none; border: 0; color: #c92a2a; cursor: pointer; }
+
+    .pos-cart-totals { padding: 10px 0; border-top: 1px solid #eee; }
+    .pos-cart-totals .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+    .pos-cart-totals .row.total { font-size: 18px; font-weight: 700; padding-top: 8px; border-top: 1px solid #eee; margin-top: 4px; }
+
+    @@media (max-width: 920px) {
+        .pos-grid { grid-template-columns: 1fr; }
+        .pos-cart { position: static; max-height: none; }
+    }
+</style>
+
+<script>
+(function () {
+    const cart = new Map(); // key: productId, val: { id, name, price, qty, vatRate }
+    const $items = document.getElementById('posCartItems');
+    const $sub = document.getElementById('posSubtotal');
+    const $vat = document.getElementById('posVat');
+    const $grand = document.getElementById('posGrand');
+    const $tendered = document.getElementById('posAmountTendered');
+    const $change = document.getElementById('posChange');
+    const $coTotal = document.getElementById('posCheckoutTotal');
+    const $msg = document.getElementById('posMessage');
+    const $grid = document.getElementById('posProductGrid');
+    const $search = document.getElementById('posSearch');
+    const $cat = document.getElementById('posCategory');
+
+    function recompute() {
+        let sub = 0, vat = 0;
+        for (const it of cart.values()) {
+            const lineSub = it.price * it.qty;
+            const lineVat = lineSub * (it.vatRate / 100);
+            sub += lineSub; vat += lineVat;
+        }
+        const grand = sub + vat;
+        $sub.textContent = sub.toFixed(2);
+        $vat.textContent = vat.toFixed(2);
+        $grand.textContent = grand.toFixed(2);
+        $coTotal.textContent = '· ' + grand.toFixed(2);
+        const tendered = parseFloat($tendered.value || 0);
+        $change.textContent = Math.max(0, tendered - grand).toFixed(2);
+    }
+
+    function render() {
+        $items.innerHTML = '';
+        for (const it of cart.values()) {
+            const li = document.createElement('li');
+            li.innerHTML = `<div><div class="name">${it.name}</div><div class="price">${it.price.toFixed(2)} × </div></div>
+                            <div class="qty"><input type="number" min="0.01" step="0.01" value="${it.qty}" data-id="${it.id}" /></div>
+                            <button type="button" class="rm" data-id="${it.id}" title="Remove">×</button>`;
+            $items.appendChild(li);
+        }
+        recompute();
+    }
+
+    function add(p) {
+        const existing = cart.get(p.id);
+        if (existing) { existing.qty += 1; }
+        else { cart.set(p.id, { id: p.id, name: p.name, price: +p.price, vatRate: +p.vatRate, qty: 1 }); }
+        render();
+    }
+
+    $grid.addEventListener('click', e => {
+        const tile = e.target.closest('.pos-tile');
+        if (!tile) return;
+        add({ id: +tile.dataset.id, name: tile.dataset.name, price: +tile.dataset.price, vatRate: +tile.dataset.vat });
+    });
+
+    $items.addEventListener('input', e => {
+        if (e.target.matches('.qty input')) {
+            const id = +e.target.dataset.id;
+            const v = parseFloat(e.target.value);
+            const it = cart.get(id);
+            if (it && v > 0) { it.qty = v; }
+            recompute();
+        }
+    });
+    $items.addEventListener('click', e => {
+        const btn = e.target.closest('button.rm');
+        if (!btn) return;
+        cart.delete(+btn.dataset.id); render();
+    });
+
+    $tendered.addEventListener('input', recompute);
+
+    document.getElementById('posClearBtn').addEventListener('click', () => { cart.clear(); render(); });
+
+    let searchTimer;
+    function refreshGrid() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(async () => {
+            const q = $search.value;
+            const c = $cat.value;
+            const r = await fetch(`/POS/Search?q=${encodeURIComponent(q)}&categoryId=${c || ''}`);
+            const list = await r.json();
+            $grid.innerHTML = list.map(p =>
+                `<button type="button" class="pos-tile" data-id="${p.id}" data-sku="${p.sku}" data-name="${p.nameAr}" data-price="${p.sellingPrice}" data-vat="${p.vatRate}">
+                    <div class="pos-tile-name">${@(isArabic ? "p.nameAr" : "p.nameEn || p.nameAr")}</div>
+                    <div class="pos-tile-price">${(+p.sellingPrice).toFixed(2)} <small>@T("SAR", "ر.س")</small></div>
+                    <div class="pos-tile-sku"><code>${p.sku}</code></div>
+                </button>`).join('');
+        }, 200);
+    }
+    $search.addEventListener('input', refreshGrid);
+    $cat.addEventListener('change', refreshGrid);
+
+    document.getElementById('posCheckoutBtn').addEventListener('click', async () => {
+        if (cart.size === 0) { msg('warning', '@T("Cart is empty.", "السلة فارغة.")'); return; }
+        const method = document.querySelector('input[name="payMethod"]:checked').value;
+        const payload = {
+            CustomerId: +document.getElementById('posCustomer').value,
+            WarehouseId: +document.getElementById('posWarehouse').value,
+            PaymentMethod: method,
+            AmountTendered: parseFloat($tendered.value || 0),
+            Lines: Array.from(cart.values()).map(it => ({
+                ProductId: it.id, Quantity: it.qty, UnitPrice: it.price, Discount: 0, VatRate: it.vatRate
+            }))
+        };
+        const tok = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const r = await fetch('/POS/Checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': tok },
+            body: JSON.stringify(payload)
+        });
+        if (!r.ok) {
+            const err = await r.text();
+            msg('danger', '@T("Checkout failed: ", "فشل الدفع: ")' + err);
+            return;
+        }
+        const j = await r.json();
+        msg('success', `@T("Sale complete:", "تم البيع:") ${j.invoiceNumber} · @T("Total", "الإجمالي") ${(+j.grandTotal).toFixed(2)} ${method === 'Cash' ? '· @T("Change:", "الباقي:") ' + (+j.change).toFixed(2) : ''}`);
+        cart.clear(); render();
+        $tendered.value = '';
+    });
+
+    function msg(kind, text) {
+        $msg.className = 'alert mt-3 alert-' + kind;
+        $msg.classList.remove('d-none');
+        $msg.textContent = text;
+        setTimeout(() => $msg.classList.add('d-none'), 6000);
+    }
+})();
+</script>
+
+@Html.AntiForgeryToken()
